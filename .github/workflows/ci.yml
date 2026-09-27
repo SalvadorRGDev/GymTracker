@@ -1,0 +1,95 @@
+name: CI
+
+# En TODAS las ramas y en los PR: un trabajo que sólo corre en main deja semanas
+# de trabajo sin pasar nunca por aquí (§19.1 del plan).
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  secretos:
+    name: Detección de secretos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  adrs:
+    name: ADRs pendientes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ningún ADR PENDIENTE con código escrito
+        run: |
+          set -euo pipefail
+          archivo=docs/01-decisiones.md
+          total=$(grep -cE '^## ADR-[0-9]{3} ' "$archivo" || true)
+          estados=$(grep -cE '^\*\*Estado\*\*: ' "$archivo" || true)
+          # Un control que no puede controlar debe fallar, no aprobar.
+          if [ "$total" -eq 0 ] || [ "$total" -ne "$estados" ]; then
+            echo "No encuentro ADRs con su estado ($total ADRs, $estados estados): el formato cambió y no puedo verificar nada."
+            exit 1
+          fi
+          if [ -d src ] && grep -qE '^\*\*Estado\*\*: PENDIENTE' "$archivo"; then
+            grep -nE '^\*\*Estado\*\*: PENDIENTE' "$archivo"
+            echo "Hay ADRs PENDIENTES y existe src/: el código espera a la decisión."
+            exit 1
+          fi
+          echo "$total ADRs con estado, ninguno pendiente."
+
+  lint-y-pruebas:
+    name: Lint, tipos, pruebas y compilación
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build:api
+      # Un import que Vite no resuelve no lo ve ni tsc ni Vitest.
+      - run: npm run build:web
+
+  ensayo:
+    name: Ensayo de punta a punta
+    needs: lint-y-pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build:api
+      - run: npm run build:web
+      - run: bash deploy/ensayo.sh
+
+  hoja-de-calculo:
+    name: LibreOffice abre y re-guarda sin cambiar un decimal
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libreoffice-calc
+      - run: npm ci
+      - name: La prueba de LibreOffice corre (y no se salta en verde)
+        run: |
+          set -euo pipefail
+          npx vitest run src/almacen/xlsx.test.ts --reporter=verbose | tee salida.txt
+          grep -q 'Calc abre lo que escribimos' salida.txt
+          if grep -qiE 'skipped|↓' salida.txt; then echo "La prueba de hoja de cálculo se saltó"; exit 1; fi

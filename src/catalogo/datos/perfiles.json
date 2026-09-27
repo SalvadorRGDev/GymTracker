@@ -1,0 +1,129 @@
+[
+  {
+    "id": "esencial",
+    "nombre": "Esencial",
+    "descripcion": "Los ejercicios más comunes de un gimnasio, para empezar sin una lista larga.",
+    "por_omision": false,
+    "equipamiento": [
+      "barra",
+      "rack",
+      "banco",
+      "mancuernas",
+      "polea",
+      "maquina",
+      "barra-dominadas",
+      "paralelas",
+      "kettlebell",
+      "barra-z",
+      "rueda"
+    ],
+    "seleccion": [
+      "press-banca",
+      "press-inclinado-mancuernas",
+      "press-mancuernas",
+      "cruce-poleas",
+      "flexiones",
+      "fondos-paralelas",
+      "dominadas",
+      "jalon-pecho",
+      "remo-barra",
+      "remo-mancuerna",
+      "remo-polea",
+      "press-militar",
+      "press-hombro-mancuernas",
+      "elevaciones-laterales",
+      "elevaciones-laterales-polea",
+      "face-pull",
+      "pajaros",
+      "curl-barra",
+      "curl-mancuernas",
+      "curl-martillo",
+      "extension-polea",
+      "extension-trasnuca",
+      "press-frances",
+      "curl-muneca",
+      "encogimientos-mancuernas",
+      "crunch",
+      "plancha",
+      "elevaciones-piernas-colgado",
+      "crunch-polea",
+      "hiperextensiones",
+      "hip-thrust",
+      "peso-muerto",
+      "sentadilla",
+      "prensa",
+      "extension-cuadriceps",
+      "zancadas",
+      "sentadilla-bulgara",
+      "peso-muerto-rumano",
+      "curl-femoral-tumbado",
+      "curl-femoral-sentado",
+      "aduccion-maquina",
+      "talones-de-pie",
+      "talones-sentado",
+      "sentadilla-goblet"
+    ],
+    "sin_cobertura": []
+  },
+  {
+    "id": "gimnasio-completo",
+    "nombre": "Gimnasio completo",
+    "descripcion": "Barra, mancuernas, poleas y máquinas.",
+    "por_omision": true,
+    "equipamiento": [
+      "barra",
+      "rack",
+      "banco",
+      "mancuernas",
+      "polea",
+      "maquina",
+      "barra-dominadas",
+      "paralelas",
+      "kettlebell",
+      "barra-z",
+      "rueda"
+    ],
+    "sin_cobertura": []
+  },
+  {
+    "id": "gimnasio-casa",
+    "nombre": "Gimnasio en casa",
+    "descripcion": "Barra con rack, banco, mancuernas, barra de dominadas, kettlebell y bandas.",
+    "por_omision": false,
+    "equipamiento": [
+      "barra",
+      "rack",
+      "banco",
+      "mancuernas",
+      "barra-dominadas",
+      "kettlebell",
+      "banda"
+    ],
+    "sin_cobertura": []
+  },
+  {
+    "id": "mancuernas",
+    "nombre": "Mancuernas",
+    "descripcion": "Un par de mancuernas ajustables y un banco.",
+    "por_omision": false,
+    "equipamiento": [
+      "mancuernas",
+      "banco"
+    ],
+    "sin_cobertura": []
+  },
+  {
+    "id": "calistenia",
+    "nombre": "Calistenia",
+    "descripcion": "Peso corporal, barra de dominadas, paralelas y anillas.",
+    "por_omision": false,
+    "equipamiento": [
+      "barra-dominadas",
+      "paralelas",
+      "anillas"
+    ],
+    "sin_cobertura": [
+      "deltoides-lateral"
+    ]
+  }
+]

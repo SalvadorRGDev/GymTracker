@@ -1,0 +1,82 @@
+[
+  {
+    "id": "pectoral",
+    "nombre": "Pectoral",
+    "descripcion": "Pectoral mayor, porciones clavicular y esternal."
+  },
+  {
+    "id": "deltoides-anterior",
+    "nombre": "Deltoides anterior",
+    "descripcion": "Porción frontal del hombro."
+  },
+  {
+    "id": "deltoides-lateral",
+    "nombre": "Deltoides lateral",
+    "descripcion": "Porción media del hombro; da la anchura."
+  },
+  {
+    "id": "deltoides-posterior",
+    "nombre": "Deltoides posterior",
+    "descripcion": "Porción trasera del hombro."
+  },
+  {
+    "id": "biceps",
+    "nombre": "Bíceps",
+    "descripcion": "Bíceps braquial y braquial anterior."
+  },
+  {
+    "id": "triceps",
+    "nombre": "Tríceps",
+    "descripcion": "Las tres cabezas del tríceps."
+  },
+  {
+    "id": "antebrazo",
+    "nombre": "Antebrazo",
+    "descripcion": "Flexores y extensores de muñeca y dedos; braquiorradial."
+  },
+  {
+    "id": "abdomen",
+    "nombre": "Abdomen",
+    "descripcion": "Recto abdominal y oblicuos."
+  },
+  {
+    "id": "trapecio",
+    "nombre": "Trapecio y romboides",
+    "descripcion": "Trapecio en sus tres porciones y romboides."
+  },
+  {
+    "id": "dorsal",
+    "nombre": "Dorsal",
+    "descripcion": "Dorsal ancho y redondo mayor."
+  },
+  {
+    "id": "lumbares",
+    "nombre": "Lumbares",
+    "descripcion": "Erectores de la columna en la zona lumbar."
+  },
+  {
+    "id": "gluteo",
+    "nombre": "Glúteo",
+    "descripcion": "Glúteo mayor y medio."
+  },
+  {
+    "id": "cuadriceps",
+    "nombre": "Cuádriceps",
+    "descripcion": "Los cuatro vientres del cuádriceps."
+  },
+  {
+    "id": "isquiosurales",
+    "nombre": "Isquiosurales",
+    "descripcion": "Bíceps femoral, semitendinoso y semimembranoso."
+  },
+  {
+    "id": "aductores",
+    "nombre": "Aductores",
+    "descripcion": "Aductor mayor, largo y corto; cara interna del muslo."
+  },
+  {
+    "id": "gemelo",
+    "nombre": "Gemelo y sóleo",
+    "descripcion": "Tríceps sural: gemelos y sóleo."
+  }
+]

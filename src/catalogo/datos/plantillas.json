@@ -1,0 +1,781 @@
+[
+  {
+    "id": "cuerpo-completo-3d",
+    "nombre": "Cuerpo completo · 3 días",
+    "descripcion": "Tres sesiones iguales en estructura y distintas en ejercicios, con un día de descanso entre cada una. Pensada para un gimnasio en casa.",
+    "perfil": "gimnasio-casa",
+    "ciclo_dias": 7,
+    "dias": [
+      {
+        "dia": 1,
+        "nombre": "Día A",
+        "entradas": [
+          {
+            "ejercicio": "sentadilla",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "press-banca",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "remo-barra",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "elevaciones-laterales",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "curl-mancuernas",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "extension-trasnuca",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "curl-nordico",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "talones-mancuerna",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "plancha",
+            "series": "2.00"
+          }
+        ]
+      },
+      {
+        "dia": 3,
+        "nombre": "Día B",
+        "entradas": [
+          {
+            "ejercicio": "peso-muerto-rumano",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "sentadilla-goblet",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "press-militar",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "flexiones",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "dominadas",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "pajaros",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "curl-martillo",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "press-frances-mancuernas",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "paseo-granjero",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "crunch",
+            "series": "3.00"
+          }
+        ]
+      },
+      {
+        "dia": 5,
+        "nombre": "Día C",
+        "entradas": [
+          {
+            "ejercicio": "sentadilla-bulgara",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "hip-thrust",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "peso-muerto-una-pierna",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "press-inclinado-mancuernas",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "remo-mancuerna",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "elevaciones-laterales",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "pajaros",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "curl-mancuernas",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "patada-triceps",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "talones-mancuerna",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "plancha-copenhague",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "superman",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "crunch",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "encogimientos-mancuernas",
+            "series": "2.00"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "torso-pierna-4d",
+    "nombre": "Torso y pierna · 4 días",
+    "descripcion": "Dos días de torso y dos de pierna, alternados. Cada grupo recibe trabajo dos veces por semana.",
+    "perfil": "gimnasio-completo",
+    "ciclo_dias": 7,
+    "dias": [
+      {
+        "dia": 1,
+        "nombre": "Torso 1",
+        "entradas": [
+          {
+            "ejercicio": "press-banca",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "remo-barra",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "press-hombro-mancuernas",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "jalon-pecho",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "elevaciones-laterales",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "curl-barra",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "extension-polea",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "face-pull",
+            "series": "3.00"
+          }
+        ]
+      },
+      {
+        "dia": 2,
+        "nombre": "Pierna 1",
+        "entradas": [
+          {
+            "ejercicio": "sentadilla",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "peso-muerto-rumano",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "extension-cuadriceps",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "curl-femoral-tumbado",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "talones-de-pie",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "crunch-polea",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "aduccion-maquina",
+            "series": "2.00"
+          }
+        ]
+      },
+      {
+        "dia": 4,
+        "nombre": "Torso 2",
+        "entradas": [
+          {
+            "ejercicio": "press-inclinado-mancuernas",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "dominadas",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "remo-polea",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "cruce-poleas",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "elevaciones-laterales-polea",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "pajaros-polea",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "curl-martillo",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "extension-trasnuca-polea",
+            "series": "3.00"
+          }
+        ]
+      },
+      {
+        "dia": 5,
+        "nombre": "Pierna 2",
+        "entradas": [
+          {
+            "ejercicio": "prensa",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "hip-thrust",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "curl-femoral-sentado",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "zancadas",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "talones-sentado",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "elevaciones-piernas-colgado",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "hiperextensiones",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "curl-muneca",
+            "series": "2.00"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ppl-6d",
+    "nombre": "Empuje, tracción y pierna · 6 días",
+    "descripcion": "El clásico «push-pull-legs» dos veces por semana. Mucho volumen repartido en sesiones cortas.",
+    "perfil": "gimnasio-completo",
+    "ciclo_dias": 7,
+    "dias": [
+      {
+        "dia": 1,
+        "nombre": "Empuje 1",
+        "entradas": [
+          {
+            "ejercicio": "press-banca",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "press-hombro-mancuernas",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "cruce-poleas",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "elevaciones-laterales",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "extension-polea",
+            "series": "2.00"
+          }
+        ]
+      },
+      {
+        "dia": 2,
+        "nombre": "Tracción 1",
+        "entradas": [
+          {
+            "ejercicio": "dominadas",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "remo-barra",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "face-pull",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "curl-barra",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "curl-martillo",
+            "series": "2.00"
+          }
+        ]
+      },
+      {
+        "dia": 3,
+        "nombre": "Pierna 1",
+        "entradas": [
+          {
+            "ejercicio": "sentadilla",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "peso-muerto-rumano",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "extension-cuadriceps",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "curl-femoral-tumbado",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "talones-de-pie",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "crunch-polea",
+            "series": "4.00"
+          }
+        ]
+      },
+      {
+        "dia": 4,
+        "nombre": "Empuje 2",
+        "entradas": [
+          {
+            "ejercicio": "press-inclinado-mancuernas",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "fondos-paralelas",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "pec-deck",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "elevaciones-laterales-polea",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "extension-trasnuca-polea",
+            "series": "2.00"
+          }
+        ]
+      },
+      {
+        "dia": 5,
+        "nombre": "Tracción 2",
+        "entradas": [
+          {
+            "ejercicio": "jalon-pecho",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "remo-polea",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "pajaros-polea",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "curl-inclinado",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "encogimientos-mancuernas",
+            "series": "2.00"
+          }
+        ]
+      },
+      {
+        "dia": 6,
+        "nombre": "Pierna 2",
+        "entradas": [
+          {
+            "ejercicio": "prensa",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "zancadas",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "hip-thrust",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "curl-femoral-sentado",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "talones-sentado",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "elevaciones-piernas-colgado",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "aduccion-maquina",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "hiperextensiones",
+            "series": "3.00"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cinco-dias-grupos",
+    "nombre": "Cinco días por grupos",
+    "descripcion": "Un día para cada zona: pecho, espalda, hombro, pierna y brazo. Cada grupo recibe su trabajo directo una vez por semana y el indirecto en los demás días.",
+    "perfil": "gimnasio-completo",
+    "ciclo_dias": 7,
+    "dias": [
+      {
+        "dia": 1,
+        "nombre": "Pecho",
+        "entradas": [
+          {
+            "ejercicio": "press-banca",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "press-inclinado-mancuernas",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "cruce-poleas",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "fondos-paralelas",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "crunch-polea",
+            "series": "4.00"
+          }
+        ]
+      },
+      {
+        "dia": 2,
+        "nombre": "Espalda",
+        "entradas": [
+          {
+            "ejercicio": "dominadas",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "remo-barra",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "jalon-pecho",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "remo-polea",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "encogimientos-mancuernas",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "hiperextensiones",
+            "series": "3.00"
+          }
+        ]
+      },
+      {
+        "dia": 3,
+        "nombre": "Hombro",
+        "entradas": [
+          {
+            "ejercicio": "press-militar",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "elevaciones-laterales",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "elevaciones-laterales-polea",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "face-pull",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "pajaros",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "elevaciones-piernas-colgado",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "talones-sentado",
+            "series": "4.00"
+          }
+        ]
+      },
+      {
+        "dia": 4,
+        "nombre": "Pierna",
+        "entradas": [
+          {
+            "ejercicio": "sentadilla",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "peso-muerto-rumano",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "prensa",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "extension-cuadriceps",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "curl-femoral-tumbado",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "hip-thrust",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "talones-de-pie",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "aduccion-maquina",
+            "series": "2.00"
+          }
+        ]
+      },
+      {
+        "dia": 5,
+        "nombre": "Brazo",
+        "entradas": [
+          {
+            "ejercicio": "curl-barra",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "curl-inclinado",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "curl-martillo",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "extension-polea",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "extension-trasnuca-polea",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "press-frances",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "curl-muneca",
+            "series": "2.00"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ppl-ciclo-4",
+    "nombre": "Empuje, tracción y pierna · ciclo de 4",
+    "descripcion": "Empuje, tracción, pierna y descanso, sin atarse a la semana: el ciclo dura cuatro días y rota sobre el calendario.",
+    "perfil": "gimnasio-completo",
+    "ciclo_dias": 4,
+    "dias": [
+      {
+        "dia": 1,
+        "nombre": "Empuje",
+        "entradas": [
+          {
+            "ejercicio": "press-banca",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "press-hombro-mancuernas",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "cruce-poleas",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "elevaciones-laterales",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "extension-polea",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "elevaciones-piernas-colgado",
+            "series": "2.00"
+          }
+        ]
+      },
+      {
+        "dia": 2,
+        "nombre": "Tracción",
+        "entradas": [
+          {
+            "ejercicio": "dominadas",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "remo-polea",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "face-pull",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "curl-barra",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "curl-martillo",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "encogimientos-mancuernas",
+            "series": "1.00"
+          }
+        ]
+      },
+      {
+        "dia": 3,
+        "nombre": "Pierna",
+        "entradas": [
+          {
+            "ejercicio": "sentadilla",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "peso-muerto-rumano",
+            "series": "4.00"
+          },
+          {
+            "ejercicio": "extension-cuadriceps",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "curl-femoral-tumbado",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "hip-thrust",
+            "series": "2.00"
+          },
+          {
+            "ejercicio": "aduccion-maquina",
+            "series": "1.00"
+          },
+          {
+            "ejercicio": "talones-de-pie",
+            "series": "5.00"
+          },
+          {
+            "ejercicio": "crunch-polea",
+            "series": "3.00"
+          },
+          {
+            "ejercicio": "hiperextensiones",
+            "series": "1.00"
+          }
+        ]
+      }
+    ]
+  }
+]

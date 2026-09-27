@@ -1,0 +1,76 @@
+{
+  "fuentes": [
+    {
+      "id": "schoenfeld-2017",
+      "cita": "Schoenfeld BJ, Ogborn D, Krieger JW. Dose-response relationship between weekly resistance training volume and increases in muscle mass: a systematic review and meta-analysis. Journal of Sports Sciences, 2017.",
+      "aporta": "Relación dosis-respuesta entre series semanales por grupo e hipertrofia; ventaja de 10 o más series semanales frente a menos de 5."
+    },
+    {
+      "id": "baz-valle-2022",
+      "cita": "Baz-Valle E, Balsalobre-Fernández C, Alix-Fages C, Santos-Concejero J. A systematic review of the effects of different resistance training volumes on muscle hypertrophy. Journal of Human Kinetics, 2022.",
+      "aporta": "Rango de 12 a 20 series semanales por grupo como zona con mejor respuesta en personas entrenadas; evidencia escasa por encima."
+    },
+    {
+      "id": "schoenfeld-2019",
+      "cita": "Schoenfeld BJ, Contreras B, Krieger J, et al. Resistance training volume enhances muscle hypertrophy but not strength in trained men. Medicine & Science in Sports & Exercise, 2019.",
+      "aporta": "Más volumen semanal, más hipertrofia, en hombres entrenados; volúmenes altos (unas 30 series) sin techo claro en ese estudio."
+    },
+    {
+      "id": "pelland-2025",
+      "cita": "Pelland JC, Remmert JF, Robinson ZP, et al. The resistance training dose response: meta-regressions exploring the effects of weekly volume and frequency on muscle hypertrophy and strength gain. Sports Medicine, 2025.",
+      "aporta": "Conteo fraccionado: 1 serie para el músculo objetivo y 0.5 para el que trabaja de forma indirecta; rendimientos decrecientes con el volumen."
+    },
+    {
+      "id": "vigotsky-2022",
+      "cita": "Vigotsky AD, Halperin I, Trajano GS, Vieira TM. Longing for a longitudinal proxy: acutely measured surface EMG amplitude is not a validated predictor of muscle hypertrophy. Sports Medicine, 2022.",
+      "aporta": "La amplitud de EMG aguda no predice hipertrofia: por eso los coeficientes no se derivan de estudios de EMG."
+    }
+  ],
+  "bandas": [
+    {
+      "id": "general",
+      "nombre": "Rango general",
+      "minimo": "10.00",
+      "maximo": "20.00",
+      "respaldo": "publicado",
+      "fuentes": ["schoenfeld-2017", "baz-valle-2022", "schoenfeld-2019", "pelland-2025"],
+      "margen": "La relación es continua y con rendimientos decrecientes: 10 y 20 son cortes de lectura, no umbrales fisiológicos. Por debajo de 10 también hay efecto; por encima de 20 la evidencia es escasa y más heterogénea."
+    },
+    {
+      "id": "indirecto",
+      "nombre": "Grupo con mucho trabajo indirecto",
+      "minimo": "6.00",
+      "maximo": "16.00",
+      "respaldo": "propio",
+      "fuentes": ["pelland-2025"],
+      "margen": "Criterio propio. Para grupos que reciben la mayor parte de su estímulo como sinergistas y que el conteo fraccionado ya recoge; se baja el suelo del rango general porque el trabajo directo de estos grupos rara vez es necesario."
+    },
+    {
+      "id": "directo-barato",
+      "nombre": "Grupo pequeño de trabajo directo",
+      "minimo": "8.00",
+      "maximo": "22.00",
+      "respaldo": "propio",
+      "fuentes": ["baz-valle-2022"],
+      "margen": "Criterio propio. Grupos pequeños con poca fatiga general por serie: se admite algo menos de suelo y algo más de techo que en el rango general. Es una convención declarada, no una medición."
+    }
+  ],
+  "grupos": {
+    "pectoral": "general",
+    "dorsal": "general",
+    "cuadriceps": "general",
+    "isquiosurales": "general",
+    "gluteo": "general",
+    "triceps": "general",
+    "deltoides-lateral": "directo-barato",
+    "deltoides-posterior": "directo-barato",
+    "biceps": "directo-barato",
+    "gemelo": "directo-barato",
+    "abdomen": "directo-barato",
+    "deltoides-anterior": "indirecto",
+    "antebrazo": "indirecto",
+    "lumbares": "indirecto",
+    "aductores": "indirecto",
+    "trapecio": "indirecto"
+  }
+}
