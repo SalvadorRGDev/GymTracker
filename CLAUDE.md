@@ -13,14 +13,14 @@ lo mismo.
 ## Estado
 
 - Fases 0, 1, 2 y **3** en código: la **comparativa** con su vigilancia del
-  umbral, la simulación y la línea semanal del atajo (ADR-019); fase de producto
+  umbral, la simulación, la línea semanal del atajo y el mapa «Comparado con el
+  plan» (ADR-019); fase de producto
   (catálogo base, rangos, rutinas); dirección visual moderna y **mapa muscular
   del resumen** (ADR-017 y 018); borrar serie o sesión, confirmar fecha y
   archivar ejercicio desde la web.
 - Baja de cuenta real con `npm run baja` y aviso de privacidad
   (`docs/11-privacidad.md`).
-- Pendiente: **probar los atajos en un iPhone real** (`atajos/PRUEBA-MANUAL.md`)
-  y la opción «Comparado con el plan» del mapa.
+- Pendiente: **probar los atajos en un iPhone real** (`atajos/PRUEBA-MANUAL.md`).
 
 ## Comandos
 
@@ -29,7 +29,7 @@ npm test                 # Vitest: dominio, almacén, API, catálogo, cliente (j
 npm run lint             # Biome + tsc del servidor + tsc del cliente
 npm run build:api        # dist/ (servidor)
 npm run build:web        # dist/web (cliente)
-bash deploy/ensayo.sh    # proceso compilado de verdad: veintiuna afirmaciones, respalda y restaura
+bash deploy/ensayo.sh    # proceso compilado de verdad: veintidós afirmaciones, respalda, restaura y da de baja
 npm run alta -- correo zona umbral     # cuenta nueva; la contraseña se teclea
 npm run verifica -- datos              # valida el almacén sin escribir nada
 npm run baja -- correo                 # borra la cuenta de verdad; se confirma tecleando el correo

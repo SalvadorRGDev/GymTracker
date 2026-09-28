@@ -130,6 +130,17 @@ llama al mismo servicio, así que hereda sus reglas enteras:
   se muestran igual, con su explicación.
 - Un ejercicio sin grupos se marca en la lista. Es el origen de
   `series_sin_mapeo` en el resumen, y verlo aquí es lo que cierra el círculo.
+- **Los ajustes de la métrica son opcionales y lo dicen primero.** Se titulan
+  «Ajustes avanzados», llevan la etiqueta «Opcional» y abren con «No hace falta
+  tocar nada aquí». Cada ajuste explica antes qué es, para quien no sabe de
+  entrenamiento: qué es el RIR y qué significa 1.00, 0.50, 0.25 y en blanco. Nada
+  de «fijar», «en sitio» ni «versión»: se dice desde cuándo se aplica.
+- **Los coeficientes se ven antes de poder tocarse**: el reparto en una frase
+  («cada serie de Press banca cuenta así: …») y los campos sólo tras pulsar
+  «Modificar los coeficientes». Lo que difiere del catálogo base se marca con su
+  valor de referencia y se puede restaurar; antes de guardar se enumera lo que
+  cambia, y «Guardar» está desactivado mientras no cambie nada. Un clic suelto no
+  puede reescribir cómo se cuentan las series.
 
 ## La credencial de captura se ve una vez
 
@@ -244,7 +255,15 @@ llama al mismo servicio, así que hereda sus reglas enteras:
   en texto. Nunca una figura de muestra coloreada.
 - La escala verde → rojo es de **cantidad**: rótulos que describen volumen,
   nunca «bien» o «mal», y ninguna relación con el rango de cada grupo. La fase 3
-  no reutilizará ese rojo con el significado de «déficit».
+  no reutiliza ese rojo con el significado de «déficit».
+- **«Comparado con el plan»** (ADR-019) es un control **aparte** («Color»), no una
+  opción más de «¿Qué quieres ver?»: si lo fuera, comparar obligaría al cuerpo
+  completo. Va a la URL (`?color=plan`) y sólo entonces se pide la comparativa.
+  La figura pinta el `estado` que manda el servidor con la escala divergente
+  (ámbar, ámbar claro para «pendiente», neutro para «en plan», azul), dice qué
+  semana del plan compara —no es la semana natural del resumen— y cita **su
+  propia tabla** («hecho de planeado» y la diferencia con signo) como descripción.
+  Sin plan, lo dice y no colorea nada.
 
 ## La comparativa (fase 3, ADR-019)
 

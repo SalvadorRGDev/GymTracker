@@ -96,6 +96,9 @@
   --superavit-texto: #1f4f8f;
   --superavit-fondo: #e5eefa;
   --superavit-barra: #3a6fbd;
+  /* La figura comparada: pendiente es un ámbar claro, en plan un neutro. */
+  --pendiente-relleno: #f0cf9f;
+  --en-plan-relleno: #9aa598;
 
   /* Vidrio: la receta vive en un selector compartido más abajo. */
   --vidrio-fondo: rgb(255 255 255 / 72%);
@@ -214,6 +217,8 @@
     --superavit-texto: #9cc2f4;
     --superavit-fondo: #15233a;
     --superavit-barra: #5b93dd;
+    --pendiente-relleno: #6e4a1c;
+    --en-plan-relleno: #5d6860;
 
     --vidrio-fondo: rgb(20 26 22 / 72%);
     --vidrio-borde: rgb(238 243 238 / 10%);
@@ -914,6 +919,14 @@ button:disabled,
   font-size: 15px;
 }
 
+.aviso p {
+  margin: 0;
+}
+
+.aviso p + p {
+  margin-top: 6px;
+}
+
 .aviso .icono {
   margin-top: 2px;
 }
@@ -1542,9 +1555,75 @@ button:disabled,
 }
 
 /* Un grupo de la figura que no está en el catálogo del usuario: sin dato, sin trama. */
-.region[data-nivel="ninguno"] {
+.region[data-nivel="ninguno"],
+.region[data-estado="ninguno"] {
   fill: var(--silueta);
   cursor: default;
+}
+
+/* Comparada con el plan (ADR-019): el estado que decide el servidor. */
+.figura-interior.coloreada .region[data-estado="deficit"] {
+  fill: var(--deficit-barra);
+}
+
+.figura-interior.coloreada .region[data-estado="pendiente"] {
+  fill: var(--pendiente-relleno);
+}
+
+.figura-interior.coloreada .region[data-estado="en-plan"] {
+  fill: var(--en-plan-relleno);
+}
+
+.figura-interior.coloreada .region[data-estado="superavit"] {
+  fill: var(--superavit-barra);
+}
+
+.figura-interior.coloreada .region[data-estado="sin-plan"] {
+  fill: url("#trama-sin-trabajo-frente");
+}
+
+.figura-interior.coloreada .cara-espalda .region[data-estado="sin-plan"] {
+  fill: url("#trama-sin-trabajo-espalda");
+}
+
+.muestra-de-estado {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: 3px;
+}
+
+.muestra-de-estado[data-estado="deficit"] {
+  background: var(--deficit-barra);
+}
+
+.muestra-de-estado[data-estado="pendiente"] {
+  background: var(--pendiente-relleno);
+}
+
+.muestra-de-estado[data-estado="en-plan"] {
+  background: var(--en-plan-relleno);
+}
+
+.muestra-de-estado[data-estado="superavit"] {
+  background: var(--superavit-barra);
+}
+
+.muestra-de-estado[data-estado="sin-plan"] {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--trama-linea) 0 1.5px,
+    var(--trama-fondo) 1.5px 5px
+  );
+}
+
+.hecho-de-plan {
+  display: block;
+  margin-top: 2px;
+  color: var(--texto-2);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 /* La silueta del acceso: sin colorear y sin cifras. */
@@ -2012,10 +2091,63 @@ button:disabled,
   transform: rotate(180deg);
 }
 
+/* Ajustes avanzados de la métrica: cada ajuste con su explicación delante. */
+.ajuste {
+  display: grid;
+  gap: var(--e1);
+  padding-top: var(--e2);
+  border-top: 1px solid var(--borde);
+}
+
+.ajuste h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.ajuste .ayuda p {
+  margin: 0 0 6px;
+}
+
+.ajuste .ayuda ul {
+  margin: 0 0 6px;
+  padding-left: 18px;
+}
+
+.campo-estrecho {
+  max-width: 340px;
+}
+
+.reparto {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--r2);
+  background: var(--fondo-sutil);
+  font-size: 14px;
+}
+
+.ayuda-campo {
+  color: var(--texto-3);
+  font-size: 12px;
+}
+
+.resumen-de-cambios {
+  padding: 10px 12px;
+  border: 1px dashed var(--borde-fuerte);
+  border-radius: var(--r2);
+  font-size: 14px;
+}
+
+.resumen-de-cambios ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
 .coeficientes {
   display: grid;
   gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  /* Una nota bajo un campo no estira los campos de su fila. */
+  align-items: start;
 }
 
 .coeficientes .entrada {

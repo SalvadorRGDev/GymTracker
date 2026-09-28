@@ -10,7 +10,7 @@ El orden sigue las dependencias, no la importancia. Cada fase deja algo usable.
 | **Producto** | Catálogo base (ADR-012), versión reescribible (013), rangos (014), constructor de rutinas (015), vidrio (016) | Cerrada |
 | **Producto visual** | Dirección moderna (ADR-017) y mapa muscular del resumen (ADR-018) | Cerrada |
 | **Huecos del spec** | Borrar serie o sesión desde el historial, confirmar fecha, archivar ejercicio, aviso de frescura activo | Cerrada |
-| **3 — Comparativa** | La resta plan contra real (ADR-019) | En código · la opción «Comparado con el plan» del mapa, pendiente |
+| **3 — Comparativa** | La resta plan contra real (ADR-019), también en el mapa muscular | En código |
 | **4 — Nutrición** | Hojas aditivas | No comprometida |
 
 ## Fase 3 — Comparativa (en código)
@@ -19,8 +19,8 @@ Hecho: `GET /api/planes/v1/comparativa` (ventana desde el ancla, plan vigente
 entonces, versiones de parámetros por día y declaradas, delta con signo, estado
 del servidor, detalle diario como desplazamiento, simulación con `?umbral=`),
 `vigilaUmbral` en el motor, la vista web con escala divergente ámbar ↔ azul y la
-línea semanal del atajo (`GET /api/captura/v1/semana`). Pendiente: la opción
-«Comparado con el plan» del mapa muscular, que no es un criterio del spec.
+línea semanal del atajo (`GET /api/captura/v1/semana`), y la opción «Comparado
+con el plan» del mapa muscular (color aparte, `?color=plan`).
 
 Lo que se pedía:
 

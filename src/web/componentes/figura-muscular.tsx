@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { GrupoDelDashboard } from '../../api/lectura/contrato';
+import type { GrupoComparado } from '../../api/planes/contrato';
+import { ROTULO_DE_ESTADO } from './delta';
 import {
   CABEZA,
   type Cara,
@@ -14,7 +16,9 @@ import {
 /**
  * La figura NO calcula: pinta cada región con el `nivel` que decidió el
  * servidor (ADR-018). Si el número dijera otra cosa, manda el nivel del
- * contrato, porque la leyenda y el color salen de la misma fuente.
+ * contrato, porque la leyenda y el color salen de la misma fuente. Comparada
+ * con el plan (ADR-019), pinta el `estado` de la comparativa, que también
+ * decide el servidor; un grupo sin plan ni series queda con la trama.
  *
  * Dos caras SVG apiladas; elegir «Espalda» gira el interior 180° en 3D (CSS
  * puro). Con movimiento reducido no hay giro: la cara cambia sin más y el
@@ -31,6 +35,14 @@ export interface PropiedadesDeFigura {
   readonly movimiento: boolean;
   readonly etiqueta: string;
   readonly descritaPor?: string;
+  /** Con esto, la figura pinta la comparativa por id de grupo en vez del volumen. */
+  readonly comparacion?: ReadonlyMap<string, GrupoComparado> | undefined;
+}
+
+function tituloComparado(grupo: GrupoDelDashboard, comparado: GrupoComparado | undefined): string {
+  return comparado === undefined
+    ? `${grupo.nombre}: ni plan ni series esta semana del plan`
+    : `${grupo.nombre}: ${comparado.ejecutado} de ${comparado.planeado}, ${comparado.delta} (${ROTULO_DE_ESTADO[comparado.estado]})`;
 }
 
 function CaraDeLaFigura({
@@ -38,11 +50,13 @@ function CaraDeLaFigura({
   vista,
   porZona,
   activo,
+  comparacion,
 }: {
   cara: Cara;
   vista: Vista;
   porZona: ReadonlyMap<string, GrupoDelDashboard>;
   activo: string | null;
+  comparacion: ReadonlyMap<string, GrupoComparado> | undefined;
 }) {
   const m = matrizDeEncuadre(vista);
   const trama = `trama-sin-trabajo-${cara}`;
@@ -75,20 +89,29 @@ function CaraDeLaFigura({
         {cara === 'espalda' && <path class="columna-vertebral" d={COLUMNA} />}
         {REGIONES[cara].map((region) => {
           const grupo = porZona.get(region.grupo);
-          const nivel = grupo === undefined ? 'ninguno' : String(grupo.nivel);
+          const comparado = grupo === undefined ? undefined : comparacion?.get(grupo.id);
+          const pintura =
+            comparacion === undefined
+              ? { 'data-nivel': grupo === undefined ? 'ninguno' : String(grupo.nivel) }
+              : {
+                  'data-estado':
+                    grupo === undefined ? 'ninguno' : (comparado?.estado ?? 'sin-plan'),
+                };
           return (
             <path
               key={`${region.grupo}-${region.lado}`}
               class={`region${grupo !== undefined && grupo.id === activo ? ' activa' : ''}`}
               d={region.d}
               data-grupo={region.grupo}
-              data-nivel={nivel}
+              {...pintura}
               style={{ '--orden': String(region.orden) }}
             >
               <title>
                 {grupo === undefined
                   ? 'Grupo que no está en tu catálogo'
-                  : `${grupo.nombre}: ${grupo.series_efectivas} series efectivas esta semana`}
+                  : comparacion !== undefined
+                    ? tituloComparado(grupo, comparado)
+                    : `${grupo.nombre}: ${grupo.series_efectivas} series efectivas esta semana`}
               </title>
             </path>
           );
@@ -154,8 +177,16 @@ export function FiguraMuscular(p: PropiedadesDeFigura) {
       {...(p.descritaPor === undefined ? {} : { 'aria-describedby': p.descritaPor })}
     >
       <div class={clases} data-testid="figura-interior">
-        <CaraDeLaFigura cara="frente" vista={p.vista} porZona={porZona} activo={p.activo} />
-        <CaraDeLaFigura cara="espalda" vista={p.vista} porZona={porZona} activo={p.activo} />
+        {(['frente', 'espalda'] as const).map((cara) => (
+          <CaraDeLaFigura
+            key={cara}
+            cara={cara}
+            vista={p.vista}
+            porZona={porZona}
+            activo={p.activo}
+            comparacion={p.comparacion}
+          />
+        ))}
       </div>
     </div>
   );

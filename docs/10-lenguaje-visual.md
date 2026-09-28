@@ -77,5 +77,25 @@ datos tienen su propia escala, no el acento de la marca. La leyenda es de tramos
 discretos, con marcas 0 · 4 · 8 · 12 · 16 · 20+, y una frase fija: el color es una
 cantidad, no una nota.
 
-**Pendiente a mano**: ver la escala con un simulador de deuteranopía y la
-animación de giro en Safari de iOS.
+Con deuteranopía simulada (Machado, 2009) la claridad sigue siendo monótona y
+cada nivel se separa del siguiente por ΔE ≥ 8; lo comprueba
+`src/server/lenguaje-visual.test.ts`. **Pendiente a mano**: la animación de giro
+en Safari de iOS.
+
+## La escala divergente de la comparativa (ADR-019)
+
+Ámbar ↔ azul, propia: no reutiliza el rojo del mapa (que dice «mucho volumen»),
+ni el de peligro, ni el acento. El color nunca va solo: cada diferencia lleva su
+cifra con signo, un icono y la palabra.
+
+| Token | Claro | Oscuro | Uso |
+| ----- | ----- | ------ | --- |
+| `--deficit-texto` / `--deficit-fondo` | `#8A4700` / `#FCEFDD` | `#F2B366` / `#2A1F11` | Pastilla de déficit (≥ 5:1) |
+| `--superavit-texto` / `--superavit-fondo` | `#1F4F8F` / `#E5EEFA` | `#9CC2F4` / `#15233A` | Pastilla de superávit (≥ 5:1) |
+| `--deficit-barra` | `#C77414` | `#D98B2B` | Barra y región con déficit (≥ 3:1) |
+| `--superavit-barra` | `#3A6FBD` | `#5B93DD` | Barra y región con superávit (≥ 3:1) |
+| `--pendiente-relleno` | `#F0CF9F` | `#6E4A1C` | Región pendiente (semana en curso) |
+| `--en-plan-relleno` | `#9AA598` | `#5D6860` | Región en plan |
+
+Con deuteranopía, déficit y superávit quedan a ΔE ≥ 40, y en la figura los cuatro
+estados y la trama a ΔE ≥ 25 entre sí. Lo comprueba la misma prueba.

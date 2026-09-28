@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Ensayo de punta a punta: veintiuna afirmaciones que ninguna prueba de unidad ve.
+# Ensayo de punta a punta: veintidós afirmaciones que ninguna prueba de unidad ve.
 #
 # Monta un directorio temporal (NUNCA toca datos/), da de alta una cuenta,
 # arranca el proceso COMPILADO, captura como el atajo y como la web, importa el
@@ -178,5 +178,19 @@ ESPERADO_PROPIETARIOS=1 ESPERADO_SESIONES=1 bash deploy/restaura-verifica.sh "$A
   falla "la restauración no reproduce el almacén"
 ok "respaldar y restaurar reproduce el almacén (propietarios=1 sesiones=1)"
 
-echo "Ensayo completo: $N de 21 afirmaciones."
-[ "$N" -eq 21 ] || falla "se esperaban 21 afirmaciones"
+# 22 ── la baja borra de verdad: libro, credenciales y copias automáticas con sus datos
+printf 'ensayo@ejemplo.com\n' | node dist/server/baja.js ensayo@ejemplo.com >/dev/null || falla "la baja no terminó"
+[ "$(node dist/server/verifica.js "$DATOS_DIR")" = "propietarios=0 sesiones=0 series=0" ] || falla "tras la baja quedan datos"
+[ "$(find "$DATOS_DIR" -maxdepth 1 -name '*.xlsx' | wc -l)" -eq 1 ] || falla "tras la baja queda un libro además de cuentas.xlsx"
+[ "$(find "$DATOS_DIR/respaldos" -name '*.xlsx' ! -name 'cuentas--*' | wc -l)" -eq 0 ] || falla "quedan copias del libro borrado"
+node --input-type=module -e "
+import { readdirSync, readFileSync } from 'node:fs';
+import { leeLibro } from '$RAIZ/dist/almacen/xlsx.js';
+const d = process.env.DATOS_DIR + '/respaldos';
+const conCorreo = readdirSync(d).filter((n) => JSON.stringify(leeLibro(readFileSync(d + '/' + n))).includes('ensayo@ejemplo.com'));
+process.exit(conCorreo.length === 0 ? 0 : 1);
+" || falla "una copia automática de cuentas.xlsx conserva el correo"
+ok "la baja borra el libro, las credenciales y las copias automáticas con sus datos"
+
+echo "Ensayo completo: $N de 22 afirmaciones."
+[ "$N" -eq 22 ] || falla "se esperaban 22 afirmaciones"

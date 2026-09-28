@@ -5,6 +5,7 @@ import type {
   ResultadoDeImportacion,
   ResultadoDeParametros,
 } from '../../api/lectura/contrato';
+import { centesimasDesdeDecimal, esDecimalExacto } from '../../domain/volume/centesimas';
 import { Aviso, CabeceraDePagina, Cargando, ErrorDeCarga, Respuesta } from '../componentes/basicos';
 import { Icono } from '../componentes/iconos';
 import { mensajeDe, pide } from '../estado/api';
@@ -21,12 +22,11 @@ import { normalizaNombre, paraBuscar } from '../formato/numeros';
  */
 
 function explicaCamino(camino: string, vigenteDesde: string): string {
-  if (camino === 'sin-cambios')
-    return 'No había nada nuevo que añadir: tus parámetros siguen igual.';
+  if (camino === 'sin-cambios') return 'No había nada nuevo: tus ajustes siguen como estaban.';
   if (camino === 'en-sitio') {
-    return 'Ninguna sesión fijaba tus parámetros, así que se actualizaron en sitio y rigen ya, hoy incluido.';
+    return 'Guardado. Todavía no habías registrado entrenamientos con estos ajustes, así que se aplican ya, también a lo de hoy.';
   }
-  return `Había sesiones que fijaban la versión anterior: se creó una nueva que rige desde el ${fechaLarga(vigenteDesde, true)}. Lo ya registrado no cambia.`;
+  return `Guardado. Como ya habías registrado entrenamientos, se aplica a partir del ${fechaLarga(vigenteDesde, true)}: lo ya registrado se sigue contando como estaba.`;
 }
 
 function Importacion({
@@ -231,21 +231,65 @@ function NuevoNombre({
   );
 }
 
+const COEFICIENTE = /^(?:[01](?:\.\d{1,2})?|2(?:\.0{1,2})?)$/;
+
+/** «1» y «1.00» son el mismo valor. Comparar no es calcular volumen: no se suma nada. */
+function mismoValor(a: string, b: string): boolean {
+  if (a === '' || b === '') return a === b;
+  return (
+    esDecimalExacto(a) &&
+    esDecimalExacto(b) &&
+    centesimasDesdeDecimal(a) === centesimasDesdeDecimal(b)
+  );
+}
+
 /**
- * El editor de coeficientes está PLEGADO, y plegado significa que sus campos
- * ni se pintan. Envía la propuesta ENTERA —archivados incluidos—: un par que no
- * se envía desaparece de la versión nueva.
+ * Lo que dice el catálogo base para cada par ejercicio–grupo del usuario,
+ * emparejados por nombre (así se importaron). Sirve para marcar lo cambiado y
+ * para restaurarlo; un ejercicio o grupo propio no tiene valor de referencia.
+ */
+function valoresDelCatalogoBase(
+  catalogo: DatosDeCatalogo,
+  base: CatalogoBaseConPerfiles | null,
+): { valores: Map<string, string>; conReferencia: Set<string> } {
+  const valores = new Map<string, string>();
+  const conReferencia = new Set<string>();
+  if (base === null) return { valores, conReferencia };
+  const grupoBase = new Map(base.grupos.map((g) => [normalizaNombre(g.nombre), g.id]));
+  const ejercicioBase = new Map(base.ejercicios.map((e) => [normalizaNombre(e.nombre), e]));
+  for (const e of catalogo.ejercicios) {
+    const referencia = ejercicioBase.get(normalizaNombre(e.nombre));
+    if (referencia === undefined) continue;
+    conReferencia.add(e.id);
+    for (const g of catalogo.grupos) {
+      const id = grupoBase.get(normalizaNombre(g.nombre));
+      const valor = id === undefined ? undefined : referencia.coeficientes[id];
+      if (valor !== undefined) valores.set(`${e.id}|${g.id}`, valor);
+    }
+  }
+  return { valores, conReferencia };
+}
+
+/**
+ * Ajustes avanzados de la métrica: el umbral de RIR y los coeficientes. Son
+ * OPCIONALES —vienen puestos con el catálogo base— y la pantalla lo dice antes
+ * que nada. Los coeficientes se ven como reparto y sólo se vuelven campos al
+ * pedir «Modificar»; lo que difiere del catálogo base se marca y se puede
+ * restaurar, y guardar enumera antes lo que cambia.
+ *
+ * Plegado significa que sus campos ni se pintan. Envía la propuesta ENTERA
+ * —archivados incluidos—: un par que no se envía desaparece de la versión nueva.
  */
 function EditorDeParametros({
   catalogo,
+  base,
   alGuardar,
 }: {
   catalogo: DatosDeCatalogo;
+  base: CatalogoBaseConPerfiles | null;
   alGuardar: () => void;
 }) {
-  const [abierto, setAbierto] = useState(false);
-  const [umbral, setUmbral] = useState(String(catalogo.parametros.umbral_rir));
-  const [borrador, setBorrador] = useState<Map<string, string>>(
+  const original = useMemo(
     () =>
       new Map(
         catalogo.parametros.contribuciones.map((c) => [
@@ -253,14 +297,61 @@ function EditorDeParametros({
           c.coeficiente,
         ]),
       ),
+    [catalogo],
   );
+  const referencia = useMemo(() => valoresDelCatalogoBase(catalogo, base), [catalogo, base]);
+  const [abierto, setAbierto] = useState(false);
+  const [editando, setEditando] = useState(false);
+  const [umbral, setUmbral] = useState(String(catalogo.parametros.umbral_rir));
+  const [borrador, setBorrador] = useState<Map<string, string>>(() => new Map(original));
   const [ejercicio, setEjercicio] = useState(catalogo.ejercicios[0]?.id ?? '');
   const [resultado, setResultado] = useState<ResultadoDeParametros | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const invalidos = [...borrador.entries()].filter(
-    ([, v]) => v !== '' && !/^(?:[01](?:\.\d{1,2})?|2(?:\.0{1,2})?)$/.test(v),
+  const nombreDeEjercicio = new Map(catalogo.ejercicios.map((e) => [e.id, e.nombre]));
+  const nombreDeGrupo = new Map(catalogo.grupos.map((g) => [g.id, g.nombre]));
+  const invalidos = [...borrador.values()].filter((v) => v !== '' && !COEFICIENTE.test(v));
+  const claves = [...new Set([...original.keys(), ...borrador.keys()])];
+  const cambios = claves
+    .filter((k) => !mismoValor(original.get(k) ?? '', borrador.get(k) ?? ''))
+    .map((k) => {
+      const [e = '', g = ''] = k.split('|');
+      return {
+        clave: k,
+        texto: `${nombreDeEjercicio.get(e) ?? '?'}: ${nombreDeGrupo.get(g) ?? '?'} ${original.get(k) ?? 'en blanco'} → ${borrador.get(k) || 'en blanco'}`,
+      };
+    });
+  const cambiaUmbral = umbral !== String(catalogo.parametros.umbral_rir);
+  const hayCambios = cambiaUmbral || cambios.length > 0;
+
+  const reparto = catalogo.grupos
+    .map((g) => ({ grupo: g.nombre, valor: borrador.get(`${ejercicio}|${g.id}`) ?? '' }))
+    .filter((x) => x.valor !== '');
+  const modificadosDelEjercicio = catalogo.grupos.filter(
+    (g) =>
+      referencia.conReferencia.has(ejercicio) &&
+      !mismoValor(
+        borrador.get(`${ejercicio}|${g.id}`) ?? '',
+        referencia.valores.get(`${ejercicio}|${g.id}`) ?? '',
+      ),
   );
+
+  const restaura = () => {
+    const nuevo = new Map(borrador);
+    for (const g of catalogo.grupos) {
+      const clave = `${ejercicio}|${g.id}`;
+      const valor = referencia.valores.get(clave);
+      if (valor === undefined) nuevo.delete(clave);
+      else nuevo.set(clave, valor);
+    }
+    setBorrador(nuevo);
+  };
+
+  const descarta = () => {
+    setUmbral(String(catalogo.parametros.umbral_rir));
+    setBorrador(new Map(original));
+    setEditando(false);
+  };
 
   const guarda = async () => {
     setError(null);
@@ -277,6 +368,7 @@ function EditorDeParametros({
           contribuciones,
         }),
       );
+      setEditando(false);
       alGuardar();
     } catch (e) {
       setError(mensajeDe(e));
@@ -290,17 +382,34 @@ function EditorDeParametros({
     >
       <summary>
         <Icono nombre="chevron-down" tamano={16} />
-        Parámetros de la métrica: umbral de RIR y coeficientes
+        Ajustes avanzados de la métrica: qué series cuentan y para qué músculo
+        <span class="etiqueta-pequena">Opcional</span>
       </summary>
       {abierto && (
         <div class="formulario plegable-contenido">
           <Aviso tipo="info">
-            {catalogo.parametros.fijada
-              ? `Hay sesiones que fijan estos parámetros. Guardar NO los reescribe: crea una versión nueva que rige desde el ${fechaLarga(catalogo.parametros.manana, true)}. Lo ya registrado se sigue leyendo con los de su día.`
-              : 'Ninguna sesión fija todavía estos parámetros: guardar los reescribe en sitio y rigen ya, hoy incluido.'}
+            <p>
+              <strong>No hace falta tocar nada aquí.</strong> Estos ajustes ya vienen puestos con el
+              catálogo base y la aplicación funciona con ellos. Cámbialos sólo si sabes por qué:
+              deciden cómo se cuentan tus series.
+            </p>
+            <p>
+              {catalogo.parametros.fijada
+                ? `Como ya registraste entrenamientos con estos ajustes, lo que cambies se aplicará a partir del ${fechaLarga(catalogo.parametros.manana, true)}. Lo ya registrado se sigue contando como estaba.`
+                : 'Todavía no has registrado entrenamientos con estos ajustes: lo que cambies se aplicará también a lo de hoy.'}
+            </p>
           </Aviso>
-          <div class="fila-de-campos">
-            <div class="campo">
+
+          <section class="ajuste" aria-labelledby="titulo-umbral">
+            <h3 id="titulo-umbral">1. Qué series cuentan: el umbral de RIR</h3>
+            <p class="ayuda">
+              El RIR son las repeticiones que te quedaban «en reserva» al terminar la serie: 0 es
+              que no podías hacer ni una más; 3, que te sobraban unas tres. Sólo cuenta como
+              efectiva una serie terminada cerca del límite. Con el umbral en 4, que es lo habitual,
+              cuentan las series con RIR de 0 a 4; con 5 o más de reserva la serie fue demasiado
+              fácil y no suma.
+            </p>
+            <div class="campo campo-estrecho">
               <label for="umbral">Una serie cuenta si su RIR es como mucho</label>
               <select
                 id="umbral"
@@ -310,13 +419,44 @@ function EditorDeParametros({
               >
                 {Array.from({ length: 11 }, (_, i) => (
                   <option key={i} value={String(i)}>
-                    {i}
+                    {i === 4 ? '4 (lo habitual)' : String(i)}
                   </option>
                 ))}
               </select>
             </div>
-            <div class="campo">
-              <label for="ejercicio-coeficientes">Coeficientes de</label>
+          </section>
+
+          <section class="ajuste" aria-labelledby="titulo-coeficientes">
+            <h3 id="titulo-coeficientes">
+              2. Para qué músculo cuenta cada serie: los coeficientes
+            </h3>
+            <div class="ayuda">
+              <p>
+                Un ejercicio no trabaja un solo músculo. En el press de banca empuja sobre todo el
+                pectoral, pero también trabajan el tríceps y la parte delantera del hombro. El
+                coeficiente dice qué parte de cada serie se le apunta a cada músculo:
+              </p>
+              <ul>
+                <li>
+                  <strong>1.00</strong>: la serie cuenta entera (el músculo principal).
+                </li>
+                <li>
+                  <strong>0.50</strong>: cuenta como media serie (un músculo que ayuda).
+                </li>
+                <li>
+                  <strong>0.25</strong>: un cuarto (un músculo que participa poco).
+                </li>
+                <li>
+                  <strong>En blanco</strong>: ese músculo no recibe nada de este ejercicio.
+                </li>
+              </ul>
+              <p>
+                Los valores del catálogo base son una aproximación razonable, no una medida exacta
+                de cada persona.
+              </p>
+            </div>
+            <div class="campo campo-estrecho">
+              <label for="ejercicio-coeficientes">Ver el reparto de</label>
               <select
                 id="ejercicio-coeficientes"
                 class="selector"
@@ -331,49 +471,117 @@ function EditorDeParametros({
                 ))}
               </select>
             </div>
-          </div>
-          <div class="coeficientes">
-            {catalogo.grupos.map((g) => {
-              const clave = `${ejercicio}|${g.id}`;
-              const valor = borrador.get(clave) ?? '';
-              const malo = valor !== '' && !/^(?:[01](?:\.\d{1,2})?|2(?:\.0{1,2})?)$/.test(valor);
-              return (
-                <div key={g.id} class="campo">
-                  <label for={`c-${g.id}`}>{g.nombre}</label>
-                  <input
-                    id={`c-${g.id}`}
-                    class="entrada"
-                    inputMode="decimal"
-                    placeholder="—"
-                    aria-invalid={malo}
-                    value={valor}
-                    onInput={(e) => {
-                      const nuevo = new Map(borrador);
-                      const texto = (e.target as HTMLInputElement).value.replace(',', '.');
-                      if (texto === '') nuevo.delete(clave);
-                      else nuevo.set(clave, texto);
-                      setBorrador(nuevo);
-                    }}
-                  />
-                  {malo && <span class="error-de-campo">Entre 0.01 y 2.00, dos decimales</span>}
+            <p class="reparto">
+              {reparto.length === 0 ? (
+                <>
+                  <strong>{nombreDeEjercicio.get(ejercicio)}</strong> no se apunta a ningún músculo:
+                  sus series no suman a ninguno.
+                </>
+              ) : (
+                <>
+                  Cada serie de <strong>{nombreDeEjercicio.get(ejercicio)}</strong> cuenta así:{' '}
+                  {reparto.map((x) => `${x.grupo} ${x.valor}`).join(' · ')}.
+                </>
+              )}
+            </p>
+            {!editando ? (
+              <div class="acciones">
+                <button
+                  type="button"
+                  class="boton-fantasma boton-pequeno"
+                  onClick={() => setEditando(true)}
+                >
+                  <Icono nombre="pencil" tamano={14} />
+                  Modificar los coeficientes
+                </button>
+              </div>
+            ) : (
+              <>
+                <Aviso tipo="alerta">
+                  Estás cambiando cómo se reparte cada serie de este ejercicio. Si te equivocas,
+                  «Restaurar los del catálogo base» lo deja como venía, y nada se guarda hasta que
+                  pulses «Guardar los ajustes».
+                </Aviso>
+                <div class="coeficientes">
+                  {catalogo.grupos.map((g) => {
+                    const clave = `${ejercicio}|${g.id}`;
+                    const valor = borrador.get(clave) ?? '';
+                    const malo = valor !== '' && !COEFICIENTE.test(valor);
+                    const deReferencia = referencia.valores.get(clave) ?? '';
+                    const distinto =
+                      referencia.conReferencia.has(ejercicio) && !mismoValor(valor, deReferencia);
+                    return (
+                      <div key={g.id} class="campo">
+                        <label for={`c-${g.id}`}>{g.nombre}</label>
+                        <input
+                          id={`c-${g.id}`}
+                          class="entrada"
+                          inputMode="decimal"
+                          placeholder="en blanco"
+                          aria-invalid={malo}
+                          value={valor}
+                          onInput={(e) => {
+                            const nuevo = new Map(borrador);
+                            const texto = (e.target as HTMLInputElement).value.replace(',', '.');
+                            if (texto === '') nuevo.delete(clave);
+                            else nuevo.set(clave, texto);
+                            setBorrador(nuevo);
+                          }}
+                        />
+                        {malo && (
+                          <span class="error-de-campo">Entre 0.01 y 2.00, dos decimales</span>
+                        )}
+                        {!malo && distinto && (
+                          <span class="ayuda-campo">
+                            Catálogo base: {deReferencia === '' ? 'en blanco' : deReferencia}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
-          </div>
-          <p class="ayuda">
-            En blanco = no contribuye. La métrica usa 1.00 para el músculo principal, 0.50 para el
-            sinergista y 0.25 para el menor; cualquier valor hasta 2.00 es tuyo.
-          </p>
+                {modificadosDelEjercicio.length > 0 && (
+                  <div class="acciones">
+                    <button type="button" class="boton-texto boton-pequeno" onClick={restaura}>
+                      <Icono nombre="refresh-cw" tamano={14} />
+                      Restaurar los del catálogo base
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </section>
+
+          {hayCambios && (
+            <div class="resumen-de-cambios">
+              <strong>Si guardas, cambia:</strong>
+              <ul>
+                {cambiaUmbral && (
+                  <li>
+                    Umbral de RIR: {catalogo.parametros.umbral_rir} → {umbral}
+                  </li>
+                )}
+                {cambios.map((c) => (
+                  <li key={c.clave}>{c.texto}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div class="acciones">
             <button
               type="button"
               class="boton"
-              disabled={invalidos.length > 0}
+              disabled={!hayCambios || invalidos.length > 0}
               onClick={() => void guarda()}
             >
               <Icono nombre="check" tamano={16} />
-              Guardar parámetros
+              Guardar los ajustes
             </button>
+            {hayCambios && (
+              <button type="button" class="boton-texto" onClick={descarta}>
+                Descartar los cambios
+              </button>
+            )}
           </div>
           <Respuesta>
             {error !== null && <Aviso tipo="error">{error}</Aviso>}
@@ -524,6 +732,7 @@ export function Catalogo() {
           <EditorDeParametros
             key={c.parametros.version_id + c.parametros.contribuciones.length}
             catalogo={c}
+            base={base.datos}
             alGuardar={catalogo.recarga}
           />
         </div>

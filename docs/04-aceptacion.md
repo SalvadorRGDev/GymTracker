@@ -50,6 +50,9 @@ mutación: quitar el mecanismo debe poner en rojo su caso y sólo el suyo.
 | Semana vacía en neutro y con el texto | Figura de muestra coloreada | `resumen.test.tsx` |
 | Los 16 grupos tienen región | Un grupo invisible | `figura/rutas.test.ts` |
 | Luminancia monótona en claro y oscuro; contraste de rótulos | Escala ilegible en gris o con deuteranopía | `lenguaje-visual.test.ts` |
+| Comparado con el plan: la región se pinta con el `estado` del servidor aunque el signo de la cifra diga otra cosa | El cliente decidiendo déficit o superávit | `resumen.test.tsx` |
+| Comparado con el plan: dice la semana del plan, cita su propia tabla y sin plan no colorea | Una semana natural leída como la del plan; una figura de muestra | `resumen.test.tsx` |
+| Los cuatro estados de la figura y la trama se separan con deuteranopía (ΔE ≥ 25) | «Pendiente» confundido con «en plan» | `lenguaje-visual.test.ts` |
 | Deuteranopía: claridad monótona y niveles separados (ΔE ≥ 8) con la escala simulada; déficit y superávit distinguibles | Dos niveles o los dos signos que se confunden | `lenguaje-visual.test.ts` (Machado 2009) |
 | A mano: el giro en Safari de iOS | — | pendiente |
 

@@ -133,7 +133,7 @@ arranque sin iniciar sesión).
 ## El ensayo
 
 `bash deploy/ensayo.sh` monta un directorio temporal (nunca toca `datos/`), da de
-alta una cuenta, arranca el proceso compilado y comprueba **veintiuna**
+alta una cuenta, arranca el proceso compilado y comprueba **veintidós**
 afirmaciones: el alta, el 401, el cliente en la raíz y en sus rutas, el 404 de
 API, los recursos compilados, la cookie, la importación del catálogo base, la
 credencial (y que su archivo apunta a la URL del navegador), la captura del atajo
@@ -141,4 +141,5 @@ y su idempotencia, que el atajo no llega a las rutas de planes, la web en la
 misma sesión, que la cookie no vale como portador, el rechazo con 200, que lo
 capturado hoy cuenta (ADR-013), el grupo sin mapeo a cero, el contrato del mapa
 muscular, la exportación sin huellas, la comparativa con la línea semanal del
-atajo, y que respaldar y restaurar reproduce el almacén.
+atajo, que respaldar y restaurar reproduce el almacén, y que la baja borra el
+libro, las credenciales y las copias automáticas con sus datos.

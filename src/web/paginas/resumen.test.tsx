@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ESCALA } from '../../api/escala';
 import type { Dashboard, GrupoDelDashboard } from '../../api/lectura/contrato';
+import type { Comparativa } from '../../api/planes/contrato';
 import {
   asienta,
   boton,
@@ -184,5 +185,123 @@ describe('Resumen: la figura no calcula', () => {
     expect(detalle?.textContent).toContain('Volumen alto');
     for (const r of regiones(raiz, 'espalda', 'dorsal'))
       expect(r.classList.contains('activa')).toBe(true);
+  });
+});
+
+describe('Resumen: la figura comparada con el plan (ADR-019)', () => {
+  const COMPARATIVA: Comparativa = {
+    hoy: '2026-09-26',
+    simulacion: null,
+    vigilancia: {
+      desde: '2026-07-05',
+      hasta: '2026-09-26',
+      efectivas: 0,
+      en_la_franja: 0,
+      porcentaje: null,
+      disparador: 15,
+      minimo: 30,
+      pide_sensibilidad: false,
+      umbrales: [],
+    },
+    ventanas: [
+      {
+        desde: '2026-09-22',
+        hasta: '2026-09-28',
+        dias: 7,
+        numero: 3,
+        en_curso: true,
+        plan: {
+          asignacion_id: 'a1',
+          version_id: 'v1',
+          nombre: 'Torso',
+          numero_de_version: 1,
+          ciclo_dias: 7,
+          ancla: '2026-09-08',
+        },
+        versiones_de_parametros: [{ id: 'p1', vigente_desde: '2000-01-01', umbral_rir: 4 }],
+        entradas_sin_mapeo: 0,
+        series_sin_mapeo: 0,
+        grupos: [
+          // El estado lo decide el servidor: si el cliente leyera el signo, pintaría déficit.
+          {
+            id: 'g-pec',
+            nombre: 'Pectoral',
+            planeado: '7.00',
+            ejecutado: '5.00',
+            delta: '-2.00',
+            estado: 'superavit',
+          },
+          {
+            id: 'g-dorsal',
+            nombre: 'Dorsal',
+            planeado: '8.00',
+            ejecutado: '9.00',
+            delta: '+1.00',
+            estado: 'deficit',
+          },
+        ],
+        detalle: [],
+      },
+    ],
+  };
+
+  async function pintaComparada(comparativa: Comparativa, ruta = '/?color=plan') {
+    simulaMovimiento(true);
+    const red = simulaFetch({
+      'GET /api/lectura/v1/dashboard': { cuerpo: dashboard([PECTORAL, DORSAL]) },
+      'GET /api/planes/v1/comparativa': { cuerpo: comparativa },
+    });
+    window.history.replaceState(null, '', ruta);
+    montado = await monta(<Resumen zona="America/Mexico_City" />);
+    return { raiz: montado.raiz, red };
+  }
+
+  it('pinta el estado que manda el servidor, no el signo de la cifra', async () => {
+    const { raiz } = await pintaComparada(COMPARATIVA);
+    for (const r of regiones(raiz, 'frente', 'pectoral')) {
+      expect(r.getAttribute('data-estado')).toBe('superavit');
+      expect(r.hasAttribute('data-nivel')).toBe(false);
+    }
+    for (const r of regiones(raiz, 'espalda', 'dorsal')) {
+      expect(r.getAttribute('data-estado')).toBe('deficit');
+    }
+  });
+
+  it('dice qué semana del plan compara, cita su propia tabla y pone la diferencia con signo', async () => {
+    const { raiz } = await pintaComparada(COMPARATIVA);
+    const texto = textoDe(raiz);
+    expect(texto).toContain('Semana 3 de «Torso»');
+    expect(texto).toContain('Del 22 al 28 de septiembre, en curso');
+    expect(texto).toContain('no desde el lunes');
+    const figura = raiz.querySelector('[role="img"]');
+    expect(figura?.getAttribute('aria-describedby')).toBe('tabla-comparada-del-mapa');
+    expect(figura?.getAttribute('aria-label')).toBe(
+      'Mapa muscular, cuerpo completo, frente, comparado con el plan',
+    );
+    const tabla = raiz.querySelector('table#tabla-comparada-del-mapa');
+    expect(tabla?.textContent).toContain('5.00 de 7.00');
+    expect(tabla?.textContent).toContain('-2.00');
+    expect(texto).toContain('aquí nada significa «mucho»');
+  });
+
+  it('sin plan asignado lo dice y no colorea nada', async () => {
+    const { raiz } = await pintaComparada({ ...COMPARATIVA, ventanas: [] });
+    expect(textoDe(raiz)).toContain('No hay plan asignado: nada que comparar');
+    const estados = new Set(
+      [...raiz.querySelectorAll('.region')].map((r) => r.getAttribute('data-estado')),
+    );
+    expect([...estados].sort()).toEqual(['ninguno', 'sin-plan']);
+  });
+
+  it('sólo se pide la comparativa cuando se elige, y la elección va a la URL', async () => {
+    const { raiz, red } = await pintaComparada(COMPARATIVA, '/');
+    expect(red.llamadas.some((l) => l.url.startsWith('/api/planes/v1/comparativa'))).toBe(false);
+    const color = campo(raiz, 'Color') as HTMLSelectElement;
+    color.value = 'plan';
+    color.dispatchEvent(new Event('change', { bubbles: true }));
+    await asienta();
+    expect(window.location.search).toBe('?color=plan');
+    expect(red.llamadas.some((l) => l.url === '/api/planes/v1/comparativa?ventanas=1')).toBe(true);
+    expect(regiones(raiz, 'frente', 'pectoral')[0]?.getAttribute('data-estado')).toBe('superavit');
   });
 });

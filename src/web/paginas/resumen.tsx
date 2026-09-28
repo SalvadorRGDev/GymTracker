@@ -1,5 +1,6 @@
 import { useState } from 'preact/hooks';
 import type { Dashboard, GrupoDelDashboard } from '../../api/lectura/contrato';
+import type { Comparativa } from '../../api/planes/contrato';
 import {
   Aviso,
   CabeceraDePagina,
@@ -166,7 +167,11 @@ function TablaDeGrupos({
 export function Resumen({ zona }: { zona: string }) {
   const recurso = useRecurso<Dashboard>('/api/lectura/v1/dashboard');
   const { consulta } = useUbicacion();
-  const { vista, cara } = leeVista(consulta);
+  const { vista, cara, color } = leeVista(consulta);
+  // La comparativa sólo se pide cuando la figura la va a pintar.
+  const comparativa = useRecurso<Comparativa>(
+    color === 'plan' ? '/api/planes/v1/comparativa?ventanas=1' : null,
+  );
   const [activo, setActivo] = useState<string | null>(null);
   const [rangos, setRangos] = usePreferencia('rangos', 'si');
 
@@ -280,6 +285,8 @@ export function Resumen({ zona }: { zona: string }) {
                   dashboard={d}
                   vista={vista}
                   cara={cara}
+                  color={color}
+                  comparativa={color === 'plan' ? comparativa : null}
                   activo={activo}
                   alActivar={setActivo}
                   idDeTabla={ID_DE_TABLA}

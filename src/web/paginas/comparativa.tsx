@@ -1,7 +1,6 @@
 import type {
   CantidadDeGrupo,
   Comparativa as DatosDeComparativa,
-  EstadoDeComparacion,
   VentanaComparada,
   VigilanciaDelUmbral,
 } from '../../api/planes/contrato';
@@ -13,7 +12,7 @@ import {
   ErrorDeCarga,
   Vacio,
 } from '../componentes/basicos';
-import { Icono, type NombreDeIcono } from '../componentes/iconos';
+import { Delta } from '../componentes/delta';
 import { useRecurso } from '../estado/recurso';
 import { actualizaConsulta, useUbicacion } from '../estado/ruta';
 import { fechaCorta, fechaLarga, rangoDeDias } from '../formato/fechas';
@@ -25,20 +24,6 @@ import { anchoDeBarra, escalaDeBarras } from '../formato/numeros';
  * decide el estado; aquí se enseña. La escala es divergente y propia: el rojo
  * del mapa dice «mucho volumen» y aquí no significa nada.
  */
-
-const ROTULO: Record<EstadoDeComparacion, string> = {
-  deficit: 'déficit',
-  pendiente: 'pendiente',
-  'en-plan': 'en plan',
-  superavit: 'superávit',
-};
-
-const ICONO: Record<EstadoDeComparacion, NombreDeIcono> = {
-  deficit: 'minus',
-  pendiente: 'clock',
-  'en-plan': 'check',
-  superavit: 'plus',
-};
 
 const VENTANAS = ['4', '8', '12'];
 
@@ -192,11 +177,7 @@ function Ventana({ v }: { v: VentanaComparada }) {
                   <td class="numero cifra col-cifra">{g.planeado}</td>
                   <td class="numero cifra col-cifra">{g.ejecutado}</td>
                   <td class="numero">
-                    <span class={`delta delta-${g.estado}`}>
-                      <Icono nombre={ICONO[g.estado]} tamano={14} />
-                      <span class="cifra">{g.delta}</span>
-                      <span class="delta-rotulo">{ROTULO[g.estado]}</span>
-                    </span>
+                    <Delta delta={g.delta} estado={g.estado} />
                   </td>
                 </tr>
               ))}

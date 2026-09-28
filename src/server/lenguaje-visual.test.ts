@@ -290,6 +290,8 @@ describe('lenguaje visual: la escala divergente de la comparativa (ADR-019)', ()
     '--superavit-texto',
     '--superavit-fondo',
     '--superavit-barra',
+    '--pendiente-relleno',
+    '--en-plan-relleno',
   ];
 
   it('no reutiliza el rojo del mapa ni el de peligro ni el acento: «déficit» no es «mucho»', () => {
@@ -314,6 +316,28 @@ describe('lenguaje visual: la escala divergente de la comparativa (ADR-019)', ()
             contraste(color(t.get(barra) ?? '', t), color(t.get(fondo) ?? '', t)),
             `${barra} sobre ${fondo}`,
           ).toBeGreaterThanOrEqual(3);
+        }
+      }
+    }
+  });
+
+  it('en la figura, los cuatro estados y la trama se separan entre sí con deuteranopía', () => {
+    for (const [nombre, t] of [
+      ['claro', CLARO],
+      ['oscuro', OSCURO],
+    ] as const) {
+      const rellenos = [
+        '--deficit-barra',
+        '--pendiente-relleno',
+        '--en-plan-relleno',
+        '--superavit-barra',
+        '--trama-fondo',
+      ].map((k) => [k, deuteranopia(color(t.get(k) ?? '', t))] as const);
+      for (let i = 0; i < rellenos.length; i += 1) {
+        for (let j = i + 1; j < rellenos.length; j += 1) {
+          const [a, ca] = rellenos[i] as (typeof rellenos)[number];
+          const [b, cb] = rellenos[j] as (typeof rellenos)[number];
+          expect(distancia(ca, cb), `${nombre}: ${a} ↔ ${b}`).toBeGreaterThanOrEqual(25);
         }
       }
     }

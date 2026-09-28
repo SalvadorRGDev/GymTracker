@@ -94,12 +94,14 @@ semana, y compara lo **planeado** con lo **ejecutado**.
 - **El corazón**: un **motor de volumen puro** en `src/domain/volume/`, sin
   dependencias, sin reloj y sin coma flotante, que es el único sitio del sistema
   donde se calcula volumen. El plan y lo ejecutado pasan por la misma función.
-- **Estado (26/09/2026)**: fases 0, 1 y 2 cerradas en código, más una fase de
-  producto (catálogo base de 182 ejercicios, rangos de referencia, constructor de
-  rutinas y rediseño visual). **337 pruebas en verde**, lint limpio. Falta
-  **probar los atajos en un iPhone real** y la **fase 3** (la comparativa
-  plan-contra-real, que da nombre al proyecto). Todo el trabajo desde el 14 de
-  septiembre **está sin commit** (ver §16.3).
+- **Estado (27/09/2026)**: fases 0, 1, 2 y **3** en código —la comparativa
+  plan-contra-real, que da nombre al proyecto, con su vigilancia del umbral, la
+  simulación, la línea semanal del atajo y el mapa «Comparado con el plan»
+  (ADR-019)—, más la fase de producto (catálogo base de 182 ejercicios, rangos de
+  referencia, constructor de rutinas y rediseño visual) y la baja de cuenta.
+  **290 pruebas en verde**, lint limpio, ensayo de 22 afirmaciones. Falta
+  **probar los atajos en un iPhone real**. El repositorio tiene su primer commit
+  (`1a43544`).
 
 ---
 
@@ -163,7 +165,7 @@ Cuatro vistas, en este orden de dependencia (`docs/03-fases.md`):
 | **REGISTRO**    | Captura por serie: ejercicio, repeticiones, carga, RIR, calentamiento.    | Hecha (atajos + web) |
 | **PRINCIPAL**   | Esfuerzo real acumulado por grupo y semana, calculado desde lo registrado.| Hecha (resumen) |
 | **PROYECCIÓN**  | Volumen previsto por un plan semanal; cambiar de plan recalcula.          | Hecha         |
-| **COMPARATIVA** | Real contra planeado, con delta y signo, contra la versión de plan vigente entonces. | **Fase 3, pendiente** |
+| **COMPARATIVA** | Real contra planeado, con delta y signo, contra la versión de plan vigente entonces. | Hecha (fase 3, ADR-019) |
 
 El orden **REGISTRO → PRINCIPAL → PROYECCIÓN → COMPARATIVA** no es de
 importancia sino de dependencia. La comparativa da nombre al proyecto y va
@@ -208,7 +210,7 @@ mantiene deliberadamente modesto. Cuando el coste pasó a ser **cero obligatorio
 | Gasto calórico por MET                | La banda de error (±33 %) es más ancha que cualquier decisión que se tomaría con ella. Si vuelve, calibrado desde tendencia de peso e ingesta, nunca por MET. | ADR-005  |
 | Registro público de cuentas           | Superficie de ataque sin contraprestación. Las cuentas se crean con `npm run alta`.        | ADR-007  |
 | Cliente nativo / Android              | Coste de tienda y de dos runtimes. Si hiciera falta, es otro cliente contra el mismo contrato. | ADR-008 |
-| Comparativa plan-contra-real          | Es la fase 3, a propósito (§3.1).                                                          | fases    |
+| Comparativa plan-contra-real          | Era la fase 3, a propósito (§3.1); ya está hecha (ADR-019).                               | fases    |
 | Nutrición                             | Fase 4, no comprometida: existe como prueba de que el modelo aguanta.                     | fases    |
 
 ---
@@ -279,6 +281,7 @@ El proyecto siguió un proceso muy deliberado que vale la pena copiar:
 | 16 sep 2026  | **Segundo giro**: el almacén pasa de PostgreSQL a libros de Excel (ADR-010) y la ejecución a la máquina local con túnel (ADR-011). Se retiran migraciones, Docker, Fly y Caddy. | **sin commit** |
 | 21 sep 2026  | **Fase de producto**: catálogo base (ADR-012), versión sin fijar reescribible (ADR-013), rangos de referencia (ADR-014), constructor de rutinas (ADR-015), vidrio sobre lienzo (ADR-016). | **sin commit** |
 | 26 sep 2026  | Este documento. 337 pruebas en verde, lint limpio.                                                            | **sin commit**  |
+| 27 sep 2026  | **Fase 3** (ADR-019) y mapa «Comparado con el plan»; revisión de errores con experimentos (`WEB_DIR` que servía los datos, `credencial.json` detrás del túnel, límite por IP, JSON ilegible); baja de cuenta y aviso de privacidad. | `1a43544` (primer commit) |
 
 ### 4.4 Lo que se esperaba contra lo que pasó
 
@@ -1174,11 +1177,11 @@ muscular con figura giratoria y escala de color en el Resumen. Ver **§19.6**.
 | Hoja de cálculo | LibreOffice abre y re-guarda sin cambiar un decimal    | `xlsx.test.ts`, trabajo propio de CI |
 | **Captura**   | Cola, sesión vigente, bandera, pantalla bloqueada        | **A mano en el iPhone**             |
 
-### 14.2 Estado comprobado el 26/09/2026
+### 14.2 Estado comprobado el 27/09/2026
 
-- `npm test`: **33 archivos, 337 pruebas, todas en verde** (≈ 4 s). No necesitan
+- `npm test`: **31 archivos, 290 pruebas, todas en verde** (≈ 4 s). No necesitan
   nada externo: ni base, ni servicios, ni variables.
-- `npm run lint`: Biome limpio sobre 101 archivos y `tsc --noEmit` sin errores
+- `npm run lint`: Biome limpio sobre 118 archivos y `tsc --noEmit` sin errores
   (servidor y cliente).
 - Estilo de las pruebas: sin instantáneas; fixtures con **dos propietarios**
   reales; validadores ejercitados con datos **rotos a propósito** (uno que sólo se
@@ -1199,16 +1202,19 @@ Se dispara en **push a `main`** y en **pull requests**. Cinco trabajos:
 ### 14.4 El ensayo (`deploy/ensayo.sh`)
 
 Monta un directorio temporal (nunca toca `datos/`), da de alta una cuenta,
-arranca el proceso compilado y comprueba **veinte afirmaciones** que ninguna
+arranca el proceso compilado y comprueba **veintidós afirmaciones** que ninguna
 prueba de unidad ve: que el alta crea el libro; 401 sin sesión; que la raíz y una
 ruta del cliente sirven `index.html`; que una ruta de API inexistente sigue siendo
 404 de API; que se sirve el cliente compilado; que la entrada devuelve cookie;
-que el atajo registra y el reenvío es idempotente; que el atajo no lee planes;
+que el atajo registra y el reenvío es idempotente; que el atajo no llega a las
+rutas de planes; que el archivo de credencial apunta a la URL del navegador;
 que la web registra en la misma sesión; que la cookie no vale como credencial de
 captura; que un ejercicio inexistente se rechaza con 200; la importación del
 catálogo base; que lo capturado hoy cuenta con lo guardado hoy (ADR-013); que un
-grupo sin mapeo sale con cero; que la exportación no lleva huellas; y que
-**respaldar y restaurar reproduce el almacén**, comparando conteos.
+grupo sin mapeo sale con cero; que la exportación no lleva huellas; que la
+comparativa resta lo hecho de lo planeado y el atajo recibe su línea semanal; que
+**respaldar y restaurar reproduce el almacén**, comparando conteos; y que la
+**baja** borra el libro, las credenciales y las copias automáticas con sus datos.
 
 ### 14.5 Lo que deliberadamente no se prueba
 
@@ -1364,7 +1370,7 @@ correcto ante sospecha de compromiso.
 | **1 — Registro y esfuerzo real** | Motor, almacén, autenticación, contrato de captura, atajos especificados, captura web, lectura (resumen, historial, catálogo, dispositivos, exportación), respaldo y restauración ensayados | ✅ En código · ⏳ **prueba de atajos en iPhone pendiente** |
 | **2 — Proyección** | Expansión del plan por el motor, contrato de planes, vista de proyección, autoría | ✅ Cerrada |
 | **Producto** | Catálogo base (ADR-012), versión reescribible sin fijar (ADR-013), rangos (ADR-014), constructor de rutinas (ADR-015), vidrio sobre lienzo (ADR-016) | ✅ Cerrada |
-| **3 — Comparativa** | La resta plan-contra-real y lo que la rodea (§17.1) | ⬜ No empezada |
+| **3 — Comparativa** | La resta plan-contra-real y lo que la rodea (§17.1) | ✅ En código (ADR-019) |
 | **4 — Nutrición** | Hojas aditivas | ⬜ No comprometida |
 
 ### 16.2 Criterios del spec
@@ -1372,7 +1378,7 @@ correcto ante sospecha de compromiso.
 | Caso exigido                             | Estado |
 | ---------------------------------------- | ------ |
 | Sesión que cruza la medianoche           | ✅ en almacén y motor · ⏳ en el atajo (prueba manual) |
-| Cambio de plan a mitad del histórico     | 🟡 **Parcial**: las piezas (no hay dos planes vigentes, publicado inmutable, asignación con histórico inmutable) están en verde; el criterio de punta a punta es de la fase 3 |
+| Cambio de plan a mitad del histórico     | ✅ de punta a punta: «la semana del 3 de marzo contra el plan vigente el 3 de marzo» (`comparativa.integracion.test.ts`) |
 | Edición de coeficiente con datos previos | ✅ |
 | Guardado duplicado por reintento         | ✅ (sesión y serie) |
 
@@ -1410,6 +1416,10 @@ Comprobado con `git status` el 26/09/2026:
 ## 17. Lo que se planeaba y falta
 
 ### 17.1 Fase 3 — Comparativa
+
+**Hecho (27/09/2026)**: los seis puntos del orden de trabajo y la opción del mapa,
+con las decisiones en el ADR-019 y el estado en `docs/03-fases.md`. Lo que sigue
+es el planteamiento original.
 
 **Objetivo**: la resta, y hacerla bien.
 
@@ -1519,7 +1529,8 @@ que recomiendo atender antes.
 
 ### 19.2 Huecos funcionales frente al spec (días)
 
-1. **Borrado real de cuenta** (spec, LFPDPPP). No existe en el almacén Excel. Con
+1. **Hecho (27/09/2026)**: `npm run baja` y `docs/11-privacidad.md`.
+   **Borrado real de cuenta** (spec, LFPDPPP). No existe en el almacén Excel. Con
    el ADR-010 es sencillo —borrar el libro del propietario y sus filas de
    `cuentas.xlsx`—, pero hay que decidir qué pasa con `datos/respaldos/` y con
    los respaldos completos, y escribir el **aviso de privacidad** que declare el
@@ -1707,7 +1718,8 @@ escritas con la recomendación:
   ya maneja con la API de historial: el botón «atrás» funciona y la vista se puede
   mandar por mensaje. No hay nada que guardar en el servidor.
 - En la fase 3 el mismo desplegable puede ganar una opción **«Comparado con el
-  plan»** (§19.6.8).
+  plan»** (§19.6.8). Hecho como un control **aparte** («Color»): dentro de este
+  desplegable, comparar obligaría a ver el cuerpo completo.
 
 **Qué grupos se ven en cada cara.** El mapeo usa los 16 identificadores del
 catálogo base (§12). Cada grupo aparece en al menos una cara, y la prueba lo
@@ -1937,6 +1949,7 @@ identificador del catálogo base. Alternativas descartadas:
   signo. **No se reutiliza el rojo de esta escala con otro significado**: el rojo
   aquí quiere decir «mucho volumen», y que en otra vista quisiera decir «déficit»
   sería el error de lectura más fácil de cometer.
+  **Hecho** (ADR-019): ámbar ↔ azul, validada con deuteranopía, con el delta con signo.
 - **Periodo**: un selector de «esta semana / semana anterior / media de cuatro
   semanas», siempre servido por el servidor y nunca promediado en el navegador.
 
