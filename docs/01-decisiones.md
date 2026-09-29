@@ -31,6 +31,7 @@ no aprobar.
 | 018 | Mapa muscular del resumen y su escala | ACEPTADO |
 | 019 | Comparativa: ventana desde el ancla y línea semanal del atajo | ACEPTADO (enmienda al 009) |
 | 020 | Alta pública con tope | ACEPTADO (enmienda al 007) |
+| 021 | «Ver ejemplo»: figuras animadas propias | ACEPTADO |
 
 ---
 
@@ -419,3 +420,87 @@ tope. Verificar el correo: exige un servicio de envío (coste y terceros).
 
 **Consecuencias.** Cualquiera con el enlace puede ocupar plazas hasta el tope;
 el dueño lo vigila con `npm run verifica` y retira cuentas con `npm run baja`.
+
+## ADR-021 — «Ver ejemplo»: figuras animadas propias
+
+**Estado**: ACEPTADO
+
+**Contexto.** En el catálogo, quien no conoce un ejercicio no sabe qué está
+importando. El usuario pidió, junto a cada nombre y su casilla, un botón «Ver
+ejemplo» de otro color que abra una ventana emergente: la página se oscurece y en
+el centro queda el vídeo del ejercicio, con un botón «Cerrar» abajo. Eligió
+**animaciones propias** frente a vídeos o imágenes de terceros.
+
+**Decisión.**
+
+- **Figura propia en SVG, animada con código.** Un maniquí de proporciones
+  humanas en tres dimensiones proyectado por una cámara ortográfica
+  (`src/web/componentes/demostracion/`). Cada pose dice dónde está la pelvis,
+  cómo va el tronco y adónde llegan manos y tobillos; codos y rodillas los
+  resuelve una cinemática inversa de dos segmentos, así una barra que sube recto
+  sube recto y un pie apoyado no patina. Entre poses, recto, por un punto de paso
+  o en arco alrededor de una articulación (un curl gira alrededor del codo).
+- **Una figura para cada uno de los 182 ejercicios**, asignada por identificador
+  en una tabla (`ejemplos.ts`): unas noventa animaciones con variantes de
+  material (barra, mancuernas, polea, banda, máquina, Smith, anillas) y de
+  apoyo. La tabla, no una deducción por nombre, para que una prueba exija
+  cobertura completa y ninguna entrada huérfana. Lo que la figura no puede
+  enseñar (el agarre) lo dice una nota.
+- **La ventana es el `<dialog>` nativo** en modo modal: velo oscuro opaco
+  (`--velo`, sin desenfoque: el vidrio sigue en dos sitios), foco en «Cerrar» al
+  abrir y de vuelta a «Ver ejemplo» al cerrar; se cierra con «Cerrar», Escape o
+  pulsando fuera. Enseña cómo se hace en una frase para quien no lo ha hecho
+  nunca, qué músculos trabajan (de los coeficientes: principal, ayudan, un poco)
+  y el material.
+- **Movimiento**: es la tercera excepción declarada (docs/10). Un bucle con
+  `requestAnimationFrame` de unos tres segundos por repetición, sólo con
+  `prefers-reduced-motion: no-preference` y sólo mientras la ventana está
+  abierta. Con movimiento reducido la figura queda quieta: la posición de partida
+  en tenue y la de llegada encima.
+- **Carga diferida**: las poses viven en un módulo aparte (≈ 23 kB comprimido)
+  que se pide al abrir la primera ventana.
+
+**Alternativas descartadas.** Vídeos o GIF de terceros: dependencia externa, la
+política de contenido (`default-src 'self'`) los bloquearía, cargarían desde
+fuera a cada apertura y no hay licencia clara. Vídeos grabados en el proyecto:
+cientos de megas en el repositorio. Una sola figura genérica por patrón: más
+barata, pero enseñaría un press de banca a quien pregunta por una máquina.
+
+**Consecuencias.** Las poses son datos escritos a mano; un error de tecleo se ve
+en la figura, no en el cálculo. Lo vigila `demostracion.test.ts`: que manos y
+tobillos lleguen a su objetivo en todo el recorrido, que ningún segmento cambie
+de largo, que nada atraviese el suelo y que cada bucle cierre sin saltos. Nada
+de esto toca el motor ni el almacén.
+
+**Ampliación: una figura que se lea como un maniquí de gimnasio.** Tras la
+primera versión, el usuario pidió arreglar los fallos de las animaciones y darles
+más oficio. Se decidió:
+
+- **Volumen en vez de palotes.** El tronco son secciones elípticas (cadera,
+  cintura, pecho, hombros) con el trapecio como ladera del cuello al hombro;
+  brazos y piernas, masas que se estrechan; la cabeza lleva mentón. Luz de arriba
+  a la izquierda, el lado lejano más claro y un filo del color del escenario en
+  cada pieza. Bajo lo que toca el suelo, una mancha de contacto.
+- **Los músculos del ejercicio, en la figura.** Coral lo que trabaja sobre todo
+  (1.00) y melocotón lo que ayuda (0.50), **tomados de los coeficientes del
+  catálogo base**, los mismos que la ventana nombra en texto: la figura no inventa
+  qué trabaja. Cada región del tronco pinta sólo la parte que mira a la cámara.
+- **La cámara se elige por lo que trabaja**: tres cuartos por delante por
+  omisión y tres cuartos por detrás para espalda, glúteo y deltoides posterior.
+- **Material con volumen y máquinas que se entienden**: discos, manguitos,
+  mancuernas y rodillos son cilindros con tapa; las palancas giran donde gira la
+  articulación (encima del hombro en el pec deck, en la cadera en el crunch, por
+  detrás del hombro en las laterales) y las máquinas guiadas suben por su poste,
+  así que nada se estira ni atraviesa la cara.
+- **Fallos corregidos**: pies que daban media vuelta con el tronco muy
+  inclinado, rodillas y puntas que cambiaban de lado de golpe al pasar de una pose
+  sin polo a otra con él, y una lista de cruces entre cuerpo y material revisada
+  a mano, figura por figura.
+
+`demostracion.test.ts` añade que ninguna articulación salte entre dos de 360
+muestras por vuelta (más de 5 unidades es un pie que se da la vuelta), que cada
+grupo del catálogo tenga sitio en la figura, que lo que trabaja sobre todo mire a
+la cámara en algún momento y que una región de la espalda no se pinte vista de
+frente. Los colores los vigila `lenguaje-visual.test.ts`. Sigue sin tocar el
+motor ni el almacén, y el módulo diferido de las poses pasa a unos 24 kB
+comprimidos.

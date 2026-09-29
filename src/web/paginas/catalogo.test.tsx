@@ -12,6 +12,7 @@ import {
   monta,
   pulsa,
   simulaFetch,
+  simulaMovimiento,
   textoDe,
 } from '../prueba/utiles';
 import { Catalogo } from './catalogo';
@@ -150,5 +151,77 @@ describe('Catálogo: ajustes avanzados de la métrica', () => {
       ],
     });
     expect(textoDe(ajustes)).toContain('se aplica a partir del lunes 28 de septiembre de 2026');
+  });
+});
+
+describe('Catálogo: ver ejemplo', () => {
+  const CON_PERFIL: CatalogoBaseConPerfiles = {
+    ...BASE,
+    perfiles: [
+      {
+        id: 'esencial',
+        nombre: 'Esencial',
+        descripcion: 'Lo básico.',
+        por_omision: true,
+        equipamiento: [],
+        sin_cobertura: [],
+      },
+    ],
+    ejercicios_por_perfil: { esencial: ['press-banca'] },
+  };
+
+  async function abreLaLista() {
+    simulaFetch({
+      'GET /api/lectura/v1/catalogo': { cuerpo: CATALOGO },
+      'GET /api/lectura/v1/catalogo/base': { cuerpo: CON_PERFIL },
+    });
+    montado = await monta(<Catalogo />);
+    return montado.raiz;
+  }
+
+  it('cada ejercicio de la lista lleva «Ver ejemplo» fuera de su etiqueta: pulsarlo no toca la casilla', async () => {
+    simulaMovimiento(true);
+    const raiz = await abreLaLista();
+    const verEjemplo = boton(raiz, 'Ver ejemplo de Press banca');
+    expect(verEjemplo.closest('label')).toBeNull();
+    const casilla = verEjemplo.closest('li')?.querySelector('input[type="checkbox"]');
+    if (!(casilla instanceof HTMLInputElement)) throw new Error('sin casilla');
+    expect(casilla.checked).toBe(true);
+    await pulsa(verEjemplo);
+    expect(casilla.checked).toBe(true);
+    expect(boton(raiz, /^Importar 1 ejercicios/).disabled).toBe(false);
+  });
+
+  it('abre una ventana modal con la figura, cómo se hace y qué trabaja; «Cerrar» la quita', async () => {
+    simulaMovimiento(true);
+    const raiz = await abreLaLista();
+    const verEjemplo = boton(raiz, 'Ver ejemplo de Press banca');
+    verEjemplo.focus();
+    await pulsa(verEjemplo);
+
+    const ventana = raiz.querySelector('dialog');
+    if (ventana === null) throw new Error('no se abrió la ventana');
+    expect(ventana.open).toBe(true);
+    expect(document.activeElement).toBe(boton(ventana, 'Cerrar'));
+    const titulo = ventana.querySelector(`#${ventana.getAttribute('aria-labelledby')}`);
+    expect(titulo?.textContent).toBe('Press banca');
+
+    await vi.waitFor(() => expect(ventana.querySelector('svg[role="img"]')).not.toBeNull());
+    expect(textoDe(ventana)).toContain('Tumbado en el banco con los pies en el suelo');
+    expect(textoDe(ventana)).toContain('En la figura: press en banco plano con barra.');
+    expect(
+      [...ventana.querySelectorAll('.ventana-datos div')].map((d) => [
+        d.querySelector('dt')?.textContent,
+        d.querySelector('dd')?.textContent,
+      ]),
+    ).toEqual([
+      ['Principal', 'Pectoral'],
+      ['Ayudan', 'Tríceps'],
+      ['Material', 'Ninguno: el propio peso del cuerpo'],
+    ]);
+
+    await pulsa(boton(ventana, 'Cerrar'));
+    expect(raiz.querySelector('dialog')).toBeNull();
+    expect(document.activeElement).toBe(verEjemplo);
   });
 });

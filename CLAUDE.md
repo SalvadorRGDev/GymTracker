@@ -4,7 +4,7 @@ Aplicación personal de seguimiento de fuerza: **series efectivas por grupo
 muscular y semana**, lo planeado contra lo ejecutado. Dos personas, coste cero,
 un proceso de Node en la máquina del autor publicado por un túnel, datos en
 libros de Excel. Documento maestro: `Plan.md`. Decisiones: `docs/01-decisiones.md`
-(ADR-001 a 020). Reglas por directorio: `.claude/rules/`.
+(ADR-001 a 021). Reglas por directorio: `.claude/rules/`.
 
 Código, comentarios, documentación e identificadores en **español**: el dominio
 se piensa en español y traducir a medias hace que dos personas llamen distinto a
@@ -21,6 +21,8 @@ lo mismo.
 - Baja de cuenta real con `npm run baja` y aviso de privacidad
   (`docs/11-privacidad.md`). Alta pública opcional desde la web con tope
   (`ALTA_ABIERTA`, `MAXIMO_DE_CUENTAS`; ADR-020).
+- «Ver ejemplo» en el catálogo: cada uno de los 182 ejercicios base tiene su
+  figura animada propia en una ventana modal (ADR-021).
 - Pendiente: **probar los atajos en un iPhone real** (`atajos/PRUEBA-MANUAL.md`).
 
 ## Comandos
@@ -75,6 +77,9 @@ almacén real en un experimento: un libro corrompido no tiene deshacer.
   `DATOS_DIR`, y de él sólo salen las extensiones de `build:web`, sin ocultos.
 - **El cliente no agrega ni recalcula**, tampoco el nivel de color del mapa: lo
   decide el servidor (`src/api/escala.ts`).
+- **Las figuras de «Ver ejemplo» son datos a mano**: cada ejercicio base tiene la
+  suya por identificador y `demostracion.test.ts` exige que manos y pies lleguen,
+  que nada atraviese el suelo y que el bucle cierre.
 
 ## Qué no hacer
 

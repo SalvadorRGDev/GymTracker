@@ -164,6 +164,9 @@ const PARES: readonly [string, string][] = [
   ['--deficit-texto', '--deficit-fondo'],
   ['--superavit-texto', '--fondo'],
   ['--superavit-texto', '--superavit-fondo'],
+  ['--ejemplo-texto', '--ejemplo-fondo'],
+  ['--ejemplo-texto', '--ejemplo-fondo-hover'],
+  ['--ejemplo-texto', '--fondo'],
 ];
 
 /**
@@ -408,5 +411,57 @@ describe('lenguaje visual: apagados, vidrio y movimiento', () => {
         expect(ms(valor), `${r.selector}: ${valor}`).toBeLessThanOrEqual(260);
       }
     }
+  });
+});
+
+describe('lenguaje visual: «Ver ejemplo» y su figura', () => {
+  it('el botón no se confunde con el nombre del ejercicio, que va en índigo al marcarlo', () => {
+    for (const t of [CLARO]) {
+      const [boton, nombre] = ['--ejemplo-texto', '--acento-texto'].map((k) =>
+        color(t.get(k) ?? '', t),
+      );
+      expect(distancia(boton as Rgba, nombre as Rgba)).toBeGreaterThanOrEqual(25);
+      expect(
+        distancia(deuteranopia(boton as Rgba), deuteranopia(nombre as Rgba)),
+        'con deuteranopía',
+      ).toBeGreaterThanOrEqual(15);
+    }
+  });
+
+  it('los trazos de la figura se ven sobre su escenario (≥ 3:1, contraste de lo que no es texto)', () => {
+    for (const t of [CLARO]) {
+      const escenario = color(t.get('--demo-escenario') ?? '', t);
+      for (const trazo of [
+        '--demo-cuerpo',
+        '--demo-cuerpo-lejos',
+        '--demo-disco',
+        '--demo-cable',
+        '--demo-banda',
+      ]) {
+        expect(contraste(color(t.get(trazo) ?? '', t), escenario), trazo).toBeGreaterThanOrEqual(3);
+      }
+    }
+  });
+
+  it('los músculos coloreados se ven sobre el cuerpo y se distinguen entre sí, también con deuteranopía', () => {
+    for (const t of [CLARO]) {
+      const cuerpo = color(t.get('--demo-cuerpo') ?? '', t);
+      const principal = color(t.get('--demo-principal') ?? '', t);
+      const ayuda = color(t.get('--demo-ayuda') ?? '', t);
+      expect(contraste(principal, cuerpo), 'principal sobre el cuerpo').toBeGreaterThanOrEqual(3);
+      expect(contraste(ayuda, cuerpo), 'los que ayudan sobre el cuerpo').toBeGreaterThanOrEqual(3);
+      expect(distancia(deuteranopia(principal), deuteranopia(ayuda))).toBeGreaterThanOrEqual(15);
+      // El tono de los músculos no es el del material que se mueve.
+      expect(
+        distancia(deuteranopia(principal), deuteranopia(color(t.get('--demo-disco') ?? '', t))),
+      ).toBeGreaterThanOrEqual(25);
+    }
+  });
+
+  it('el velo de la ventana oscurece sin vidrio: color translúcido y ningún desenfoque', () => {
+    const velo = REGLAS.find((r) => r.selector === '.ventana::backdrop');
+    expect(velo?.cuerpo).toMatch(/background:\s*var\(--velo\)/);
+    expect(velo?.cuerpo).not.toMatch(/backdrop-filter/);
+    expect(color(CLARO.get('--velo') ?? '', CLARO)[3]).toBeLessThan(1);
   });
 });

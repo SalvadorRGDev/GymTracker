@@ -5,9 +5,11 @@ import type {
   ResultadoDeImportacion,
   ResultadoDeParametros,
 } from '../../api/lectura/contrato';
+import type { EjercicioBase } from '../../catalogo/tipos';
 import { centesimasDesdeDecimal, esDecimalExacto } from '../../domain/volume/centesimas';
 import { Aviso, CabeceraDePagina, Cargando, ErrorDeCarga, Respuesta } from '../componentes/basicos';
 import { Icono } from '../componentes/iconos';
+import { VentanaDeEjemplo } from '../componentes/ventana-de-ejemplo';
 import { mensajeDe, pide } from '../estado/api';
 import { usePreferencia } from '../estado/preferencias';
 import { useRecurso } from '../estado/recurso';
@@ -44,6 +46,7 @@ function Importacion({
   const [resultado, setResultado] = useState<ResultadoDeImportacion | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
+  const [viendo, setViendo] = useState<EjercicioBase | null>(null);
 
   const ejercicios = base.ejercicios.filter((e) => idsDelPerfil.includes(e.id));
   const visibles = ejercicios.filter(
@@ -151,6 +154,11 @@ function Importacion({
                       .join('')}
                   </span>
                 </label>
+                {/* Fuera de la etiqueta: dentro, el clic marcaría o desmarcaría la casilla. */}
+                <button type="button" class="ver-ejemplo" onClick={() => setViendo(e)}>
+                  <Icono nombre="circle-play" tamano={15} />
+                  Ver ejemplo<span class="solo-lectores"> de {e.nombre}</span>
+                </button>
               </li>
             ))}
           </ul>
@@ -167,6 +175,13 @@ function Importacion({
           Importar {elegidos.length} ejercicios
         </button>
       </div>
+      {viendo !== null && (
+        <VentanaDeEjemplo
+          ejercicio={viendo}
+          grupos={base.grupos}
+          alCerrar={() => setViendo(null)}
+        />
+      )}
       <Respuesta>
         {error !== null && <Aviso tipo="error">{error}</Aviso>}
         {resultado !== null && (

@@ -102,6 +102,22 @@ llama al mismo servicio, así que hereda sus reglas enteras:
   equipamiento. Los sinónimos salen del catálogo base y viven sólo en el
   navegador: en el almacén serían una segunda clave por la que dos ejercicios
   pueden colisionar.
+- **«Ver ejemplo»** (ADR-021) va en cada fila de la lista, **fuera de la
+  etiqueta** de la casilla: dentro, el clic marcaría o desmarcaría el ejercicio.
+  Su nombre accesible dice de qué ejercicio es («Ver ejemplo de Press banca») y su
+  tono (menta) no es el del nombre (índigo al marcarlo).
+- La ventana es el `<dialog>` nativo en modo modal: el foco entra por «Cerrar» y
+  vuelve a «Ver ejemplo» al salir; Escape y un clic fuera también cierran. Las
+  poses se cargan con `import()` al abrirla, no con la página.
+- **La figura no inventa lo que no sabe.** Cada ejercicio del catálogo base
+  tiene la suya por identificador (`ejemplos.ts`); lo que no puede enseñar (el
+  agarre) va en una nota, y un ejercicio sin figura lo dice en vez de enseñar
+  otra. Los músculos que lista salen de los coeficientes del catálogo base, y
+  **los que colorea también**: coral lo que trabaja sobre todo (1.00),
+  melocotón lo que ayuda (0.50), nada para el 0.25. Una región del tronco pinta
+  sólo lo que mira a la cámara, y la cámara de cada ejercicio se elige para que
+  lo que trabaja se vea (`DESDE_ATRAS` para espalda, glúteo y deltoides
+  posterior): lo exige `demostracion.test.ts`.
 - Los **rangos de referencia** se presentan como referencia y no como objetivo
   (ADR-014): «dentro», «por debajo» o «por encima», con su respaldo declarado.
   Sin puntuación, sin porcentaje y sin semáforo. Se pueden ocultar (preferencia
@@ -218,7 +234,11 @@ llama al mismo servicio, así que hereda sus reglas enteras:
 - Todo el movimiento vive bajo `prefers-reduced-motion: no-preference` y nada
   dura más de 260 ms, salvo las **dos excepciones declaradas del mapa**:
   `--duracion-giro` (480 ms) y `--duracion-relleno` (320 ms por región, 40 ms de
-  desfase, total ≤ 1 s).
+  desfase, total ≤ 1 s), y **la demostración de «Ver ejemplo»** (ADR-021), un
+  bucle con `requestAnimationFrame` que con movimiento reducido no arranca y
+  deja la figura quieta (partida en tenue, llegada encima).
+- **El velo de la ventana modal** es lo único oscuro de la aplicación, y opaco:
+  nada de `backdrop-filter` fuera del selector compartido del vidrio.
 - Espacio en la escala de tokens (`--e1`…`--e7`) y radios `--r1`…`--r4` y
   `--r-pastilla`; dentro de un componente se admiten ajustes finos de 2 px. Nunca
   un `rem` a ojo.

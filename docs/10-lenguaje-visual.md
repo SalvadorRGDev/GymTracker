@@ -1,8 +1,8 @@
 # Lenguaje visual
 
-ADR-016 (vidrio sobre lienzo), enmendado por el ADR-017 (dirección moderna) y el
-ADR-018 (mapa muscular). Implementación: `src/web/estilos.css`. Reglas medibles:
-`src/server/lenguaje-visual.test.ts`.
+ADR-016 (vidrio sobre lienzo), enmendado por el ADR-017 (dirección moderna), el
+ADR-018 (mapa muscular) y el ADR-021 (figuras de «Ver ejemplo»). Implementación:
+`src/web/estilos.css`. Reglas medibles: `src/server/lenguaje-visual.test.ts`.
 
 **El número manda sobre el efecto.**
 
@@ -59,10 +59,56 @@ color.
 ## Movimiento
 
 Sólo bajo `prefers-reduced-motion: no-preference` y ≤ 260 ms. Excepciones únicas
-y declaradas, en el mapa muscular: el giro (`--duracion-giro`, 480 ms) y el
-relleno por región (`--duracion-relleno`, 320 ms con 40 ms de desfase; el total no
-pasa de un segundo). Con movimiento reducido no hay giro ni relleno: la cara
-cambia y el color aparece puesto.
+y declaradas:
+
+- En el mapa muscular, el giro (`--duracion-giro`, 480 ms) y el relleno por región
+  (`--duracion-relleno`, 320 ms con 40 ms de desfase; el total no pasa de un
+  segundo). Con movimiento reducido no hay giro ni relleno: la cara cambia y el
+  color aparece puesto.
+- **La demostración de un ejercicio** (ADR-021): un bucle de unos tres segundos
+  por repetición, movido con `requestAnimationFrame` y no con CSS, sólo mientras
+  la ventana «Ver ejemplo» está abierta. Con movimiento reducido no hay bucle: la
+  figura queda quieta, con la posición de partida en tenue (30 %) y la de llegada
+  encima. El contenido que se mueve se detiene cerrando la ventana.
+
+## «Ver ejemplo» y su figura (ADR-021)
+
+- **El botón tiene su propio tono**: menta `#E6F6F1` con tinta verde `#0B6557`
+  (≥ 5:1, también al pasar, `#D3EFE5`), para no confundirse con el nombre del
+  ejercicio, que al marcarlo va en índigo. La prueba exige que los dos tonos se
+  separen también con deuteranopía.
+- **La ventana** es una tarjeta blanca centrada, radio 20 px, sobre un velo
+  `rgb(18 22 38 / 58%)`: lo único oscuro de la aplicación, y opaco, sin
+  desenfoque. Aparece con un fundido de 200 ms bajo `no-preference`.
+- **La figura** va sobre un escenario `#F3F5FB` con un suelo `#E3E7F0`. El
+  maniquí es grafito con luz de arriba a la izquierda (degradado `#5A6480` →
+  `#3B4358`); el brazo y la pierna del lado lejano, más claros (`#9AA3B7` →
+  `#7C869D`): la profundidad sin sombras. Cada pieza lleva un filo del color del
+  escenario (2,2 px, pintado por debajo del relleno) que la separa de la que tiene
+  detrás: hombro, codo, cadera y rodilla se leen como las junturas de un maniquí
+  articulado. Bajo lo que toca el suelo, una mancha de contacto que se aclara al
+  despegar.
+- **Los músculos del ejercicio** salen de los coeficientes del catálogo base:
+  **coral** `#EC7048` lo que trabaja sobre todo (1.00) y **melocotón** `#F0A88A`
+  lo que ayuda (0.50); lo que trabaja «un poco» (0.25) no se colorea. Brazos y
+  piernas se colorean enteros; el tronco, por regiones (pecho, dorsal, abdomen con
+  oblicuos, lumbares, glúteo mayor y medio, trapecio) y el deltoides por cabezas.
+  Una región **sólo pinta lo que mira a la cámara**, nunca lo de detrás a través
+  del cuerpo. Los dos tonos se separan del grafito (≥ 3:1) y entre sí con
+  deuteranopía; el color nunca va solo: la ventana los nombra en texto.
+- **La cámara** de cada ejercicio se elige para que lo que más trabaja se vea:
+  tres cuartos por delante por omisión y **tres cuartos por detrás**
+  (`DESDE_ATRAS`) cuando trabajan la espalda, el glúteo o la parte de atrás del
+  hombro. Una prueba exige que lo que trabaja sobre todo mire a la cámara en
+  algún momento del recorrido.
+- **El material**: lo que tiene volumen es un cilindro con su tapa y el canto en
+  otro tono. Discos y mancuernas en índigo `#4A56C9` (canto `#343F9F`), barras y
+  palancas en acero `#C3CAD6`, asas y cuerdas en goma `#5C6477`, rodillos y
+  hombreras acolchados `#8B95AA`; cables `#4F586C` y bandas en frambuesa
+  `#C2456D`. Bancos y máquinas en grises azulados con la cara de arriba más clara.
+  Las palancas giran donde gira la articulación que acompañan (encima del hombro
+  en el pec deck, en la cadera en el crunch), así que no se estiran. Todos los
+  trazos ≥ 3:1 sobre el escenario (contraste de lo que no es texto), comprobado.
 
 ## La escala del mapa muscular (ADR-018)
 

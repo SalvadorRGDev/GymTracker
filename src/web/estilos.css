@@ -115,6 +115,46 @@
   --pendiente-relleno: #f0cf9f;
   --en-plan-relleno: #9aa598;
 
+  /* «Ver ejemplo»: el botón tiene su propio tono (menta con tinta verde) para
+     no confundirse con el nombre del ejercicio, que va en índigo al marcarlo. */
+  --ejemplo-texto: #0b6557;
+  --ejemplo-fondo: #e6f6f1;
+  --ejemplo-borde: #a9dccd;
+  --ejemplo-fondo-hover: #d3efe5;
+  /* La ventana que lo enseña oscurece la página: es lo único oscuro que hay. */
+  --velo: rgb(18 22 38 / 58%);
+  /* La figura de la demostración: el cuerpo con luz de arriba a la izquierda,
+     los músculos del ejercicio en coral (los que trabajan sobre todo) y
+     melocotón (los que ayudan), y el material con su canto en otro tono. */
+  --demo-escenario: #f3f5fb;
+  --demo-suelo: #e3e7f0;
+  --demo-sombra: rgb(59 67 88 / 16%);
+  --demo-cuerpo: #3b4358;
+  --demo-cuerpo-luz: #5a6480;
+  --demo-cuerpo-lejos: #7c869d;
+  --demo-cuerpo-lejos-luz: #9aa3b7;
+  --demo-principal: #ec7048;
+  --demo-principal-luz: #f59a7c;
+  --demo-principal-lejos: #f0a189;
+  --demo-principal-lejos-luz: #f6bfad;
+  --demo-ayuda: #f0a88a;
+  --demo-ayuda-luz: #f8cdb9;
+  --demo-ayuda-lejos: #f4c3ae;
+  --demo-ayuda-lejos-luz: #f9dccf;
+  --demo-disco: #4a56c9;
+  --demo-disco-lado: #343f9f;
+  --demo-acero: #c3cad6;
+  --demo-acero-lado: #97a0b3;
+  --demo-agarre: #5c6477;
+  --demo-agarre-lado: #3f4656;
+  --demo-almohadilla: #8b95aa;
+  --demo-almohadilla-lado: #6f798e;
+  --demo-cable: #4f586c;
+  --demo-banda: #c2456d;
+  --demo-mueble: #aeb7c8;
+  --demo-mueble-claro: #c9d0dd;
+  --demo-mueble-borde: #939db2;
+
   /* Vidrio: la receta vive en un selector compartido más abajo. */
   --vidrio-fondo: rgb(255 255 255 / 72%);
   --vidrio-borde: rgb(40 36 30 / 8%);
@@ -1828,18 +1868,27 @@ button:disabled,
   background: var(--fondo);
 }
 
-.lista-de-ejercicios li label {
+.lista-de-ejercicios li {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 9px 12px;
+  gap: 8px;
   border-radius: 8px;
+}
+
+.lista-de-ejercicios li label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2px 10px;
+  padding: 9px 12px;
   cursor: pointer;
   font-size: 15px;
 }
 
-.lista-de-ejercicios li label:hover {
+.lista-de-ejercicios li:hover {
   background: var(--fondo-sutil);
 }
 
@@ -1852,10 +1901,42 @@ button:disabled,
   color: var(--texto-3);
 }
 
-.lista-de-ejercicios li:has(input:checked) label {
+.lista-de-ejercicios li:has(input:checked) {
   background: var(--acento-suave);
+}
+
+.lista-de-ejercicios li:has(input:checked) label {
   color: var(--acento-texto);
   font-weight: 600;
+}
+
+/* «Ver ejemplo»: otro tono que el nombre, para que se lea como algo que se pulsa. */
+.ver-ejemplo {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  margin-right: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--ejemplo-borde);
+  border-radius: var(--r-pastilla);
+  background: var(--ejemplo-fondo);
+  color: var(--ejemplo-texto);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+.ver-ejemplo:hover {
+  background: var(--ejemplo-fondo-hover);
+  border-color: var(--ejemplo-texto);
+}
+
+.ver-ejemplo:focus-visible {
+  outline: 2px solid var(--ejemplo-texto);
+  outline-offset: 2px;
 }
 
 .ejercicio-elegido {
@@ -2380,5 +2461,334 @@ button:disabled,
     order: 3;
     flex: 1 0 100%;
     padding-bottom: 10px;
+  }
+}
+
+/* ─── Demostración de un ejercicio ────────────────────────────────────── */
+
+.demo {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  background: radial-gradient(ellipse at 50% 30%, var(--fondo) 0%, var(--demo-escenario) 72%);
+  border-radius: var(--r3);
+}
+
+.demo line {
+  stroke-linecap: round;
+}
+
+.demo polygon {
+  stroke-linejoin: round;
+}
+
+/* Cada pieza del cuerpo lleva un filo del color del escenario, pintado por debajo
+   del relleno: separa lo que queda delante de lo que queda detrás. */
+.demo-cuerpo,
+.demo-lejos,
+.demo-principal,
+.demo-principal-lejos,
+.demo-ayuda,
+.demo-ayuda-lejos {
+  stroke: var(--demo-escenario);
+  stroke-width: 2.2;
+  paint-order: stroke;
+}
+
+.demo-cuerpo {
+  fill: url(#demo-luz-cuerpo);
+}
+
+.demo-lejos {
+  fill: url(#demo-luz-lejos);
+}
+
+.demo-principal,
+.demo-parche-principal {
+  fill: url(#demo-luz-principal);
+}
+
+.demo-principal-lejos {
+  fill: url(#demo-luz-principal-lejos);
+}
+
+.demo-ayuda,
+.demo-parche-ayuda {
+  fill: url(#demo-luz-ayuda);
+}
+
+.demo-ayuda-lejos {
+  fill: url(#demo-luz-ayuda-lejos);
+}
+
+.demo-luz-cuerpo-a {
+  stop-color: var(--demo-cuerpo-luz);
+}
+
+.demo-luz-cuerpo-b {
+  stop-color: var(--demo-cuerpo);
+}
+
+.demo-luz-lejos-a {
+  stop-color: var(--demo-cuerpo-lejos-luz);
+}
+
+.demo-luz-lejos-b {
+  stop-color: var(--demo-cuerpo-lejos);
+}
+
+.demo-luz-principal-a {
+  stop-color: var(--demo-principal-luz);
+}
+
+.demo-luz-principal-b {
+  stop-color: var(--demo-principal);
+}
+
+.demo-luz-principal-lejos-a {
+  stop-color: var(--demo-principal-lejos-luz);
+}
+
+.demo-luz-principal-lejos-b {
+  stop-color: var(--demo-principal-lejos);
+}
+
+.demo-luz-ayuda-a {
+  stop-color: var(--demo-ayuda-luz);
+}
+
+.demo-luz-ayuda-b {
+  stop-color: var(--demo-ayuda);
+}
+
+.demo-luz-ayuda-lejos-a {
+  stop-color: var(--demo-ayuda-lejos-luz);
+}
+
+.demo-luz-ayuda-lejos-b {
+  stop-color: var(--demo-ayuda-lejos);
+}
+
+/* El material: la tapa en un tono y el canto en otro, más oscuro. */
+.demo-disco {
+  fill: var(--demo-disco);
+  stroke: var(--demo-disco-lado);
+  stroke-width: 0.8;
+}
+
+.demo-disco-lado {
+  fill: var(--demo-disco-lado);
+}
+
+.demo-acero {
+  fill: var(--demo-acero);
+}
+
+.demo-acero-lado {
+  fill: var(--demo-acero-lado);
+}
+
+.demo-agarre {
+  fill: var(--demo-agarre);
+}
+
+.demo-agarre-lado {
+  fill: var(--demo-agarre-lado);
+}
+
+.demo-almohadilla {
+  fill: var(--demo-almohadilla);
+}
+
+.demo-almohadilla-lado {
+  fill: var(--demo-almohadilla-lado);
+}
+
+.demo-anilla {
+  fill: none;
+  stroke: var(--demo-agarre);
+  stroke-width: 2.4;
+}
+
+.demo-cable {
+  stroke: var(--demo-cable);
+}
+
+.demo-banda {
+  stroke: var(--demo-banda);
+}
+
+.demo-mueble,
+.demo-mueble-arriba {
+  fill: var(--demo-mueble);
+  stroke: var(--demo-mueble-borde);
+  stroke-width: 0.8;
+}
+
+.demo-mueble-arriba {
+  fill: var(--demo-mueble-claro);
+}
+
+.demo-pata {
+  stroke: var(--demo-acero-lado);
+}
+
+.demo-sombra {
+  fill: var(--demo-suelo);
+}
+
+.demo-sombra-cuerpo {
+  fill: var(--demo-sombra);
+}
+
+/* Sin animación: la posición de partida, en tenue, bajo la de llegada. */
+.demo-partida {
+  opacity: 0.3;
+}
+
+/* ─── La ventana de «Ver ejemplo» ─────────────────────────────────────── */
+
+.ventana {
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 1px solid var(--borde);
+  border-radius: var(--r4);
+  background: var(--fondo);
+  color: var(--texto);
+  box-shadow: var(--sombra-flotante);
+  overflow: hidden;
+}
+
+.ventana[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Opaco, sin desenfoque: el vidrio sólo vive en la cabecera y el detalle. */
+.ventana::backdrop {
+  background: var(--velo);
+}
+
+.ventana-cuerpo {
+  display: grid;
+  gap: var(--e2);
+  padding: var(--e3) var(--e3) var(--e2);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ventana-antetitulo {
+  margin: 0 0 2px;
+  color: var(--ejemplo-texto);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ventana h2 {
+  font-size: 26px;
+}
+
+.ventana-pista {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.ventana-nota {
+  margin: 0;
+  color: var(--texto-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ventana-datos {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.ventana-datos div {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 10px;
+}
+
+.ventana-datos dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--texto-2);
+  font-weight: 600;
+}
+
+.muestra {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--r-pastilla);
+}
+
+.muestra-principal {
+  background: var(--demo-principal);
+}
+
+.muestra-ayuda {
+  background: var(--demo-ayuda);
+}
+
+.ventana-datos dd {
+  margin: 0;
+}
+
+.ventana-pie {
+  display: flex;
+  justify-content: center;
+  padding: var(--e2) var(--e3) var(--e3);
+  border-top: 1px solid var(--borde);
+}
+
+.ventana-pie .boton {
+  min-width: 160px;
+}
+
+.demo-cargando {
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: var(--texto-2);
+  font-size: 14px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ventana[open] {
+    animation: ventana-aparece var(--duracion) var(--curva);
+  }
+
+  .ventana[open]::backdrop {
+    animation: velo-aparece var(--duracion) ease-out;
+  }
+
+  .ver-ejemplo {
+    transition:
+      background-color var(--duracion) ease,
+      border-color var(--duracion) ease;
+  }
+}
+
+@keyframes ventana-aparece {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@keyframes velo-aparece {
+  from {
+    opacity: 0;
   }
 }
