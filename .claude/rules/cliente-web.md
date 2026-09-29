@@ -194,8 +194,10 @@ llama al mismo servicio, así que hereda sus reglas enteras:
 - **Dirección moderna** (ADR-017, que enmienda al ADR-016): base clara, títulos en
   serif (Playfair Display) sólo en `h1`/`h2`, todo lo demás —y **las cifras**— en
   Inter con `tabular-nums`. Tarjetas blancas con borde de 1 px y sombra suave; al
-  pasar cambian el borde, no se elevan. Botón primario en el verde profundo; el
-  verde vivo sólo decora. Fuentes alojadas en `src/web/fuentes/` (OFL) e iconos
+  pasar cambian el borde, no se elevan. Botón primario en pervinca claro con
+  tinta índigo; el pervinca vivo sólo decora. Lienzo con veladuras azules; las de
+  lavanda, rosa y menta, sólo en las fichas de la fila de estadísticas, con la
+  cifra en tinta. Fuentes alojadas en `src/web/fuentes/` (OFL) e iconos
   Lucide copiados como datos en `componentes/iconos.tsx` (ISC): ni Google Fonts ni
   `lucide-preact`. Nunca emoji.
 - **El vidrio queda en dos sitios**: la cabecera fija y el detalle flotante del
@@ -209,9 +211,10 @@ llama al mismo servicio, así que hereda sus reglas enteras:
 - **Los tres apagados no son opcionales**: `prefers-reduced-transparency`,
   `prefers-contrast: more` y `@supports not (backdrop-filter: …)`, juntos al
   principio del archivo. Reescriben tokens, no reglas.
-- **El contraste se calcula sobre el color compuesto** y es ≥ 5:1 en claro y en
-  oscuro. Lo recalcula `src/server/lenguaje-visual.test.ts` cada vez que se toca
-  un color.
+- **Siempre clara**: no hay modo oscuro (`color-scheme: light`), aunque el
+  sistema lo pida. El acento es pastel con tinta encima, nunca un bloque oscuro.
+- **El contraste se calcula sobre el color compuesto** y es ≥ 5:1. Lo recalcula
+  `src/server/lenguaje-visual.test.ts` cada vez que se toca un color.
 - Todo el movimiento vive bajo `prefers-reduced-motion: no-preference` y nada
   dura más de 260 ms, salvo las **dos excepciones declaradas del mapa**:
   `--duracion-giro` (480 ms) y `--duracion-relleno` (320 ms por región, 40 ms de

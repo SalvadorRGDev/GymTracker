@@ -8,12 +8,18 @@ ADR-018 (mapa muscular). Implementación: `src/web/estilos.css`. Reglas medibles
 
 ## Dirección
 
-- **Base clara** por omisión, con el modo oscuro conservado por tokens. Neutros
-  con una pizca de verde: fondo `#FFFFFF`, sutil `#F7F9F6`, apagado `#F1F4EF`,
-  borde `#E3E8E1`; texto `#111611`, `#515A52`, `#5E6760`.
-- **Un tono verde manda.** Botones y enlaces en el verde profundo `#1C6340`
-  (7.2:1 con blanco). El verde vivo `#5EA832` sólo decora: puntos, anillos de
-  foco, bordes al pasar. Con texto blanco no llega a 5:1.
+- **Siempre clara.** No hay modo oscuro: aunque el sistema esté en oscuro, la
+  página se ve clara (`color-scheme: light`; lo fija una prueba). Lienzo blanco
+  azulado `#F8FAFD` con veladuras azul cielo, pervinca y hielo (`#D4E4FF`,
+  `#DBE0FF`, `#D8EDFB`) y tarjetas blancas; neutros cálidos: sutil `#F6F5F1`, apagado
+  `#EFEEE9`, borde `#E8E6E0`; texto grafito `#1F2430`, `#535A6A`, `#4F5566`.
+- **Veladuras de color** (lavanda `#EEF0FF`, rosa `#FDF0F4`, menta `#EAF7F3`)
+  detrás de cada cifra de la fila de estadísticas: el color decora y el número va
+  en tinta, con contraste ≥ 5:1 comprobado.
+- **Acento pastel, nunca un bloque oscuro.** Botones en pervinca claro
+  `#CFD8FF` con tinta índigo `#1F2A7A` encima; enlaces, bordes de selección y
+  controles marcados en índigo `#3A45B0`. El pervinca vivo `#8E9CFF` sólo decora.
+  La marca lleva un degradado pastel pervinca → lila → rosa.
 - **Títulos en serif** (Playfair Display) sólo en `h1` y `h2`. Todo lo demás
   —navegación, tarjetas, botones, tablas y **cifras**— en Inter; las cifras con
   `tabular-nums` para que las columnas se alineen.
@@ -47,8 +53,8 @@ ve sobria y completa.
 ## Contraste
 
 ≥ 5:1 para todo texto, **calculado sobre el color compuesto** (el vidrio
-translúcido encima del lienzo), en claro y en oscuro. La prueba lo recalcula cada
-vez que se toca un color.
+translúcido encima del lienzo). La prueba lo recalcula cada vez que se toca un
+color.
 
 ## Movimiento
 

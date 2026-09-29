@@ -78,15 +78,6 @@ const REGLAS = reglas(CSS);
 const CLARO = tokens(
   REGLAS.find((r) => r.contexto.length === 0 && r.selector === ':root')?.cuerpo ?? '',
 );
-const OSCURO = new Map([
-  ...CLARO,
-  ...tokens(
-    REGLAS.find(
-      (r) =>
-        r.contexto.join(' ') === '@media (prefers-color-scheme: dark)' && r.selector === ':root',
-    )?.cuerpo ?? '',
-  ),
-]);
 
 type Rgba = [number, number, number, number];
 
@@ -153,6 +144,22 @@ const PARES: readonly [string, string][] = [
   ['--peligro-texto', '--peligro-suave'],
   ['--aviso-texto', '--aviso-fondo'],
   ['--info-texto', '--info-fondo'],
+  ['--texto', '--lienzo'],
+  ['--texto-2', '--lienzo'],
+  ['--texto-3', '--lienzo'],
+  ['--acento-texto', '--lienzo'],
+  ['--texto', '--azul-cielo'],
+  ['--texto-2', '--azul-cielo'],
+  ['--texto-3', '--azul-cielo'],
+  ['--texto-3', '--azul-pervinca'],
+  ['--texto-3', '--azul-hielo'],
+  ['--texto', '--veladura-lavanda'],
+  ['--texto-2', '--veladura-lavanda'],
+  ['--texto-2', '--veladura-rosa'],
+  ['--texto-2', '--veladura-menta'],
+  ['--texto-3', '--veladura-lavanda'],
+  ['--texto-3', '--veladura-rosa'],
+  ['--texto-3', '--veladura-menta'],
   ['--deficit-texto', '--fondo'],
   ['--deficit-texto', '--deficit-fondo'],
   ['--superavit-texto', '--fondo'],
@@ -202,10 +209,7 @@ function distancia(a: Rgba, b: Rgba): number {
 }
 
 describe('lenguaje visual: contraste ≥ 5:1 sobre el color compuesto', () => {
-  for (const [nombre, t] of [
-    ['claro', CLARO],
-    ['oscuro', OSCURO],
-  ] as const) {
+  for (const [nombre, t] of [['claro', CLARO]] as const) {
     it(`modo ${nombre}: todos los pares de texto`, () => {
       const malos = PARES.map(([texto, fondo]) => {
         const f = color(t.get(fondo) ?? '', t);
@@ -248,17 +252,13 @@ describe('lenguaje visual: la escala del mapa muscular', () => {
       expect(l[i] ?? 0, `nivel ${i + 1}`).toBeLessThan(l[i - 1] ?? 0);
   });
 
-  it('en oscuro se invierte: el nivel 1 cerca del fondo y el 6 el más luminoso', () => {
-    const l = niveles(OSCURO);
-    for (let i = 1; i < l.length; i += 1)
-      expect(l[i] ?? 0, `nivel ${i + 1}`).toBeGreaterThan(l[i - 1] ?? 0);
+  it('no hay modo oscuro: la página es siempre clara', () => {
+    expect(CSS).not.toMatch(/prefers-color-scheme:\s*dark/);
+    expect(CLARO.get('color-scheme') ?? CSS.match(/color-scheme:\s*([^;]+);/)?.[1]).toBe('light');
   });
 
   it('con deuteranopía la claridad sigue siendo monótona y cada nivel se separa del siguiente', () => {
-    for (const [nombre, t, sube] of [
-      ['claro', CLARO, false],
-      ['oscuro', OSCURO, true],
-    ] as const) {
+    for (const [nombre, t, sube] of [['claro', CLARO, false]] as const) {
       const simulados = [1, 2, 3, 4, 5, 6].map((n) =>
         deuteranopia(color(t.get(`--nivel-${n}`) ?? '', t)),
       );
@@ -275,7 +275,7 @@ describe('lenguaje visual: la escala del mapa muscular', () => {
   });
 
   it('la escala no reutiliza el acento de la marca: los datos tienen su propio color', () => {
-    for (const t of [CLARO, OSCURO]) {
+    for (const t of [CLARO]) {
       const acento = t.get('--acento');
       for (let n = 1; n <= 6; n += 1) expect(t.get(`--nivel-${n}`)).not.toBe(acento);
     }
@@ -295,7 +295,7 @@ describe('lenguaje visual: la escala divergente de la comparativa (ADR-019)', ()
   ];
 
   it('no reutiliza el rojo del mapa ni el de peligro ni el acento: «déficit» no es «mucho»', () => {
-    for (const t of [CLARO, OSCURO]) {
+    for (const t of [CLARO]) {
       const ajenos = new Set(
         ['--peligro', '--peligro-texto', '--acento', '--acento-vivo']
           .concat([0, 1, 2, 3, 4, 5, 6].map((n) => `--nivel-${n}`))
@@ -309,7 +309,7 @@ describe('lenguaje visual: la escala divergente de la comparativa (ADR-019)', ()
   });
 
   it('las barras se ven sobre la tarjeta y el lienzo (≥ 3:1, contraste de lo que no es texto)', () => {
-    for (const t of [CLARO, OSCURO]) {
+    for (const t of [CLARO]) {
       for (const barra of ['--deficit-barra', '--superavit-barra']) {
         for (const fondo of ['--fondo', '--fondo-sutil']) {
           expect(
@@ -322,10 +322,7 @@ describe('lenguaje visual: la escala divergente de la comparativa (ADR-019)', ()
   });
 
   it('en la figura, los cuatro estados y la trama se separan entre sí con deuteranopía', () => {
-    for (const [nombre, t] of [
-      ['claro', CLARO],
-      ['oscuro', OSCURO],
-    ] as const) {
+    for (const [nombre, t] of [['claro', CLARO]] as const) {
       const rellenos = [
         '--deficit-barra',
         '--pendiente-relleno',
@@ -344,10 +341,7 @@ describe('lenguaje visual: la escala divergente de la comparativa (ADR-019)', ()
   });
 
   it('déficit y superávit se distinguen también con deuteranopía', () => {
-    for (const [nombre, t] of [
-      ['claro', CLARO],
-      ['oscuro', OSCURO],
-    ] as const) {
+    for (const [nombre, t] of [['claro', CLARO]] as const) {
       for (const [a, b] of [
         ['--deficit-barra', '--superavit-barra'],
         ['--deficit-texto', '--superavit-texto'],

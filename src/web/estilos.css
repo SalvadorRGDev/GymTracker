@@ -1,15 +1,16 @@
 /*
  * SIGIR Fitness · lenguaje visual (ADR-016 enmendado por ADR-017 y ADR-018).
  *
- * Dirección moderna: base clara, títulos editoriales en serif, tarjetas
- * blancas con borde fino, un solo tono verde que manda. El número manda sobre
+ * Dirección moderna y luminosa, siempre clara: lienzo blanco azulado con
+ * veladuras azules muy suaves, títulos editoriales en serif, tarjetas blancas
+ * con borde fino y un índigo que manda. El número manda sobre
  * el efecto: nada de vidrio detrás de una cifra, y el vidrio queda en la
  * cabecera y en el detalle flotante del mapa, aplicado desde un selector
  * compartido.
  *
  * Reglas medibles que comprueba src/server/lenguaje-visual.test.ts:
  * contraste ≥ 5:1 sobre el color compuesto, luminancia monótona de la escala
- * de volumen en claro y en oscuro, los tres apagados presentes, y todo el
+ * de volumen, los tres apagados presentes, y todo el
  * movimiento bajo prefers-reduced-motion: no-preference y ≤ 260 ms (salvo las
  * dos excepciones declaradas del mapa: --duracion-giro y --duracion-relleno).
  */
@@ -43,48 +44,62 @@
 /* ── Tokens: modo claro ─────────────────────────────────────────────────── */
 
 :root {
-  color-scheme: light dark;
+  /* Siempre claro: la aplicación no tiene modo oscuro. */
+  color-scheme: light;
 
+  /* Lienzo blanco azulado y tarjetas blancas: la luz la pone el papel, no el color. */
+  --lienzo: #f8fafd;
   --fondo: #ffffff;
-  --fondo-sutil: #f7f9f6;
-  --fondo-apagado: #f1f4ef;
-  --borde: #e3e8e1;
-  --borde-fuerte: #cbd3c8;
-  --borde-discontinuo: rgb(17 22 17 / 16%);
+  --fondo-sutil: #f6f5f1;
+  --fondo-apagado: #efeee9;
+  --borde: #e8e6e0;
+  --borde-fuerte: #d3d0c8;
+  --borde-discontinuo: rgb(40 36 30 / 14%);
 
-  --texto: #111611;
-  --texto-2: #515a52;
-  --texto-3: #5e6760;
+  /* Grafito, no negro: el contraste sobra y el tono se suaviza. */
+  --texto: #1f2430;
+  --texto-2: #535a6a;
+  --texto-3: #4f5566;
 
-  /* Un tono verde manda. El vivo sólo decora: con texto blanco no llega a 5:1. */
-  --acento: #1c6340;
-  --acento-hover: #164f33;
-  --acento-texto: #1c6340;
-  --acento-vivo: #5ea832;
-  --acento-suave: #eaf5e3;
-  --sobre-acento: #ffffff;
+  /* Acento pastel: pervinca claro con tinta índigo encima, nunca un bloque oscuro. */
+  --acento: #cfd8ff;
+  --acento-hover: #bdc9ff;
+  --acento-texto: #3a45b0;
+  --acento-vivo: #8e9cff;
+  --acento-suave: #eef1ff;
+
+  /* Veladuras: color muy suave para fondos y decoración, nunca detrás de un número. */
+  --veladura-lavanda: #eef0ff;
+  --veladura-rosa: #fdf0f4;
+  --veladura-menta: #eaf7f3;
+  /* Azules claros para el lienzo: cielo, pervinca y hielo, en contraste con el blanco. */
+  --azul-cielo: #d4e4ff;
+  --azul-pervinca: #dbe0ff;
+  --azul-hielo: #d8edfb;
+  --degradado-marca: linear-gradient(135deg, #cfd8ff 0%, #e4d6ff 55%, #ffd8e8 100%);
+  --sobre-acento: #1f2a7a;
 
   --peligro: #b42318;
   --peligro-texto: #a11e14;
   --peligro-suave: #fdecea;
   --aviso-texto: #7a4a00;
   --aviso-fondo: #fff4dc;
-  --info-texto: #1d4f7a;
-  --info-fondo: #eaf2fb;
+  --info-texto: #1e4f8a;
+  --info-fondo: #eaf1fd;
 
   /* La escala del mapa muscular: una CANTIDAD, no una nota. Luminancia
      siempre a la baja de un nivel al siguiente, para que en gris se lea igual. */
-  --nivel-0: #f1f4ef;
+  --nivel-0: #f1f0ec;
   --nivel-1: #e3f4da;
   --nivel-2: #b5dca3;
   --nivel-3: #8db77a;
   --nivel-4: #e08a2e;
   --nivel-5: #cc5a24;
   --nivel-6: #a8261c;
-  --trama-fondo: #f1f4ef;
-  --trama-linea: #c3cbc0;
-  --silueta: #eef1ec;
-  --silueta-borde: #9aa49a;
+  --trama-fondo: #f1f0ec;
+  --trama-linea: #d1cec6;
+  --silueta: #f0efeb;
+  --silueta-borde: #aba79e;
   --region-separador: #ffffff;
 
   /* La comparativa (ADR-019): escala DIVERGENTE y propia, ámbar ↔ azul, que
@@ -102,7 +117,7 @@
 
   /* Vidrio: la receta vive en un selector compartido más abajo. */
   --vidrio-fondo: rgb(255 255 255 / 72%);
-  --vidrio-borde: rgb(17 22 17 / 8%);
+  --vidrio-borde: rgb(40 36 30 / 8%);
   --vidrio-filo: inset 0 1px 0 rgb(255 255 255 / 60%);
   --vidrio-desenfoque: blur(20px) saturate(165%);
 
@@ -123,10 +138,10 @@
   --r4: 20px;
   --r-pastilla: 999px;
 
-  --sombra-1: 0 1px 3px rgb(0 0 0 / 6%);
-  --sombra-2: 0 4px 16px rgb(0 0 0 / 7%), 0 2px 4px rgb(0 0 0 / 4%);
-  --sombra-3: 0 8px 32px rgb(0 0 0 / 10%);
-  --sombra-flotante: 0 20px 60px rgb(0 0 0 / 12%);
+  --sombra-1: 0 1px 3px rgb(60 50 40 / 6%);
+  --sombra-2: 0 4px 16px rgb(60 50 40 / 7%), 0 2px 4px rgb(60 50 40 / 4%);
+  --sombra-3: 0 8px 32px rgb(60 50 40 / 10%);
+  --sombra-flotante: 0 20px 60px rgb(60 50 40 / 12%);
 
   --ancho-maximo: 1200px;
   --duracion: 200ms;
@@ -152,10 +167,10 @@
     --vidrio-fondo: var(--fondo);
     --vidrio-desenfoque: none;
     --vidrio-filo: none;
-    --borde: #8a948b;
-    --borde-fuerte: #5e6760;
-    --texto-2: #2f3630;
-    --texto-3: #3a423b;
+    --borde: #8f8b82;
+    --borde-fuerte: #5d6373;
+    --texto-2: #30343f;
+    --texto-3: #3a3f4b;
   }
 }
 
@@ -163,86 +178,6 @@
   :root {
     --vidrio-fondo: var(--fondo);
     --vidrio-desenfoque: none;
-  }
-}
-
-/* ── Tokens: modo oscuro (se conserva) ──────────────────────────────────── */
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fondo: #0e1210;
-    --fondo-sutil: #141a16;
-    --fondo-apagado: #1a211c;
-    --borde: #2a332d;
-    --borde-fuerte: #3c4740;
-    --borde-discontinuo: rgb(238 243 238 / 14%);
-
-    --texto: #eef3ee;
-    --texto-2: #b9c2ba;
-    --texto-3: #a3ada4;
-
-    --acento: #8fd3a8;
-    --acento-hover: #a7e0bb;
-    --acento-texto: #8fd3a8;
-    --acento-vivo: #6cbf42;
-    --acento-suave: #173222;
-    --sobre-acento: #0b1a11;
-
-    --peligro: #ff8a7f;
-    --peligro-texto: #ff9d93;
-    --peligro-suave: #3a1714;
-    --aviso-texto: #ffd48a;
-    --aviso-fondo: #33260d;
-    --info-texto: #a9cff2;
-    --info-fondo: #13263a;
-
-    /* En oscuro un verde muy claro «brilla» y se leería como MÁS: la escala se
-       invierte en luminancia y el nivel 1 queda cerca del fondo. */
-    --nivel-0: #1a211c;
-    --nivel-1: #21402b;
-    --nivel-2: #2c5838;
-    --nivel-3: #3f7a3a;
-    --nivel-4: #bf6a22;
-    --nivel-5: #e8743a;
-    --nivel-6: #ff7a6b;
-    --trama-fondo: #1a211c;
-    --trama-linea: #34403a;
-    --silueta: #1f2722;
-    --silueta-borde: #56625a;
-    --region-separador: #0e1210;
-
-    --deficit-texto: #f2b366;
-    --deficit-fondo: #2a1f11;
-    --deficit-barra: #d98b2b;
-    --superavit-texto: #9cc2f4;
-    --superavit-fondo: #15233a;
-    --superavit-barra: #5b93dd;
-    --pendiente-relleno: #6e4a1c;
-    --en-plan-relleno: #5d6860;
-
-    --vidrio-fondo: rgb(20 26 22 / 72%);
-    --vidrio-borde: rgb(238 243 238 / 10%);
-    --vidrio-filo: inset 0 1px 0 rgb(255 255 255 / 6%);
-
-    --sombra-1: 0 1px 3px rgb(0 0 0 / 40%);
-    --sombra-2: 0 4px 16px rgb(0 0 0 / 45%), 0 2px 4px rgb(0 0 0 / 30%);
-    --sombra-3: 0 8px 32px rgb(0 0 0 / 50%);
-    --sombra-flotante: 0 20px 60px rgb(0 0 0 / 55%);
-  }
-
-  @media (prefers-reduced-transparency: reduce) {
-    :root {
-      --vidrio-fondo: var(--fondo);
-    }
-  }
-
-  @media (prefers-contrast: more) {
-    :root {
-      --vidrio-fondo: var(--fondo);
-      --borde: #6b776f;
-      --texto-2: #d6ddd7;
-      --texto-3: #c9d1ca;
-    }
   }
 }
 
@@ -262,7 +197,13 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--fondo);
+  background-color: var(--lienzo);
+  /* Veladuras azules en las esquinas: decoran el lienzo, las cifras van en tarjetas blancas. */
+  background-image:
+    radial-gradient(1200px 640px at 6% -10%, var(--azul-cielo) 0%, transparent 68%),
+    radial-gradient(1000px 600px at 98% 4%, var(--azul-pervinca) 0%, transparent 64%),
+    radial-gradient(1200px 640px at 50% 110%, var(--azul-hielo) 0%, transparent 62%);
+  background-attachment: fixed;
   color: var(--texto);
   font-family: var(--letra);
   font-size: 16px;
@@ -439,8 +380,9 @@ fieldset.confirmacion legend {
   width: 30px;
   height: 30px;
   border-radius: var(--r2);
-  background: var(--acento);
+  background: var(--degradado-marca);
   color: var(--sobre-acento);
+  box-shadow: 0 2px 8px rgb(120 110 200 / 20%);
 }
 
 .cabecera-usuario {
@@ -769,7 +711,7 @@ button:disabled,
 .selector:focus-visible {
   outline: 3px solid var(--acento-vivo);
   outline-offset: 0;
-  border-color: var(--acento);
+  border-color: var(--acento-texto);
 }
 
 .entrada[aria-invalid="true"] {
@@ -1018,6 +960,19 @@ button:disabled,
 
 .estadistica:last-child {
   border-right: none;
+}
+
+/* Cada cifra de la fila con su veladura: color de fondo, número en tinta. */
+.estadistica:nth-child(3n + 1) {
+  background: var(--veladura-lavanda);
+}
+
+.estadistica:nth-child(3n + 2) {
+  background: var(--veladura-rosa);
+}
+
+.estadistica:nth-child(3n + 3) {
+  background: var(--veladura-menta);
 }
 
 .estadistica-valor {
@@ -1892,7 +1847,7 @@ button:disabled,
 }
 
 .lista-de-ejercicios input {
-  accent-color: var(--acento);
+  accent-color: var(--acento-texto);
 }
 
 .lista-de-ejercicios .equipo {
@@ -1941,7 +1896,7 @@ button:disabled,
 .selector-rir button[aria-pressed="true"] {
   background: var(--acento);
   color: var(--sobre-acento);
-  border-color: var(--acento);
+  border-color: var(--acento-texto);
 }
 
 /* ── Historial ──────────────────────────────────────────────────────────── */
@@ -2060,8 +2015,8 @@ button:disabled,
 }
 
 .perfil[aria-pressed="true"] {
-  border-color: var(--acento);
-  box-shadow: 0 0 0 1px var(--acento);
+  border-color: var(--acento-texto);
+  box-shadow: 0 0 0 1px var(--acento-texto);
   background: var(--acento-suave);
 }
 
@@ -2163,7 +2118,7 @@ button:disabled,
   gap: 12px;
   padding: var(--e3);
   border-radius: var(--r3);
-  border: 2px solid var(--acento);
+  border: 2px solid var(--acento-texto);
   background: var(--fondo);
 }
 

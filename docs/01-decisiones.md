@@ -27,7 +27,7 @@ no aprobar.
 | 014 | Rangos de referencia | ACEPTADO (enmendado por 018) |
 | 015 | Plantillas y editor por día del ciclo | ACEPTADO |
 | 016 | Vidrio sobre lienzo | ACEPTADO (enmendado por 017) |
-| 017 | Dirección visual moderna | ACEPTADO |
+| 017 | Dirección visual moderna | ACEPTADO (paleta y modo enmendados) |
 | 018 | Mapa muscular del resumen y su escala | ACEPTADO |
 | 019 | Comparativa: ventana desde el ancla y línea semanal del atajo | ACEPTADO (enmienda al 009) |
 
@@ -232,7 +232,7 @@ color compuesto, un tono verde que manda, nunca vidrio en filas.
 
 ## ADR-017 — Dirección visual moderna
 
-**Estado**: ACEPTADO
+**Estado**: ACEPTADO (paleta y modo enmendados el 28/09/2026)
 
 **Contexto.** El usuario pidió un lenguaje visual moderno, analizado con el
 enfoque *modern SaaS* (Linear, Stripe, Notion): base clara, títulos editoriales,
@@ -278,6 +278,15 @@ vocabulario ajeno); quitar el vidrio del todo (el usuario pidió conservar
 **Consecuencias.** Fácil: todo sale de tokens, y el modo oscuro es redefinirlos.
 Difícil: cualquier color de fondo nuevo obliga a pasar la prueba de contraste.
 Caro de revertir: nada; es presentación.
+
+**Enmienda (28/09/2026): paleta clara en azules y sin modo oscuro.** El usuario
+pidió tonos claros, sin nada oscuro, y después volver a los azules. Queda:
+**siempre clara** (`color-scheme: light`; el modo oscuro se retira y una prueba
+lo impide), lienzo blanco azulado con veladuras azules, tarjetas blancas y
+neutros cálidos, texto en grafito. **El verde deja de mandar**: el acento es
+pastel, pervinca claro con tinta índigo encima (nunca un bloque oscuro), y el
+índigo `#3A45B0` marca enlaces y selección. Todo lo demás del ADR sigue. Los
+valores, en `docs/10-lenguaje-visual.md`.
 
 ## ADR-018 — Mapa muscular del resumen y su escala de color
 
@@ -375,4 +384,3 @@ agregado guardado es un segundo sitio donde vive la verdad).
 
 **Consecuencias.** Revertir la línea del atajo es quitar la ruta y las cuatro
 entradas de lectura de `ALCANCE_DE_HOJA`; nada más depende de ellas.
-
