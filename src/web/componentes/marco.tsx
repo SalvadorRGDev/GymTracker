@@ -67,8 +67,14 @@ export function Marco({
               <ListaDeSecciones camino={camino} />
             </nav>
             <div class="cabecera-usuario">
-              <span class="cabecera-correo">{correo}</span>
-              <button type="button" class="boton-texto" onClick={() => void sal()}>
+              {/* El correo no va en la barra: con las ocho secciones no cabe en ningún
+                  ancho (el contenido mide 1200 px como mucho) y acababa tapándolas. */}
+              <button
+                type="button"
+                class="boton-texto"
+                title={`Sesión de ${correo}`}
+                onClick={() => void sal()}
+              >
                 <Icono nombre="log-out" tamano={16} />
                 Salir
               </button>
