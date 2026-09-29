@@ -23,6 +23,13 @@ export async function componeServidor(
       autenticacion,
       conAlmacenDeUsuario: (identidad, trabajo) => deposito.conAlmacenDeUsuario(identidad, trabajo),
       reloj,
+      alta: configuracion.altaAbierta
+        ? {
+            maximo: configuracion.maximoDeCuentas,
+            cuentas: () => deposito.conCuentas((c) => c.lee('usuario').length),
+            crea: (datos) => deposito.creaCuenta(datos),
+          }
+        : null,
     },
     {
       trustProxy: configuracion.trustProxy,

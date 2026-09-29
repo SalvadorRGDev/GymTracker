@@ -93,6 +93,15 @@ llavero, y el atajo **se instala compartiéndolo**.
   nunca y encolaba un Argon2 por intento: con 400 simultáneos, entrar pasaba de
   55 ms a casi 2 s para todos.
 
+## Alta pública (ADR-020)
+
+- Cerrada por omisión (`ALTA_ABIERTA`). Abierta, los límites van **antes** de
+  Argon2 y del disco: 3 por IP y hora y 10 en total por hora.
+- **Tope de cuentas** siempre: cada cuenta es un libro en disco.
+- La contraseña se acota por arriba (128) además de por abajo: sin tope, un
+  cuerpo de 256 KiB sería trabajo de Argon2 gratis para quien lo mande.
+- `GET /alta` no dice cuántas cuentas hay. Lo fija `alta.integracion.test.ts`.
+
 ## Límite por IP y proxy inverso
 
 Los límites de acceso y de exportación cuentan por IP, y la IP sale de

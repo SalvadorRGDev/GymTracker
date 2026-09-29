@@ -30,6 +30,7 @@ no aprobar.
 | 017 | Dirección visual moderna | ACEPTADO (paleta y modo enmendados) |
 | 018 | Mapa muscular del resumen y su escala | ACEPTADO |
 | 019 | Comparativa: ventana desde el ancla y línea semanal del atajo | ACEPTADO (enmienda al 009) |
+| 020 | Alta pública con tope | ACEPTADO (enmienda al 007) |
 
 ---
 
@@ -384,3 +385,37 @@ agregado guardado es un segundo sitio donde vive la verdad).
 
 **Consecuencias.** Revertir la línea del atajo es quitar la ruta y las cuatro
 entradas de lectura de `ALCANCE_DE_HOJA`; nada más depende de ellas.
+
+## ADR-020 — Alta pública con tope
+
+**Estado**: ACEPTADO (enmienda al ADR-007)
+
+**Contexto.** El ADR-007 dejó las cuentas en `npm run alta`: una persona teclea
+la contraseña de otra en la máquina del servidor. Con el servidor publicado en
+internet (Funnel) y amigos que quieren entrar, ese paso manual no funciona.
+
+**Decisión.** `POST /api/sesion/v1/alta` crea la cuenta desde la web, **sólo si
+`ALTA_ABIERTA=si`** (cerrada por omisión). Protecciones, en este orden:
+
+1. **Límite antes de nada caro**: 3 altas por IP y hora y un techo global de 10
+   por hora, antes de Argon2 y del disco. El global frena a quien reparte la
+   avalancha entre muchas IP.
+2. **Validación con motivo**: correo con forma, contraseña de 12 a 128
+   caracteres (el tope evita trabajo de Argon2 desproporcionado) y que no
+   contenga el usuario del correo, zona IANA válida.
+3. **Tope de cuentas** (`MAXIMO_DE_CUENTAS`, 20 por omisión): cada cuenta es un
+   libro en disco; sin tope, internet llenaría el disco.
+4. Correo repetido → 409 sin tocar la cuenta existente. Revela que el correo
+   existe; se acepta porque el límite por IP lo hace lento y el acceso sigue
+   contestando igual exista o no.
+5. Al crearla, entra: cookie como en «Entrar».
+
+`GET /api/sesion/v1/alta` dice sólo si se puede registrar, nunca cuántas cuentas
+hay.
+
+**Alternativas descartadas.** Código de invitación compartido y enlaces de un
+solo uso: más seguros frente a desconocidos, pero el dueño eligió abierto con
+tope. Verificar el correo: exige un servicio de envío (coste y terceros).
+
+**Consecuencias.** Cualquiera con el enlace puede ocupar plazas hasta el tope;
+el dueño lo vigila con `npm run verifica` y retira cuentas con `npm run baja`.

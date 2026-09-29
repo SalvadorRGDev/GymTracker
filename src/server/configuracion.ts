@@ -19,6 +19,10 @@ export interface Configuracion {
   /** Origen https con el que el teléfono alcanza el servidor; `null` = deducirlo al emitir. */
   readonly urlPublica: string | null;
   readonly registro: boolean;
+  /** Alta pública desde la web (ADR-020). `false` = sólo `npm run alta`. */
+  readonly altaAbierta: boolean;
+  /** Tope de cuentas: con el alta abierta, lo que impide llenar el disco. */
+  readonly maximoDeCuentas: number;
 }
 
 export class ErrorDeConfiguracion extends Error {
@@ -111,6 +115,14 @@ export function leeConfiguracion(entorno: Entorno, base = process.cwd()): Config
     problemas.push('URL_PUBLICA debe ser un origen https sin ruta (https://sigir.ejemplo.ts.net)');
   }
 
+  const altaTexto = entorno['ALTA_ABIERTA']?.trim() || 'no';
+  if (altaTexto !== 'si' && altaTexto !== 'no') problemas.push('ALTA_ABIERTA debe ser «si» o «no»');
+  const maximoTexto = entorno['MAXIMO_DE_CUENTAS']?.trim() || '20';
+  const maximoDeCuentas = Number(maximoTexto);
+  if (!/^\d{1,4}$/.test(maximoTexto) || maximoDeCuentas < 1 || maximoDeCuentas > 1000) {
+    problemas.push('MAXIMO_DE_CUENTAS debe ser 1–1000');
+  }
+
   if (problemas.length > 0) throw new ErrorDeConfiguracion(problemas);
   return {
     secretoDeSesion: secreto,
@@ -123,5 +135,7 @@ export function leeConfiguracion(entorno: Entorno, base = process.cwd()): Config
     atajosUrl,
     urlPublica: publica?.origin ?? null,
     registro: entorno['LOG'] !== 'silencio',
+    altaAbierta: altaTexto === 'si',
+    maximoDeCuentas,
   };
 }

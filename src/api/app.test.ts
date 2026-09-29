@@ -155,3 +155,42 @@ describe('un solo proceso sirve la API y el cliente', () => {
     expect(r.json()).toEqual({ codigo: 'interno', mensaje: 'Error interno' });
   });
 });
+
+describe('auditoría: segunda barrera contra CSRF y cabeceras', () => {
+  it('una escritura con cookie que el navegador marca «desde otro sitio» se rechaza', async () => {
+    s = await servidorDePrueba();
+    const ana = await s.cuenta('ana@ejemplo.com');
+    const pide = (sitio: string) =>
+      s?.pide({
+        method: 'POST',
+        url: '/api/lectura/v1/dispositivos',
+        headers: { cookie: ana.cookie, 'sec-fetch-site': sitio },
+        payload: { nombre: 'iPhone' },
+      });
+    const ajena = await pide('cross-site');
+    expect(ajena?.statusCode).toBe(403);
+    expect(ajena?.json()).toMatchObject({ codigo: 'otro-sitio' });
+    expect((await pide('same-origin'))?.statusCode).toBe(201);
+    // Leer sigue permitido, y la captura va con portador: no aplica.
+    const lectura = await s.pide({
+      method: 'GET',
+      url: '/api/lectura/v1/dashboard',
+      headers: { cookie: ana.cookie, 'sec-fetch-site': 'cross-site' },
+    });
+    expect(lectura.statusCode).toBe(200);
+    const portador = await s.portador(ana);
+    const captura = await s.pide({
+      method: 'GET',
+      url: '/api/captura/v1/catalogo',
+      headers: { authorization: `Bearer ${portador}`, 'sec-fetch-site': 'cross-site' },
+    });
+    expect(captura.statusCode).toBe(200);
+  });
+
+  it('HSTS y CORP en todas las respuestas', async () => {
+    s = await servidorDePrueba();
+    const r = await s.pide({ method: 'GET', url: '/api/salud' });
+    expect(r.headers['strict-transport-security']).toBe('max-age=31536000');
+    expect(r.headers['cross-origin-resource-policy']).toBe('same-origin');
+  });
+});

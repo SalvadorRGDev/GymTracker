@@ -56,6 +56,17 @@ export async function entra(correo: string, contrasena: string): Promise<void> {
   await compruebaSesion();
 }
 
+/** Alta pública (ADR-020): el servidor crea la cuenta y deja la sesión abierta. */
+export async function registra(correo: string, contrasena: string, zona: string): Promise<void> {
+  await pide(
+    'POST',
+    '/api/sesion/v1/alta',
+    { correo, contrasena, zona_horaria: zona },
+    { sinRedirigir: true },
+  );
+  await compruebaSesion();
+}
+
 /**
  * Salir revoca la sesión en el servidor. Si la red falla, la vista vuelve igual
  * al acceso: seguir enseñando datos tras pulsar «Salir» sería peor que una

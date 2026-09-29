@@ -7,7 +7,7 @@
 export class ErrorDeDominio extends Error {
   override name = 'ErrorDeDominio';
   constructor(
-    readonly estado: 400 | 401 | 404 | 409 | 422 | 426 | 429,
+    readonly estado: 400 | 401 | 403 | 404 | 409 | 422 | 426 | 429,
     readonly codigo: string,
     mensaje: string,
     readonly extra: Readonly<Record<string, unknown>> = {},

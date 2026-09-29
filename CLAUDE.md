@@ -4,7 +4,7 @@ Aplicación personal de seguimiento de fuerza: **series efectivas por grupo
 muscular y semana**, lo planeado contra lo ejecutado. Dos personas, coste cero,
 un proceso de Node en la máquina del autor publicado por un túnel, datos en
 libros de Excel. Documento maestro: `Plan.md`. Decisiones: `docs/01-decisiones.md`
-(ADR-001 a 019). Reglas por directorio: `.claude/rules/`.
+(ADR-001 a 020). Reglas por directorio: `.claude/rules/`.
 
 Código, comentarios, documentación e identificadores en **español**: el dominio
 se piensa en español y traducir a medias hace que dos personas llamen distinto a
@@ -19,7 +19,8 @@ lo mismo.
   del resumen** (ADR-017 y 018); borrar serie o sesión, confirmar fecha y
   archivar ejercicio desde la web.
 - Baja de cuenta real con `npm run baja` y aviso de privacidad
-  (`docs/11-privacidad.md`).
+  (`docs/11-privacidad.md`). Alta pública opcional desde la web con tope
+  (`ALTA_ABIERTA`, `MAXIMO_DE_CUENTAS`; ADR-020).
 - Pendiente: **probar los atajos en un iPhone real** (`atajos/PRUEBA-MANUAL.md`).
 
 ## Comandos

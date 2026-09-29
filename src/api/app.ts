@@ -17,10 +17,24 @@ import { rutasDeSesion } from './sesion/rutas.js';
  * nombrar un archivo.
  */
 
+/** Alta pública (ADR-020): funciones ya enlazadas al depósito, o `null` si está cerrada. */
+export interface AltaPublica {
+  readonly maximo: number;
+  cuentas(): Promise<number>;
+  crea(datos: {
+    readonly correo: string;
+    readonly hashContrasena: string;
+    readonly zonaHoraria: string;
+    readonly umbralRir: number;
+    readonly vigenteDesde: string;
+  }): Promise<string>;
+}
+
 export interface Dependencias {
   readonly autenticacion: Autenticacion;
   readonly conAlmacenDeUsuario: ConAlmacenDeUsuario;
   readonly reloj: () => Date;
+  readonly alta: AltaPublica | null;
 }
 
 export interface ConfiguracionDeApp {
@@ -140,7 +154,23 @@ export async function construyeApp(
     return reply.code(500).send({ codigo: 'interno', mensaje: 'Error interno' });
   });
 
+  // CSRF, segunda barrera (auditoría ADR-020): la cookie es SameSite=Strict, pero
+  // si un navegador la mandara igual, una escritura con cookie que el propio
+  // navegador marca como hecha desde otro sitio se rechaza. La captura va con
+  // portador, no con cookie, y no entra aquí.
+  app.addHook('onRequest', async (request) => {
+    const escritura = request.method !== 'GET' && request.method !== 'HEAD';
+    if (!escritura || !esRutaDeApi(request.url) || request.url.startsWith('/api/captura/')) return;
+    if (request.headers['sec-fetch-site'] === 'cross-site') {
+      throw new ErrorDeDominio(403, 'otro-sitio', 'Petición rechazada: llegó desde otro sitio.');
+    }
+  });
+
   app.addHook('onSend', async (request, reply, payload) => {
+    // Detrás del túnel https, que el navegador no vuelva a intentar http. En
+    // http://127.0.0.1 los navegadores la ignoran.
+    reply.header('strict-transport-security', 'max-age=31536000');
+    reply.header('cross-origin-resource-policy', 'same-origin');
     reply.header('x-content-type-options', 'nosniff');
     reply.header('referrer-policy', 'no-referrer');
     reply.header('x-frame-options', 'DENY');
@@ -151,7 +181,7 @@ export async function construyeApp(
     return payload;
   });
 
-  const { autenticacion, conAlmacenDeUsuario, reloj } = dependencias;
+  const { autenticacion, conAlmacenDeUsuario, reloj, alta } = dependencias;
   const segundos = () => reloj().getTime();
 
   app.get('/api/salud', async () => ({ estado: 'ok' }));
@@ -161,6 +191,10 @@ export async function construyeApp(
     reloj,
     limiteDeAcceso: new LimiteDeTasa(10, 60_000, segundos),
     limiteDeAccesoPorIp: new LimiteDeTasa(30, 60_000, segundos),
+    alta,
+    // Pocas altas por IP, y un techo global para quien reparta la avalancha entre IP.
+    limiteDeAltaPorIp: new LimiteDeTasa(3, 3_600_000, segundos),
+    limiteDeAltaGlobal: new LimiteDeTasa(10, 3_600_000, segundos),
   });
   rutasDeCaptura(app, {
     autenticacion,

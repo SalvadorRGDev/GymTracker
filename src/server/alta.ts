@@ -2,6 +2,7 @@ import { resolve } from 'node:path';
 import { Deposito } from '../almacen/acceso.js';
 import { esZonaValida } from '../almacen/celdas.js';
 import { hashDeContrasena, LONGITUD_MINIMA } from '../auth/contrasena.js';
+import { esCorreoValido } from '../auth/correo.js';
 
 /**
  * `npm run alta -- correo@ejemplo.com America/Mexico_City 4`
@@ -81,8 +82,7 @@ async function principal(): Promise<void> {
   if (correoCrudo === undefined || zona === undefined || umbralTexto === undefined)
     throw new Error(USO);
   const correo = correoCrudo.trim().toLowerCase();
-  if (!/^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,63}$/.test(correo))
-    throw new Error(`Correo no válido. ${USO}`);
+  if (!esCorreoValido(correo)) throw new Error(`Correo no válido. ${USO}`);
   if (!esZonaValida(zona)) throw new Error(`Zona horaria IANA desconocida: ${zona}`);
   if (!/^(?:10|\d)$/.test(umbralTexto)) throw new Error('El umbral de RIR es un entero de 0 a 10');
 

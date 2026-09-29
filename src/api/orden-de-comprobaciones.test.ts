@@ -39,6 +39,9 @@ beforeAll(async () => {
     ...dependencias,
     limiteDeAcceso: new LimiteDeTasa(1, 1),
     limiteDeAccesoPorIp: new LimiteDeTasa(1, 1),
+    alta: null,
+    limiteDeAltaPorIp: new LimiteDeTasa(1, 1),
+    limiteDeAltaGlobal: new LimiteDeTasa(1, 1),
   });
   rutasDeCaptura(espejo, {
     ...dependencias,
@@ -57,7 +60,9 @@ beforeAll(async () => {
     (r) =>
       r.method !== 'HEAD' &&
       (r.schema?.body !== undefined || r.schema?.querystring !== undefined) &&
-      r.url !== '/api/sesion/v1/entrar',
+      // Públicas por diseño: no hay credencial que comprobar antes.
+      r.url !== '/api/sesion/v1/entrar' &&
+      r.url !== '/api/sesion/v1/alta',
   );
   await espejo.close();
 });

@@ -14,6 +14,8 @@ el Excel se editó a mano mientras se guardaba: no se escribió nada.
 
 | Ruta | Qué hace |
 | ---- | -------- |
+| `GET /api/sesion/v1/alta` | `{ abierta }`: si la web admite altas (`ALTA_ABIERTA=si` y por debajo del tope). Nunca cuántas cuentas hay. |
+| `POST /api/sesion/v1/alta` `{correo, contrasena, zona_horaria}` | ADR-020. 201 y cookie. 403 `alta-cerrada` / `alta-completa`; 422 `correo`, `contrasena` (12–128, sin el usuario del correo), `zona`; 409 `correo-en-uso`; 429 con 3 por IP y hora o 10 en total por hora. |
 | `POST /api/sesion/v1/entrar` `{correo, contrasena}` | 204 y cookie `sigir_sesion` (`HttpOnly; Secure; SameSite=Strict; Path=/`). El fallo es **siempre** el mismo 401, exista o no el correo. 10 intentos por minuto por correo e IP, y 30 por IP sea cual sea el correo (cada intento cuesta un Argon2). |
 | `POST /api/sesion/v1/salir` | Revoca la fila y borra la cookie. 204, idempotente. |
 | `GET /api/sesion/v1/actual` | `{ correo, zona_horaria }` o 401. |

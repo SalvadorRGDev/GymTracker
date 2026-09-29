@@ -41,6 +41,8 @@ export async function servidorDePrueba(
     trustProxy?: false | string;
     webDir?: string | null;
     urlPublica?: string | null;
+    /** Tope de cuentas del alta pública; sin él, el alta está cerrada. */
+    maximoDeCuentas?: number;
   } = {},
 ): Promise<ServidorDePrueba> {
   const reloj = new RelojDePrueba(opciones.inicio);
@@ -55,6 +57,14 @@ export async function servidorDePrueba(
       autenticacion,
       conAlmacenDeUsuario: (identidad, trabajo) => deposito.conAlmacenDeUsuario(identidad, trabajo),
       reloj: reloj.lee,
+      alta:
+        opciones.maximoDeCuentas === undefined
+          ? null
+          : {
+              maximo: opciones.maximoDeCuentas,
+              cuentas: () => deposito.conCuentas((c) => c.lee('usuario').length),
+              crea: (datos) => deposito.creaCuenta(datos),
+            },
     },
     {
       trustProxy: opciones.trustProxy ?? 'loopback',
