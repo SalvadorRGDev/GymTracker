@@ -94,14 +94,15 @@ semana, y compara lo **planeado** con lo **ejecutado**.
 - **El corazón**: un **motor de volumen puro** en `src/domain/volume/`, sin
   dependencias, sin reloj y sin coma flotante, que es el único sitio del sistema
   donde se calcula volumen. El plan y lo ejecutado pasan por la misma función.
-- **Estado (27/09/2026)**: fases 0, 1, 2 y **3** en código —la comparativa
+- **Estado (29/09/2026)**: fases 0, 1, 2 y **3** en código —la comparativa
   plan-contra-real, que da nombre al proyecto, con su vigilancia del umbral, la
   simulación, la línea semanal del atajo y el mapa «Comparado con el plan»
   (ADR-019)—, más la fase de producto (catálogo base de 182 ejercicios, rangos de
-  referencia, constructor de rutinas y rediseño visual) y la baja de cuenta.
-  **290 pruebas en verde**, lint limpio, ensayo de 22 afirmaciones. Falta
-  **probar los atajos en un iPhone real**. El repositorio tiene su primer commit
-  (`1a43544`).
+  referencia, constructor de rutinas y rediseño visual), la baja de cuenta, el
+  alta pública con tope (ADR-020) y «Ver ejemplo»: una figura animada propia
+  para cada ejercicio del catálogo base (ADR-021). **327 pruebas en verde**, lint
+  limpio, ensayo de 22 afirmaciones. Falta **probar los atajos en un iPhone
+  real**. Todo está en `main`, un commit por cada cambio.
 
 ---
 
@@ -282,6 +283,8 @@ El proyecto siguió un proceso muy deliberado que vale la pena copiar:
 | 21 sep 2026  | **Fase de producto**: catálogo base (ADR-012), versión sin fijar reescribible (ADR-013), rangos de referencia (ADR-014), constructor de rutinas (ADR-015), vidrio sobre lienzo (ADR-016). | **sin commit** |
 | 26 sep 2026  | Este documento. 337 pruebas en verde, lint limpio.                                                            | **sin commit**  |
 | 27 sep 2026  | **Fase 3** (ADR-019) y mapa «Comparado con el plan»; revisión de errores con experimentos (`WEB_DIR` que servía los datos, `credencial.json` detrás del túnel, límite por IP, JSON ilegible); baja de cuenta y aviso de privacidad. | `1a43544` (primer commit) |
+| 28 sep 2026  | Paleta clara en azules; cuentas de usuarios migradas; **alta pública con tope** (ADR-020) con auditoría de seguridad; **«Ver ejemplo»** con figuras animadas propias para los 182 ejercicios (ADR-021). | `0a6770a` y un commit por cambio |
+| 29 sep 2026  | Revisión de las figuras: maniquí con volumen, músculos del ejercicio coloreados desde el catálogo base, cámara por lo que trabaja, máquinas que no se estiran y fallos de pies y rodillas. 327 pruebas en verde. | en el commit de «Ver ejemplo» |
 
 ### 4.4 Lo que se esperaba contra lo que pasó
 
@@ -1382,21 +1385,13 @@ correcto ante sospecha de compromiso.
 | Edición de coeficiente con datos previos | ✅ |
 | Guardado duplicado por reintento         | ✅ (sesión y serie) |
 
-### 16.3 Estado del repositorio — atención
+### 16.3 Estado del repositorio
 
-Comprobado con `git status` el 26/09/2026:
-
-- **El último commit es del 14 de septiembre** (`04e0a7a`, fase 2 sobre
-  PostgreSQL). **Todo lo posterior —ADR-010 a ADR-016, el almacén en Excel, el
-  catálogo base, la captura web, el constructor de rutinas, el rediseño— está
-  sin commit**: 91 archivos modificados o borrados (+5 824 / −8 364 líneas) más
-  archivos nuevos sin seguimiento (`src/almacen/`, `src/api/registro/`,
-  `src/api/prueba/`, `deploy/ensayo.sh`, `docs/09`, `docs/10`, dos reglas
-  nuevas). Es el mayor riesgo operativo del proyecto ahora mismo: un disco que
-  falle se lleva dos semanas de trabajo.
-- La rama es `fase-1` y el CI sólo corre en push a `main` o en PR, así que
-  **ese trabajo nunca ha pasado por CI**. Localmente, pruebas y lint están en
-  verde.
+Comprobado con `git status` el 29/09/2026: la rama es `main` y no queda nada
+sin commit. Tras `1a43544` (el primero) y `0a6770a`, un commit por cambio: la
+paleta en azules, la cabecera sin el correo, el alta pública con su auditoría
+(ADR-020) y «Ver ejemplo» con sus figuras (ADR-021). Localmente, pruebas, lint,
+las dos compilaciones y el ensayo están en verde.
 
 ### 16.4 Lo único pendiente del plan original
 
