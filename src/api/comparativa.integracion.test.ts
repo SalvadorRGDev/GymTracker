@@ -72,7 +72,7 @@ async function entrena(fecha: string, rirs: number[]) {
         clave: randomUUID(),
         ejercicio: 'Press banca',
         repeticiones: 8,
-        carga_kg: '60',
+        carga_lb: '60',
         rir,
         calentamiento: false,
       },

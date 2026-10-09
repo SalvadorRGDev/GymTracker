@@ -41,8 +41,10 @@ export interface SerieNormalizada {
     readonly clave: string;
     readonly ejercicio: string;
     readonly repeticiones: number;
-    /** Ya normalizada: punto decimal, a lo sumo dos decimales. */
-    readonly cargaKg: string;
+    /** En libras, ya normalizada: punto decimal, a lo sumo dos decimales. */
+    readonly cargaLb: string;
+    /** Lo que mandó un atajo anterior al ADR-023, en kilos; `null` si llegó en libras. */
+    readonly kilosDelAtajo: string | null;
     readonly rir: number | null;
     readonly calentamiento: boolean;
     readonly realizadaEn: Date;
@@ -108,8 +110,13 @@ function mensajeDeSerie(
   semana: readonly VolumenDeGrupo[] | undefined,
   repetida: boolean,
 ): string {
-  const prefijo = repetida ? 'Ya estaba registrada.' : 'Guardada.';
   const { serie } = entrada;
+  // Un atajo anterior a las libras manda kilos: se dice en qué quedaron.
+  const prefijo = `${repetida ? 'Ya estaba registrada.' : 'Guardada.'}${
+    serie.kilosDelAtajo === null
+      ? ''
+      : ` ${serie.kilosDelAtajo} kg = ${serie.cargaLb} lb (actualiza el atajo: ahora la carga va en libras).`
+  }`;
   let nota = '';
   if (serie.calentamiento) nota = 'Calentamiento: no cuenta volumen.';
   else if (serie.rir !== null && serie.rir > umbral) {
@@ -125,7 +132,7 @@ function mismaSerie(fila: Fila<'serie'>, entrada: SerieNormalizada, ejercicioId:
   return (
     fila.ejercicio_id === ejercicioId &&
     fila.repeticiones === String(serie.repeticiones) &&
-    centesimasDesdeDecimal(fila.carga_kg) === centesimasDesdeDecimal(serie.cargaKg) &&
+    centesimasDesdeDecimal(fila.carga_lb) === centesimasDesdeDecimal(serie.cargaLb) &&
     fila.rir === (serie.rir === null ? null : String(serie.rir)) &&
     fila.es_calentamiento === String(serie.calentamiento)
   );
@@ -219,7 +226,7 @@ export function registraSerie(
     orden: String(orden),
     ejercicio_id: ejercicio.id,
     repeticiones: String(entrada.serie.repeticiones),
-    carga_kg: entrada.serie.cargaKg,
+    carga_lb: entrada.serie.cargaLb,
     rir:
       entrada.serie.calentamiento || entrada.serie.rir === null ? null : String(entrada.serie.rir),
     es_calentamiento: String(entrada.serie.calentamiento),

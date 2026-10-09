@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { open, readFile, rename, rm, stat } from 'node:fs/promises';
 import { basename, dirname } from 'node:path';
 import { validaCelda } from './celdas.js';
-import type { Esquema, FilaDe, Tablas } from './esquema.js';
+import type { Esquema, FilaDe, Renombrada, Renombradas, Tablas } from './esquema.js';
 import type { Respaldos } from './respaldo.js';
 import {
   type Celda,
@@ -57,11 +57,56 @@ function esFilaVacia(fila: readonly Celda[]): boolean {
 }
 
 /**
+ * Una hoja anterior a un cambio de nombre de columna, leída con el nombre nuevo
+ * y los valores convertidos. Si trae las dos columnas, no se adivina cuál vale.
+ */
+function conRenombradas(hoja: Hoja, renombradas: readonly Renombrada[]): Hoja {
+  const primera = hoja.filas[0];
+  if (renombradas.length === 0 || primera === undefined) return hoja;
+  const cabecera = [...primera];
+  const filas = hoja.filas.map((f) => [...f]);
+  for (const r of renombradas) {
+    const j = cabecera.indexOf(r.de);
+    if (j === -1) continue;
+    if (cabecera.includes(r.a)) {
+      throw new ErrorDeXlsx(
+        `trae «${r.de}» y «${r.a}» a la vez: no se sabe cuál vale`,
+        hoja.nombre,
+        1,
+        letraDeColumna(j),
+      );
+    }
+    cabecera[j] = r.a;
+    filas.forEach((celdas, i) => {
+      const valor = celdas[j] ?? null;
+      if (i === 0 || valor === null) return;
+      try {
+        celdas[j] = r.convierte(valor);
+      } catch (error) {
+        throw new ErrorDeXlsx(
+          error instanceof Error ? error.message : String(error),
+          hoja.nombre,
+          i + 1,
+          `${letraDeColumna(j)} (${r.de})`,
+        );
+      }
+    });
+  }
+  filas[0] = cabecera;
+  return { nombre: hoja.nombre, filas };
+}
+
+/**
  * Valida al cargar, no sólo al escribir: el error dice hoja, fila y columna.
  * Una columna o una hoja que el esquema no conoce DETIENE la carga, porque
- * ignorarla la borraría en la siguiente escritura.
+ * ignorarla la borraría en la siguiente escritura. Las columnas renombradas se
+ * leen con su nombre nuevo antes de validar.
  */
-export function tablasDesdeHojas<E extends Esquema>(esquema: E, hojas: readonly Hoja[]): Tablas<E> {
+export function tablasDesdeHojas<E extends Esquema>(
+  esquema: E,
+  hojas: readonly Hoja[],
+  renombradas: Renombradas = {},
+): Tablas<E> {
   const conocidas = new Set(Object.keys(esquema));
   for (const hoja of hojas) {
     if (!conocidas.has(hoja.nombre)) {
@@ -73,7 +118,9 @@ export function tablasDesdeHojas<E extends Esquema>(esquema: E, hojas: readonly 
   }
   const salida: Record<string, Record<string, string | null>[]> = {};
   for (const [nombre, columnas] of Object.entries(esquema)) {
-    const hoja = hojas.find((h) => h.nombre === nombre);
+    const original = hojas.find((h) => h.nombre === nombre);
+    const hoja =
+      original === undefined ? undefined : conRenombradas(original, renombradas[nombre] ?? []);
     const filas: Record<string, string | null>[] = [];
     salida[nombre] = filas;
     if (hoja === undefined || hoja.filas.length === 0) continue; // hoja nueva: aditiva, vacía
@@ -222,6 +269,7 @@ export class LibroEnDisco<E extends Esquema> {
     private readonly esquema: E,
     private readonly compruebaAlCargar: (tablas: Tablas<E>) => void,
     private readonly respaldos: Respaldos,
+    private readonly renombradas: Renombradas = {},
   ) {}
 
   get nombre(): string {
@@ -239,7 +287,7 @@ export class LibroEnDisco<E extends Esquema> {
       if (despues === null || !misma(antes, despues)) continue; // cambió mientras se leía
       let tablas: Tablas<E>;
       try {
-        tablas = tablasDesdeHojas(this.esquema, leeLibro(bytes));
+        tablas = tablasDesdeHojas(this.esquema, leeLibro(bytes), this.renombradas);
       } catch (error) {
         if (error instanceof ErrorDeXlsx) {
           throw new ErrorDeXlsx(`${this.nombre}: ${error.message}`);

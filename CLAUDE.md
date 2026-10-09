@@ -4,7 +4,7 @@ Aplicación personal de seguimiento de fuerza: **series efectivas por grupo
 muscular y semana**, lo planeado contra lo ejecutado. Dos personas, coste cero,
 un proceso de Node en la máquina del autor publicado por un túnel, datos en
 libros de Excel. Documento maestro: `Plan.md`. Decisiones: `docs/01-decisiones.md`
-(ADR-001 a 022). Reglas por directorio: `.claude/rules/`.
+(ADR-001 a 023). Reglas por directorio: `.claude/rules/`.
 
 Código, comentarios, documentación e identificadores en **español**: el dominio
 se piensa en español y traducir a medias hace que dos personas llamen distinto a
@@ -25,6 +25,8 @@ lo mismo.
   figura animada propia en una ventana modal (ADR-021).
 - «Registrar» empieza por la rutina del día: la asignada, el día de su ciclo que
   toca y lo que va hecho, con la búsqueda libre debajo (ADR-022).
+- **Cargas en libras** y peso corporal en kilos; un libro con `carga_kg` se
+  convierte al cargarlo y un atajo viejo que manda kilos sigue valiendo (ADR-023).
 - Pendiente: **probar los atajos en un iPhone real** (`atajos/PRUEBA-MANUAL.md`).
 
 ## Comandos
@@ -56,6 +58,8 @@ almacén real en un experimento: un libro corrompido no tiene deshacer.
   **cadena**. El único redondeo es el del total por grupo del lado del plan
   (objetivo fraccionario × coeficiente fraccionario), a la mitad par.
 - **Calentamiento** como variante del tipo; el motor lo descarta él mismo.
+- **Carga en libras, peso corporal en kilos** (ADR-023). La conversión de kilos
+  a libras es la del motor (`librasDesdeKilos`, factor exacto, enteros).
 - **Fecha lógica** de la sesión, puesta por el servidor desde la zona de la
   cuenta; en la web, con el reloj del servidor. Nunca se convierte a `Date` para
   pintarla.

@@ -1,4 +1,8 @@
-import { centesimasDesdeDecimal, esDecimalExacto } from '../../domain/volume/index.js';
+import {
+  centesimasDesdeDecimal,
+  esDecimalExacto,
+  librasDesdeKilosEnTexto,
+} from '../../domain/volume/index.js';
 import { ErrorDeDominio } from '../errores.js';
 import { instanteDelCliente } from '../zona.js';
 import type {
@@ -51,11 +55,25 @@ function serieComun(
   const rir = serie.rir ?? null;
   if (serie.calentamiento && rir !== null) throw malFormada('un calentamiento no lleva RIR');
   if (!serie.calentamiento && rir === null) throw malFormada('una serie de trabajo necesita RIR');
+  // ADR-023: en libras; un atajo anterior manda kilos y se convierte aquí.
+  if ((serie.carga_lb === undefined) === (serie.carga_kg === undefined)) {
+    throw malFormada(
+      'la carga va en «carga_lb» (o en «carga_kg» desde un atajo anterior), una sola',
+    );
+  }
+  const kilos =
+    serie.carga_kg === undefined
+      ? null
+      : decimalNormalizado(serie.carga_kg, 'carga_kg', '0', '1000');
   return {
     clave: serie.clave,
     ejercicio: serie.ejercicio,
     repeticiones: serie.repeticiones,
-    cargaKg: decimalNormalizado(serie.carga_kg, 'carga_kg', '0', '1000'),
+    cargaLb:
+      kilos === null
+        ? decimalNormalizado(serie.carga_lb ?? '', 'carga_lb', '0', '2500')
+        : librasDesdeKilosEnTexto(kilos),
+    kilosDelAtajo: kilos,
     rir,
     calentamiento: serie.calentamiento,
   };

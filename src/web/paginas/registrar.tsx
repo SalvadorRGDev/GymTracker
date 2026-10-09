@@ -128,7 +128,8 @@ export function Registrar() {
   if (!/^\d{1,3}$/.test(repeticiones) || Number(repeticiones) < 1 || Number(repeticiones) > 200) {
     faltas.push('repeticiones de 1 a 200');
   }
-  if (!/^\d{1,4}(?:[.,]\d{1,2})?$/.test(carga.trim())) faltas.push('carga en kg, como 62.5');
+  // ADR-023: la carga en libras, lo que marcan los discos. El peso corporal sigue en kg.
+  if (!/^\d{1,4}(?:[.,]\d{1,2})?$/.test(carga.trim())) faltas.push('carga en lb, como 135');
 
   const guarda = async (calentamiento: boolean) => {
     if (nombreElegido === null) return;
@@ -149,7 +150,7 @@ export function Registrar() {
           clave: nuevaClave(),
           ejercicio: nombreElegido,
           repeticiones: Number(repeticiones),
-          carga_kg: carga.trim(),
+          carga_lb: carga.trim(),
           ...(calentamiento ? {} : { rir }),
           calentamiento,
         },
@@ -288,13 +289,13 @@ export function Registrar() {
               />
             </div>
             <div class="campo">
-              <label for="carga">Carga (kg)</label>
+              <label for="carga">Carga (lb)</label>
               <input
                 id="carga"
                 class="entrada"
                 inputMode="decimal"
                 autocomplete="off"
-                placeholder="62.5"
+                placeholder="135"
                 value={carga}
                 onInput={(e) => setCarga((e.target as HTMLInputElement).value)}
               />

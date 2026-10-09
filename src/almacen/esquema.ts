@@ -1,3 +1,4 @@
+import { librasDesdeKilosEnTexto } from '../domain/volume/index.js';
 import type { TipoDeCelda } from './celdas.js';
 
 /**
@@ -121,7 +122,8 @@ export const LIBRO = {
     orden: c(entero(1, 9999)),
     ejercicio_id: c(uuid),
     repeticiones: c(entero(1, 200)),
-    carga_kg: c(decimal('0.00', '1000.00', false)),
+    /** En libras (ADR-023): lo que marcan los discos y la columna de placas. */
+    carga_lb: c(decimal('0.00', '2500.00', false)),
     rir: c(entero(0, 10).nula_),
     es_calentamiento: c(booleano),
     realizada_en: c(instante),
@@ -136,6 +138,26 @@ export const LIBRO = {
     registrado_en: c(instante),
   },
 } as const satisfies Esquema;
+
+/**
+ * Una columna que cambió de nombre, y quizá de unidad. Un libro anterior la trae
+ * con el nombre viejo: se lee con el nuevo y el valor convertido, y la siguiente
+ * escritura lo deja ya en la forma nueva —con su respaldo previo, como toda
+ * escritura—. Que traiga las dos a la vez detiene la carga: no se sabría cuál vale.
+ */
+export interface Renombrada {
+  readonly de: string;
+  readonly a: string;
+  /** Del valor viejo al nuevo. Lanza si el viejo no es válido. */
+  readonly convierte: (valor: string) => string;
+}
+
+export type Renombradas = Readonly<Record<string, readonly Renombrada[]>>;
+
+/** ADR-023: las cargas pasaron de kilos a libras, con el factor exacto. */
+export const RENOMBRADAS_DEL_LIBRO: Renombradas = {
+  serie: [{ de: 'carga_kg', a: 'carga_lb', convierte: librasDesdeKilosEnTexto }],
+};
 
 /** `cuentas.xlsx`: identidad y credenciales. Lo único compartido entre personas. */
 export const CUENTAS = {

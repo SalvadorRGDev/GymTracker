@@ -52,6 +52,17 @@ protegerse: es un caso de uso.
 - Una columna que el esquema no conoce **detiene la carga** en vez de ignorarse:
   ignorarla la borraría en la siguiente escritura.
 
+## Una columna que cambia de nombre (ADR-023)
+
+- Se declara en `RENOMBRADAS_DEL_LIBRO` (`src/almacen/esquema.ts`) con su
+  conversión: el lector lee el nombre viejo como el nuevo y la siguiente
+  escritura, con su copia previa, lo deja en la forma nueva. Así también carga un
+  respaldo viejo restaurado, y no hay un script de migración que olvidar.
+- Un libro con **las dos** columnas no carga: no se sabría cuál vale.
+- La conversión es pura, vive en el motor y se prueba allí; una celda vieja
+  ilegible falla con hoja, fila y la columna vieja entre paréntesis.
+- Sigue siendo un cambio destructivo: pide su ADR, como un `RENAME COLUMN`.
+
 ## Escritura
 
 - **Atómica**: a un temporal, `sync()`, y renombrar. Un `.xlsx` a medio escribir

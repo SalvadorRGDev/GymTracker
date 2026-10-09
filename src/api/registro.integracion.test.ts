@@ -46,7 +46,7 @@ describe('/api/registro/v1: la captura web', () => {
     const web = await registra(ana, sesion, {
       ejercicio: 'Press banca',
       repeticiones: 8,
-      carga_kg: '70',
+      carga_lb: '70',
       rir: 2,
       calentamiento: false,
     });
@@ -73,7 +73,7 @@ describe('/api/registro/v1: la captura web', () => {
     await registra(ana, sesion, {
       ejercicio: 'Sentadilla',
       repeticiones: 5,
-      carga_kg: '100',
+      carga_lb: '100',
       rir: 3,
       calentamiento: false,
     });
@@ -81,7 +81,7 @@ describe('/api/registro/v1: la captura web', () => {
     const r = await registra(ana, sesion, {
       ejercicio: 'Sentadilla',
       repeticiones: 5,
-      carga_kg: '100',
+      carga_lb: '100',
       rir: 2,
       calentamiento: false,
     });
@@ -109,7 +109,7 @@ describe('/api/registro/v1: la captura web', () => {
     await registra(ana, sesion, {
       ejercicio: 'Press banca',
       repeticiones: 8,
-      carga_kg: '8',
+      carga_lb: '8',
       rir: 2,
       calentamiento: false,
     });
@@ -169,7 +169,7 @@ describe('/api/registro/v1: la captura web', () => {
     await registra(beto, randomUUID(), {
       ejercicio: 'Press banca',
       repeticiones: 8,
-      carga_kg: '70',
+      carga_lb: '70',
       rir: 2,
       calentamiento: false,
     });

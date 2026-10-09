@@ -18,7 +18,7 @@ const DATOS: DatosDeHistorial = {
           orden: 1,
           ejercicio: 'Sentadilla',
           repeticiones: 8,
-          carga_kg: '60.00',
+          carga_lb: '60.00',
           rir: null,
           es_calentamiento: true,
           realizada_en: '2026-09-08T05:52:00.000Z',
@@ -28,7 +28,7 @@ const DATOS: DatosDeHistorial = {
           orden: 2,
           ejercicio: 'Sentadilla',
           repeticiones: 5,
-          carga_kg: '100.5',
+          carga_lb: '100.5',
           rir: 0,
           es_calentamiento: false,
           realizada_en: '2026-09-08T06:15:00.000Z',
@@ -72,7 +72,7 @@ describe('Historial: el registro, no un resumen', () => {
   it('el calentamiento se marca y se conserva; la carga se enseña como llegó', async () => {
     const raiz = await pinta();
     expect(celdas(raiz, 0)[1]).toContain('Calentamiento');
-    expect(celdas(raiz, 1)[3]).toBe('100.5 kg');
+    expect(celdas(raiz, 1)[3]).toBe('100.5 lb');
   });
 
   it('una sesión sin cerrar se dice sin cerrar y la fecha por confirmar se ve', async () => {

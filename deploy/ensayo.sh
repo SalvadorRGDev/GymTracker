@@ -109,7 +109,7 @@ ok "emite una credencial que se ve una vez, y su archivo apunta a la URL del nav
 
 atajo() { curl -s -H "authorization: Bearer $1" -H 'content-type: application/json' "${@:2}"; }
 SESION="ensayo-sesion-$(date +%s)"
-SERIE_1="{\"sesion\":{\"clave\":\"$SESION\",\"iniciada_en\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"},\"serie\":{\"clave\":\"ensayo-serie-0001\",\"ejercicio\":\"Press banca\",\"repeticiones\":10,\"carga_kg\":\"60,5\",\"rir\":2,\"calentamiento\":false,\"realizada_en\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}}"
+SERIE_1="{\"sesion\":{\"clave\":\"$SESION\",\"iniciada_en\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"},\"serie\":{\"clave\":\"ensayo-serie-0001\",\"ejercicio\":\"Press banca\",\"repeticiones\":10,\"carga_lb\":\"135,5\",\"rir\":2,\"calentamiento\":false,\"realizada_en\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}}"
 
 # 10 y 11 ── el atajo registra y el reenvío es idempotente
 R1=$(atajo "$PORTADOR" -d "$SERIE_1" "$BASE/api/captura/v1/serie")
@@ -124,7 +124,7 @@ ok "reenviar la misma serie no produce un segundo efecto"
 ok "el portador del atajo no llega a las rutas de planes"
 
 # 13 ── la web registra en la misma sesión
-R3=$(web -d "{\"sesion\":{\"clave\":\"$SESION\"},\"serie\":{\"clave\":\"ensayo-serie-0002\",\"ejercicio\":\"Press banca\",\"repeticiones\":8,\"carga_kg\":\"62.5\",\"rir\":1,\"calentamiento\":false}}" "$BASE/api/registro/v1/serie")
+R3=$(web -d "{\"sesion\":{\"clave\":\"$SESION\"},\"serie\":{\"clave\":\"ensayo-serie-0002\",\"ejercicio\":\"Press banca\",\"repeticiones\":8,\"carga_lb\":\"140\",\"rir\":1,\"calentamiento\":false}}" "$BASE/api/registro/v1/serie")
 [ "$(json 'd.serie.orden' <<<"$R3")" = 2 ] || falla "la web no registró en la misma sesión: $R3"
 ok "la web registra en la misma sesión, con el mismo servicio"
 

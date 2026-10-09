@@ -33,6 +33,7 @@ no aprobar.
 | 020 | Alta pública con tope | ACEPTADO (enmienda al 007) |
 | 021 | «Ver ejemplo»: figuras animadas propias | ACEPTADO |
 | 022 | «Registrar» empieza por la rutina del día | ACEPTADO |
+| 023 | Las cargas, en libras | ACEPTADO (enmienda la unidad canónica del Plan) |
 
 ---
 
@@ -563,3 +564,55 @@ fija el día desde el ancla y su rotación, la fecha del entrenamiento abierto, 
 cuenta como hecho (efectivas, la frontera del umbral, calentamientos,
 coeficientes, sin contar dos veces) y los rechazos; `registrar.test.tsx`, lo que
 se ve, lo que se avisa y lo que va a la consulta.
+
+## ADR-023 — Las cargas, en libras
+
+**Estado**: ACEPTADO (enmienda la unidad canónica del Plan, §7.3)
+
+**Contexto.** El almacén guardaba la carga en kilos (`carga_kg`) y el Plan
+preveía la conversión a libras sólo en presentación. En el gimnasio del usuario
+discos, mancuernas y poleas marcan libras: cada serie se convertía de cabeza
+antes de capturarla, y ese paso es justo donde entra un error que nadie detecta
+después. El usuario decidió que **todo vaya en libras salvo el peso corporal**,
+que en México y en toda Latinoamérica se mide en kilos y no es un dato del
+gimnasio.
+
+**Decisión.**
+
+- **La carga se guarda en libras**: la columna de `serie` pasa a `carga_lb`, de
+  0 a 2500 con dos decimales (cubre el tope anterior de 1000 kg, que son
+  2204.62 lb). `peso_kg` de `medicion_corporal` no cambia, ni en el almacén ni en
+  la captura ni en la pantalla.
+- **Factor exacto y aritmética entera.** Una libra son 0.45359237 kg por
+  definición, así que lb = kg × 100000000 / 45359237 sobre centésimas enteras,
+  redondeado una sola vez a la centésima de libra, a la mitad par
+  (`librasDesdeKilos`, en el motor puro). 60 kg son 132.28 lb.
+- **Un libro anterior se convierte al cargarlo.** El lector lee `carga_kg` como
+  `carga_lb` con el valor convertido (`RENOMBRADAS_DEL_LIBRO`, en
+  `src/almacen/esquema.ts`) y la siguiente escritura lo deja en la forma nueva,
+  después de la copia previa de siempre. Un libro con las dos columnas detiene la
+  carga —no se sabría cuál vale— y una celda de `carga_kg` ilegible falla con
+  hoja, fila y columna, como cualquier otra. Es la única vía de carga de un libro
+  de usuario, así que `npm run verifica` y un respaldo restaurado pasan por ella.
+- **Contrato aditivo (riesgo R7).** La captura recibe `carga_lb` y, para los
+  atajos ya instalados, sigue aceptando `carga_kg`: la convierte y la
+  notificación lo dice («60 kg = 132.28 lb (actualiza el atajo…)»). Exactamente
+  una de las dos; las dos o ninguna es un 400. La web y las lecturas sólo hablan
+  de `carga_lb`.
+- **El volumen no cambia**: las series efectivas no miran la carga.
+
+**Alternativas descartadas.** Conservar kilos y convertir en presentación, lo
+que preveía el Plan: la ida y vuelta no devuelve lo tecleado (135 lb → 61.23 kg →
+134.99 lb), y lo que se guarda debe ser lo que se tecleó. Una preferencia de
+unidad por cuenta: con dos unidades en el almacén cada lectura tiene que
+preguntar cuál, y nadie la pidió. Un script aparte que reescriba los libros: un
+paso más que olvidar, y un respaldo viejo restaurado volvería a traer kilos;
+convertir al cargar cubre los dos casos.
+
+**Consecuencias.** La conversión de un libro viejo es de ida: volver a kilos no
+reproduce exactamente el original. Las copias previas a cada escritura guardan el
+libro tal como estaba y la poda conserva siempre la primera de cada día, así que
+al menos una copia en kilos sobrevive; aun así, antes de arrancar el servidor
+nuevo sobre el almacén real conviene un respaldo completo (`deploy/respaldo.sh`).
+Lo fijan `unidades.test.ts`, `almacen.test.ts` («libros anteriores a las
+libras») y `captura.integracion.test.ts`.

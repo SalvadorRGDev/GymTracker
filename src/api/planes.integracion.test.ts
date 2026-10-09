@@ -62,7 +62,7 @@ function serieWeb() {
       clave: randomUUID(),
       ejercicio: 'Press banca',
       repeticiones: 8,
-      carga_kg: '60',
+      carga_lb: '60',
       rir: 2,
       calentamiento: false,
     },

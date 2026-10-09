@@ -265,9 +265,38 @@ describe('POST /api/captura/v1/serie', () => {
       headers: { cookie: ana.cookie },
     });
     const cargas = (historial.json() as Historial).sesiones.flatMap((x) =>
-      x.series.map((y) => y.carga_kg),
+      x.series.map((y) => y.carga_lb),
     );
     expect(cargas.sort()).toEqual(['62.5', '62.5']);
+  });
+
+  it('un atajo anterior a las libras manda kilos: se guardan en libras y la respuesta lo dice (ADR-023)', async () => {
+    const cuerpo = serieDeAtajo({ kilos: '60' });
+    const r = await aceptada(portadorAna, cuerpo);
+    expect(r.mensaje).toContain('60 kg = 132.28 lb');
+    // El reenvío del drenado con los mismos kilos es la misma serie, no otra.
+    expect((await aceptada(portadorAna, cuerpo)).mensaje).toMatch(/^Ya estaba registrada\. 60 kg/);
+    const historial = await s.pide({
+      method: 'GET',
+      url: '/api/lectura/v1/historial',
+      headers: { cookie: ana.cookie },
+    });
+    const cargas = (historial.json() as Historial).sesiones.flatMap((x) =>
+      x.series.map((y) => y.carga_lb),
+    );
+    expect(cargas).toEqual(['132.28']);
+  });
+
+  it('la carga va en libras o en kilos, una sola: las dos o ninguna es un 400', async () => {
+    const cuerpo = serieDeAtajo({});
+    const ambas = { ...cuerpo, serie: { ...cuerpo.serie, carga_kg: '60' } };
+    expect((await captura(portadorAna, ambas)).statusCode).toBe(400);
+    const { carga_lb: _quitada, ...sinCarga } = cuerpo.serie as typeof cuerpo.serie & {
+      carga_lb?: string;
+    };
+    expect((await captura(portadorAna, { ...cuerpo, serie: sinCarga })).statusCode).toBe(400);
+    expect((await captura(portadorAna, serieDeAtajo({ carga: '2500.01' }))).statusCode).toBe(400);
+    expect((await aceptada(portadorAna, serieDeAtajo({ carga: '2500' }))).estado).toBe('aceptada');
   });
 
   it('validación estricta: ni propiedades de más ni tipos convertidos', async () => {

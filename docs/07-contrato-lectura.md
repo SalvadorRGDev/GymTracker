@@ -62,7 +62,7 @@ Semana natural (lunes a domingo) del hoy lógico del usuario.
 
 Hasta 100 sesiones, de la más reciente a la más antigua, con sus series crudas:
 `{ sesiones: [{ id, fecha_logica, iniciada_en, finalizada_en, fecha_por_confirmar,
-origen, series: [{ id, orden, ejercicio, repeticiones, carga_kg, rir,
+origen, series: [{ id, orden, ejercicio, repeticiones, carga_lb, rir,
 es_calentamiento, realizada_en }] }] }`. El calentamiento se marca, no se borra;
 `rir` es `null` cuando no hay dato.
 

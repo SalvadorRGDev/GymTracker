@@ -63,6 +63,11 @@ escritura sería el riesgo R10 con otro nombre.
   muestra su error y el elemento se queda en la cola, que es lo correcto.
 - Validación estricta de la forma: una carga desconocida se rechaza, no se
   interpreta como se pueda.
+- **La carga de una serie va en libras** (`carga_lb`, ADR-023). `carga_kg`
+  sigue aceptándose para los atajos ya instalados —el contrato crece, ningún
+  campo cambia de significado—: se convierte con el factor exacto y la
+  notificación pide actualizar el atajo. Las dos a la vez, o ninguna, es 400. El
+  peso corporal sigue en kilos (`peso_kg`).
 
 ## Qué se versiona aquí
 

@@ -76,11 +76,15 @@ español.
    actual** en ISO 8601; **Guardar archivo** `sesion-vigente.json`.
 3. **Elegir de la lista** con los nombres de `catalogo.json` → *Ejercicio*.
 4. **Preguntar por entrada** (número) «Repeticiones» → *Repeticiones*.
-5. **Preguntar por entrada** (número decimal) «Kilos» → *Carga*.
+5. **Preguntar por entrada** (número decimal) «Libras» → *Carga*. La carga va en
+   libras (ADR-023): lo que marcan los discos o la columna de placas.
 6. **Elegir de la lista** 0 a 10, «RIR» → *RIR*.
 7. **Diccionario**: `ruta` = `/api/captura/v1/serie`; `cuerpo` = `{ sesion: {
-   clave, iniciada_en }, serie: { clave: e-…, ejercicio, repeticiones, carga_kg,
-   rir, calentamiento: false, realizada_en: ahora ISO 8601 } }`.
+   clave, iniciada_en }, serie: { clave: e-…, ejercicio, repeticiones, carga_lb,
+   rir, calentamiento: false, realizada_en: ahora ISO 8601 } }`. Un atajo anterior
+   que todavía mande `carga_kg` sigue funcionando: el servidor la convierte a
+   libras y la notificación lo dice («60 kg = 132.28 lb…»), pero conviene
+   actualizarlo.
 8. **Guardar archivo** en `cola/<clave de la serie>.json` **antes** de nada más.
 9. **Ejecutar atajo** `Sincronizar`.
 

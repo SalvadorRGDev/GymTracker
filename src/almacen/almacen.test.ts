@@ -100,7 +100,7 @@ function nuevaSerie(
     orden: String(opciones.orden ?? 1),
     ejercicio_id: ejercicioId,
     repeticiones: '10',
-    carga_kg: '60.00',
+    carga_lb: '135.00',
     rir: opciones.rir === undefined ? (calentamiento ? null : '2') : opciones.rir,
     es_calentamiento: calentamiento ? 'true' : 'false',
     realizada_en: '2026-09-26T17:05:00.000Z',
@@ -648,7 +648,7 @@ describe('sesiones y series', () => {
     )) as unknown as TablasDeLibro;
     const serie = antes.serie[0];
     if (serie === undefined) throw new Error('sin serie');
-    const despues: TablasDeLibro = { ...antes, serie: [{ ...serie, carga_kg: '80.00' }] };
+    const despues: TablasDeLibro = { ...antes, serie: [{ ...serie, carga_lb: '185.00' }] };
     expect(() => compruebaLibro(antes, despues, ana)).toThrow(/una serie registrada no se edita/);
   });
 });
@@ -789,6 +789,73 @@ describe('el archivo se edita a mano', () => {
     const hojas = leeLibro(await readFile(rutaDe(ana)));
     await writeFile(rutaDe(ana), escribeLibro([...hojas, { nombre: 'mis_notas', filas: [['x']] }]));
     await expect(comoWeb(ana, (a) => a.lee('ejercicio'))).rejects.toBeInstanceOf(ErrorDeXlsx);
+  });
+});
+
+describe('libros anteriores a las libras (ADR-023)', () => {
+  const rutaDe = (id: string) => join(prueba.directorio, `${id}.xlsx`);
+
+  /** El libro como lo dejaba la versión en kilos: la columna `carga_kg` con `kilos`. */
+  async function enKilos(id: string, kilos: string, conLibras = false): Promise<void> {
+    const hojas = leeLibro(await readFile(rutaDe(id))).map((h) => {
+      if (h.nombre !== 'serie') return h;
+      const j = (h.filas[0] ?? []).indexOf('carga_lb');
+      const filas = h.filas.map((f, i) =>
+        f.map((c, k) => (k !== j ? c : i === 0 ? 'carga_kg' : kilos)),
+      );
+      // Con `conLibras`, además la columna nueva: un libro a medio editar a mano.
+      return {
+        ...h,
+        filas: conLibras ? filas.map((f, i) => [...f, i === 0 ? 'carga_lb' : '1.00']) : filas,
+      };
+    });
+    await writeFile(rutaDe(id), escribeLibro(hojas));
+  }
+
+  it('se lee en libras, con la conversión exacta', async () => {
+    const s = await siembra(ana);
+    await fijaVersion(ana, s);
+    await enKilos(ana, '60.00');
+    expect(await comoWeb(ana, (a) => a.lee('serie').map((x) => x.carga_lb))).toEqual(['132.28']);
+  });
+
+  it('la siguiente escritura lo deja en libras, y el respaldo previo guarda los kilos', async () => {
+    const s = await siembra(ana);
+    await fijaVersion(ana, s);
+    await enKilos(ana, '60.00');
+    await comoWeb(ana, (a) => {
+      a.inserta('grupo_muscular', { id: randomUUID(), nombre: 'Dorsal' });
+    });
+    const serie = leeLibro(await readFile(rutaDe(ana))).find((h) => h.nombre === 'serie');
+    const cabecera = serie?.filas[0] ?? [];
+    expect(cabecera).toContain('carga_lb');
+    expect(cabecera).not.toContain('carga_kg');
+    expect(serie?.filas[1]?.[cabecera.indexOf('carga_lb')]).toBe('132.28');
+    const respaldos = (await readdir(join(prueba.directorio, 'respaldos'))).filter((n) =>
+      n.startsWith(ana),
+    );
+    const textos = await Promise.all(
+      respaldos.map(async (n) =>
+        JSON.stringify(leeLibro(await readFile(join(prueba.directorio, 'respaldos', n)))),
+      ),
+    );
+    expect(textos.some((t) => t.includes('carga_kg') && t.includes('60.00'))).toBe(true);
+  });
+
+  it('con las dos columnas a la vez no adivina cuál vale', async () => {
+    const s = await siembra(ana);
+    await fijaVersion(ana, s);
+    await enKilos(ana, '60.00', true);
+    await expect(comoWeb(ana, (a) => a.lee('serie'))).rejects.toThrow(/a la vez/);
+  });
+
+  it('unos kilos ilegibles detienen la carga y el error dice dónde', async () => {
+    const s = await siembra(ana);
+    await fijaVersion(ana, s);
+    await enKilos(ana, 'sesenta');
+    await expect(comoWeb(ana, (a) => a.lee('serie'))).rejects.toThrow(
+      /hoja «serie», fila 2, columna H \(carga_kg\)/,
+    );
   });
 });
 

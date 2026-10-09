@@ -82,7 +82,7 @@ async function serie(ejercicio: string, rir: number | null, sesion: string = ran
       clave: randomUUID(),
       ejercicio,
       repeticiones: 8,
-      carga_kg: '40',
+      carga_lb: '40',
       ...(rir === null ? {} : { rir }),
       calentamiento: rir === null,
     },

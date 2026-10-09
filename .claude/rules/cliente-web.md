@@ -62,6 +62,9 @@ llama al mismo servicio, así que hereda sus reglas enteras:
   catálogo no tiene no se puede ni escribir.
 - **El calentamiento es el botón que se pulsa**, no una casilla que se pueda
   olvidar: «Guardar serie» o «Guardar calentamiento».
+- **La carga en libras** (ADR-023): «Carga (lb)», lo que marcan los discos. El
+  peso corporal sigue en kilos («Peso de hoy (kg)»): no es un dato del gimnasio
+  y aquí se mide así.
 - **La fecha lógica la pone el servidor**, que la saca de la zona de la cuenta.
   Tomarla del reloj del navegador rompería la sesión que cruza la medianoche y
   mentiría cuando el usuario viaja.

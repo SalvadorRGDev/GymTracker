@@ -14,6 +14,7 @@ import {
   type HojaDeLibro,
   LIBRO,
   type Operacion,
+  RENOMBRADAS_DEL_LIBRO,
   type Tablas,
   type TablasDeCuentas,
   type TablasDeLibro,
@@ -180,6 +181,7 @@ export class Deposito {
         LIBRO,
         (t) => compruebaLibro(t, t, usuarioId),
         this.respaldos,
+        RENOMBRADAS_DEL_LIBRO,
       );
       this.libros.set(usuarioId, libro);
     }

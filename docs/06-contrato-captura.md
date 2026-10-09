@@ -40,7 +40,7 @@ Dos puertas, **un solo servicio** (`src/api/captura/servicio.ts`):
     "clave": "9c0e…",
     "ejercicio": "Press banca",
     "repeticiones": 10,
-    "carga_kg": "62,5",
+    "carga_lb": "135,5",
     "rir": 2,
     "calentamiento": false,
     "realizada_en": "2026-09-26T23:52:10-06:00"
@@ -48,6 +48,12 @@ Dos puertas, **un solo servicio** (`src/api/captura/servicio.ts`):
 }
 ```
 
+- **La carga va en libras** (`carga_lb`, de 0 a 2500; ADR-023). Un atajo
+  anterior que todavía mande `carga_kg` (0 a 1000) sigue valiendo: el servidor la
+  pasa a libras con el factor exacto, a la centésima, y el mensaje lo dice
+  («Guardada. 60 kg = 132.28 lb (actualiza el atajo: ahora la carga va en
+  libras). Esta semana: …»). Exactamente una de las dos: las dos o ninguna es
+  400. El peso corporal sigue en kilos (`peso_kg`).
 - `rir` es obligatorio si `calentamiento` es `false` y no puede ir si es `true`
   (la bandera **es** el atajo que se ejecutó: `Serie` o `Calentamiento`).
 - El ejercicio se resuelve por nombre con la clave del índice único

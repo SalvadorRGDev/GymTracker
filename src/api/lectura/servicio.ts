@@ -117,7 +117,7 @@ export function historial(almacen: AlmacenDeUsuario, limite: number): Historial 
           orden: Number(x.orden),
           ejercicio: nombres.get(x.ejercicio_id) ?? 'Ejercicio desconocido',
           repeticiones: Number(x.repeticiones),
-          carga_kg: x.carga_kg,
+          carga_lb: x.carga_lb,
           rir: x.rir === null ? null : Number(x.rir),
           es_calentamiento: x.es_calentamiento === 'true',
           realizada_en: x.realizada_en,

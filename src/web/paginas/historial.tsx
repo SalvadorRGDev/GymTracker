@@ -121,7 +121,7 @@ function Sesion({
                     )}
                   </td>
                   <td class="numero cifra">{s.repeticiones}</td>
-                  <td class="numero cifra">{s.carga_kg} kg</td>
+                  <td class="numero cifra">{s.carga_lb} lb</td>
                   <td class="numero cifra">{s.rir === null ? '—' : s.rir}</td>
                   <td class="numero">
                     <BotonConConfirmacion

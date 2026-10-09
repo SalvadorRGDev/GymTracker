@@ -40,12 +40,17 @@ columna. Los rangos de vigencia se reparten en `…_desde` (inclusiva) y
 | `plan_entrada` | id, propietario_id, plan_version_id, dia, ejercicio_id, grupo_muscular_id, objetivo |
 | `plan_asignacion` | id, propietario_id, plan_version_id, vigente_desde, vigente_hasta, creado_en |
 | `sesion` | id, propietario_id, clave_idempotencia, fecha_logica, version_parametros_id, iniciada_en, finalizada_en, fecha_por_confirmar, origen, registrado_en |
-| `serie` | id, propietario_id, sesion_id, clave_idempotencia, orden, ejercicio_id, repeticiones, carga_kg, rir, es_calentamiento, realizada_en, registrado_en |
+| `serie` | id, propietario_id, sesion_id, clave_idempotencia, orden, ejercicio_id, repeticiones, carga_lb, rir, es_calentamiento, realizada_en, registrado_en |
 | `medicion_corporal` | id, propietario_id, fecha_logica, peso_kg, origen, registrado_en |
 
 `propietario_id`, `creado_en` y `registrado_en` los pone el almacén, nunca el
 cliente ni el servicio. `registrado_en` es el instante de escritura del
 servidor: sobre él se apoya la ventana de treinta días del alcance `captura`.
+
+La carga va en **libras** y el peso corporal en **kilos** (ADR-023). Un libro
+anterior trae `carga_kg`: el lector la lee como `carga_lb` con el factor exacto
+(`RENOMBRADAS_DEL_LIBRO`) y la siguiente escritura, tras su copia previa, la deja
+con el nombre nuevo. Un libro con las dos columnas no carga.
 
 ### Cuentas
 
@@ -98,7 +103,7 @@ antes de confirmar cada transacción; al cargar un libro, con antes = después.
 | Versión de plan publicada | Inmutable, igual que el conjunto de sus entradas; nunca vacía. |
 | Asignaciones | Sin solapes entre ellas (no hay dos planes vigentes el mismo día); sólo de versiones publicadas. |
 | Asignación que cubre sesiones | No se borra, no se re-apunta, no se le mueve el ancla, sólo se cierra por arriba y nunca dejando fuera una sesión que cubría. Asignar hacia atrás sobre sesiones que nadie cubría es legítimo. |
-| Rangos de dominio | RIR 0–10; repeticiones 1–200; carga 0–1000 kg; peso 20–400 kg; coeficiente (0, 2]; objetivo (0, 100]; ciclo y día 1–28 (celdas). |
+| Rangos de dominio | RIR 0–10; repeticiones 1–200; carga 0–2500 lb; peso 20–400 kg; coeficiente (0, 2]; objetivo (0, 100]; ciclo y día 1–28 (celdas). |
 | Exactitud decimal | Todo decimal es cadena con a lo sumo dos posiciones. |
 
 Los rechazos de dominio se deciden en el servicio con una consulta **antes** de

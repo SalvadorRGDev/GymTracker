@@ -9,7 +9,7 @@ import { ErrorDeXlsx, escribeLibro, type Hoja, leeLibro, letraDeColumna } from '
 const DIFICILES: Hoja = {
   nombre: 'serie',
   filas: [
-    ['id', 'carga_kg', 'nota', 'vacia'],
+    ['id', 'carga_lb', 'nota', 'vacia'],
     ['a', '12.50', 'Press «banca» & <tríceps>', null],
     ['b', '0.25', '  espacios  ', null],
     ['c', '007', 'literal _x000D_ sin escapar', null],

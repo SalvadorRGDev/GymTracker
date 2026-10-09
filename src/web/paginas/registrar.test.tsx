@@ -159,7 +159,7 @@ async function eligeYRellena(raiz: HTMLElement, nombre: string) {
   if (radio === undefined) throw new Error(`no aparece ${nombre}`);
   await pulsa(radio);
   await escribe(campo(raiz, 'Repeticiones') as HTMLInputElement, '10');
-  await escribe(campo(raiz, 'Carga (kg)') as HTMLInputElement, '62,5');
+  await escribe(campo(raiz, 'Carga (lb)') as HTMLInputElement, '62,5');
 }
 
 describe('Registrar', () => {
@@ -198,7 +198,7 @@ describe('Registrar', () => {
     await pulsa(boton(raiz, 'Guardar calentamiento'));
     const envio = red.llamadas.find((l) => l.metodo === 'POST');
     expect(envio?.cuerpo).toMatchObject({
-      serie: { calentamiento: true, ejercicio: 'Press banca', carga_kg: '62,5' },
+      serie: { calentamiento: true, ejercicio: 'Press banca', carga_lb: '62,5' },
     });
     expect((envio?.cuerpo as { serie: Record<string, unknown> }).serie).not.toHaveProperty('rir');
   });
@@ -271,7 +271,7 @@ describe('Registrar desde la rutina del día (ADR-022)', () => {
     expect(filaDe(raiz, 'Press banca')?.getAttribute('aria-pressed')).toBe('true');
     expect(textoDe(raiz)).toContain('Llevas 1.00 de 3.00 series efectivas de las que pide el día.');
     await escribe(campo(raiz, 'Repeticiones') as HTMLInputElement, '8');
-    await escribe(campo(raiz, 'Carga (kg)') as HTMLInputElement, '135');
+    await escribe(campo(raiz, 'Carga (lb)') as HTMLInputElement, '135');
     await pulsa(boton(raiz, '2'));
     const antes = red.llamadas.filter((l) => l.url.startsWith('/api/registro/v1/rutina')).length;
     await pulsa(boton(raiz, 'Guardar serie'));

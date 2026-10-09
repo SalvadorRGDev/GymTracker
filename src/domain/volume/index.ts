@@ -55,3 +55,4 @@ export type {
   SerieDeTrabajo,
   Ventana,
 } from './tipos.js';
+export { librasDesdeKilos, librasDesdeKilosEnTexto } from './unidades.js';

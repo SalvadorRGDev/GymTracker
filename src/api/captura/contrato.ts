@@ -32,11 +32,24 @@ export const DecimalDelCliente = Type.Union([
 
 export const Ejercicio = Type.String({ minLength: 1, maxLength: 60 });
 
+/** Una carga en libras (ADR-023): como `DecimalDelCliente`, hasta 2500. */
+export const CargaDelCliente = Type.Union([
+  Type.String({ pattern: '^\\d{1,4}(?:[.,]\\d{1,2})?$' }),
+  Type.Number({ minimum: 0, maximum: 2500 }),
+]);
+
 const SerieComun = {
   clave: Clave,
   ejercicio: Ejercicio,
   repeticiones: Type.Integer({ minimum: 1, maximum: 200 }),
-  carga_kg: DecimalDelCliente,
+  /** En libras (ADR-023): lo que marcan los discos. */
+  carga_lb: Type.Optional(CargaDelCliente),
+  /**
+   * Atajos anteriores al ADR-023: la carga en kilos, que se convierte a libras
+   * al llegar y la respuesta lo dice. Va una de las dos, nunca las dos: crecer
+   * de forma aditiva es lo que deja seguir funcionando a un atajo sin actualizar.
+   */
+  carga_kg: Type.Optional(DecimalDelCliente),
   /** Obligatorio en una serie de trabajo, ausente o nulo en un calentamiento. */
   rir: Type.Optional(Type.Union([Type.Integer({ minimum: 0, maximum: 10 }), Type.Null()])),
   /** La bandera ES el atajo (o el botón) que se usó: no hay campo que olvidar. */

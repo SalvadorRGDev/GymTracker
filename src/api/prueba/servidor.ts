@@ -146,7 +146,10 @@ export function serieDeAtajo(opciones: {
   clave?: string;
   rir?: number | null;
   calentamiento?: boolean;
+  /** En libras (ADR-023). */
   carga?: string | number;
+  /** Como un atajo anterior a las libras: la carga en `carga_kg`. */
+  kilos?: string | number;
   repeticiones?: number;
   iniciada?: string;
   realizada?: string;
@@ -161,7 +164,9 @@ export function serieDeAtajo(opciones: {
       clave: opciones.clave ?? randomUUID(),
       ejercicio: opciones.ejercicio ?? 'Press banca',
       repeticiones: opciones.repeticiones ?? 10,
-      carga_kg: opciones.carga ?? '60.00',
+      ...(opciones.kilos === undefined
+        ? { carga_lb: opciones.carga ?? '135.00' }
+        : { carga_kg: opciones.kilos }),
       ...(calentamiento ? {} : { rir: opciones.rir === undefined ? 2 : opciones.rir }),
       calentamiento,
       realizada_en: opciones.realizada ?? opciones.iniciada ?? '2026-09-26T17:05:00Z',

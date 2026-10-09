@@ -78,6 +78,14 @@ redondean distinto.
   **más** del 15 % y 30 efectivas o más, en aritmética entera. Las dos cifras son
   convenciones declaradas.
 
+## Lo que no es volumen (ADR-023)
+
+Viven aquí porque son aritmética exacta y puros, no porque sean estímulo.
+
+- **`librasDesdeKilos`** (`unidades.ts`): el factor es exacto por definición
+  (0.45359237), así que lb = kg × 100000000 / 45359237 en enteros, con un solo
+  redondeo a la centésima, a la mitad par. Nada de `* 2.2046`.
+
 ## Reproducibilidad
 
 Editar un coeficiente o el umbral de RIR NO debe reescribir métricas históricas.

@@ -73,7 +73,8 @@ export interface SerieDelHistorial {
   readonly orden: number;
   readonly ejercicio: string;
   readonly repeticiones: number;
-  readonly carga_kg: string;
+  /** En libras (ADR-023). */
+  readonly carga_lb: string;
   /** `null` = no hay dato (calentamiento). Nunca un cero: cero es el fallo muscular. */
   readonly rir: number | null;
   readonly es_calentamiento: boolean;
