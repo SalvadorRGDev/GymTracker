@@ -94,15 +94,19 @@ semana, y compara lo **planeado** con lo **ejecutado**.
 - **El corazón**: un **motor de volumen puro** en `src/domain/volume/`, sin
   dependencias, sin reloj y sin coma flotante, que es el único sitio del sistema
   donde se calcula volumen. El plan y lo ejecutado pasan por la misma función.
-- **Estado (29/09/2026)**: fases 0, 1, 2 y **3** en código —la comparativa
+- **Estado (09/10/2026)**: fases 0, 1, 2 y **3** en código —la comparativa
   plan-contra-real, que da nombre al proyecto, con su vigilancia del umbral, la
   simulación, la línea semanal del atajo y el mapa «Comparado con el plan»
   (ADR-019)—, más la fase de producto (catálogo base de 182 ejercicios, rangos de
   referencia, constructor de rutinas y rediseño visual), la baja de cuenta, el
-  alta pública con tope (ADR-020) y «Ver ejemplo»: una figura animada propia
-  para cada ejercicio del catálogo base (ADR-021). **327 pruebas en verde**, lint
-  limpio, ensayo de 22 afirmaciones. Falta **probar los atajos en un iPhone
-  real**. Todo está en `main`, un commit por cada cambio.
+  alta pública con tope (ADR-020), «Ver ejemplo»: una figura animada propia
+  para cada ejercicio del catálogo base, donde se elija un ejercicio (ADR-021),
+  «Registrar» que empieza por la rutina del día, con lo que va hecho (ADR-022),
+  las cargas en libras con el peso corporal en kilos (ADR-023) y el historial en
+  tabla con área, carga media y progreso (ADR-024), con sus gráficas de las
+  últimas ocho semanas: músculos trabajados y fuerza estimada por tren (ADR-025).
+  **411 pruebas en verde**, lint limpio, ensayo de 22 afirmaciones. Falta
+  **probar los atajos en un iPhone real**.
 
 ---
 
@@ -285,6 +289,9 @@ El proyecto siguió un proceso muy deliberado que vale la pena copiar:
 | 27 sep 2026  | **Fase 3** (ADR-019) y mapa «Comparado con el plan»; revisión de errores con experimentos (`WEB_DIR` que servía los datos, `credencial.json` detrás del túnel, límite por IP, JSON ilegible); baja de cuenta y aviso de privacidad. | `1a43544` (primer commit) |
 | 28 sep 2026  | Paleta clara en azules; cuentas de usuarios migradas; **alta pública con tope** (ADR-020) con auditoría de seguridad; **«Ver ejemplo»** con figuras animadas propias para los 182 ejercicios (ADR-021). | `0a6770a` y un commit por cambio |
 | 29 sep 2026  | Revisión de las figuras: maniquí con volumen, músculos del ejercicio coloreados desde el catálogo base, cámara por lo que trabaja, máquinas que no se estiran y fallos de pies y rodillas. 327 pruebas en verde. | en el commit de «Ver ejemplo» |
+| 29 sep 2026  | **«Registrar» desde la rutina del día** (ADR-022): la asignada y el día de su ciclo que toca, con lo que va hecho contado por el motor; la búsqueda libre, debajo. 350 pruebas en verde. | **sin commit** |
+| 1 oct 2026   | **Cargas en libras** (ADR-023; el peso corporal sigue en kilos, los libros y atajos viejos se convierten), **historial en tabla** de diez en diez con área, series efectivas, carga media y progreso (ADR-024) y «Ver ejemplo» donde se elige un ejercicio. 387 pruebas en verde. | **sin commit** |
+| 9 oct 2026   | **Gráficas del historial** (ADR-025): músculos trabajados por semana con la escala del mapa y fuerza estimada por tren en libras, encadenada con los ejercicios repetidos. 411 pruebas en verde. | **sin commit** |
 
 ### 4.4 Lo que se esperaba contra lo que pasó
 
@@ -413,7 +420,7 @@ escucha sólo en `127.0.0.1`; quien lo publica es el túnel.
 │ captura, gráficas, formato. CERO lógica de dominio.          │
 │ No agrega, no recalcula, no parchea totales.                 │
 └──────────────────────────────┬───────────────────────────────┘
-                               │ HTTP, JSON, decimales como cadena, kg
+                               │ HTTP, JSON, decimales como cadena, lb
 ┌──────────────────────────────▼───────────────────────────────┐
 │ APLICACIÓN     src/api · src/server · src/auth               │
 │ autenticación, alcance, autorización por propiedad,          │
@@ -501,7 +508,7 @@ sequenceDiagram
 
     U->>S: lanza desde pantalla bloqueada
     S->>S: sesión vigente si tiene < 6 h, si no clave nueva + fecha lógica
-    S->>U: ejercicio (lista del catálogo), reps, kg, RIR
+    S->>U: ejercicio (lista del catálogo), reps, lb, RIR
     S->>F: guarda cola/<clave_serie>.json (ANTES de la red)
     S->>Y: ejecuta Sincronizar
     Y->>API: POST cuerpo, Authorization: Bearer
@@ -545,7 +552,7 @@ Fuentes: ADR-004 (stack), ADR-010 (almacén), ADR-011 (ejecución).
 
 | Pieza                 | Elección                       | Por qué                                                                                                   | Descartado, y motivo                                                                 |
 | --------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Lenguaje              | **TypeScript `strict`**        | El motor maneja magnitudes que en ejecución son el mismo `number` (kg, series, coeficientes, RIR). Un error de unidad es un fallo silencioso. Se usan tipos «marcados» (`Centesimas`, `FechaLogica`). | JavaScript sin tipos. |
+| Lenguaje              | **TypeScript `strict`**        | El motor maneja magnitudes que en ejecución son el mismo `number` (lb, series, coeficientes, RIR). Un error de unidad es un fallo silencioso. Se usan tipos «marcados» (`Centesimas`, `FechaLogica`). | JavaScript sin tipos. |
 | Runtime               | **Node.js ≥ 22.9**             | Aburrido a propósito; trae ICU completo (base de zonas IANA).                                             | Bun (ritmo de cambios), Deno (fricción sin ganancia aquí).                           |
 | HTTP                  | **Fastify 5**                  | La validación de entrada vive en la definición de la ruta: no es olvidable.                              | Express (validación opcional), Hono (su ventaja es edge/serverless, descartado).     |
 | Esquemas E/S          | **TypeBox**                    | Una declaración produce el validador en ejecución **y** el tipo en compilación.                           | Zod (necesita adaptador con Fastify).                                                |
@@ -670,9 +677,9 @@ Toda hoja de datos de usuario lleva `propietario_id` (omitido del diagrama).
 | **Asignación de plan**       | Sin solapes. Si ya cubre sesiones: no se re-apunta, no se mueve el ancla, no se borra; sólo se cierra por arriba. | invariantes |
 | **Objetivo único**           | Un objetivo por ejercicio (o grupo) y día de ciclo: dos se sumarían.                                | invariantes     |
 | **Idempotencia**             | `clave_idempotencia` única por propietario en `sesion` y en `serie`.                                | invariantes + servicio |
-| **Rangos de dominio**        | RIR 0–10; repeticiones 1–200; carga 0–1000 kg; peso 20–400 kg; coeficiente (0, 2] con 2 decimales; objetivo (0, 100]; ciclo 1–28 días. | celdas + invariantes |
+| **Rangos de dominio**        | RIR 0–10; repeticiones 1–200; carga 0–2500 lb; peso 20–400 kg; coeficiente (0, 2] con 2 decimales; objetivo (0, 100]; ciclo 1–28 días. | celdas + invariantes |
 | **Exactitud decimal**        | Todo decimal es CADENA. Ninguna celda es número ni fecha.                                           | `celdas.ts`, `xlsx.ts` |
-| **Unidad canónica**          | `carga_kg`, `peso_kg`. La conversión, sólo en presentación.                                         | esquema         |
+| **Unidad canónica**          | `carga_lb`, `peso_kg` (ADR-023). Kilos a libras sólo con `librasDesdeKilos`, al cargar un libro viejo o recibir un atajo viejo. | esquema         |
 | **Alcance**                  | `ALCANCE_DE_HOJA` dice, por afirmación, qué puede hacer cada alcance en cada hoja. Una hoja sin entrada no la ve nadie. | `esquema.ts`, `almacen.ts` |
 | **Fecha implausible**        | Una fecha lógica futura o incoherente entra marcada con `fecha_por_confirmar`.                      | invariantes     |
 
@@ -924,7 +931,7 @@ Fuentes: `docs/06`, `docs/07` y `docs/08`; validación en cada `contrato.ts`.
 | `GET  /api/captura/v1/catalogo`                        | Bearer / captura     | Ejercicios no archivados y grupos. Única lectura de este alcance. |
 | `POST /api/registro/v1/serie` · `/sesion/cerrar` · `/peso` · `GET /catalogo` | cookie / sesion | **Las mismas funciones** que la captura, con otra credencial. |
 | `GET  /api/lectura/v1/dashboard`                       | cookie / sesion      | Semana natural (lun–dom), todos los grupos (incluidos los `0.00`), frescura. |
-| `GET  /api/lectura/v1/historial?limite=30`             | cookie / sesion      | Hasta 100 sesiones con sus series crudas; el calentamiento marcado, no borrado. |
+| `GET  /api/lectura/v1/historial?pagina=1`             | cookie / sesion      | Diez sesiones por página con área, series efectivas, carga media y progreso (ADR-024), y sus series crudas; el calentamiento marcado, no borrado. |
 | `GET  /api/lectura/v1/catalogo`                        | cookie / sesion      | Grupos, ejercicios y versión de parámetros abierta. |
 | `POST /api/lectura/v1/catalogo/grupos` · `/ejercicios` | cookie / sesion      | Crear por nombre; duplicado (sin mayúsculas) → 409. |
 | `PUT  /api/lectura/v1/catalogo/parametros`             | cookie / sesion      | Reemplaza umbral y coeficientes; en sitio o sucesora (ADR-013). |
@@ -1030,8 +1037,8 @@ Vistas:
 | ---------------- | ------------------------------------------------------------------------------------------- |
 | Acceso           | Correo y contraseña. El mismo mensaje exista o no el correo.                               |
 | **Resumen**      | Series efectivas por grupo esta semana, frescura («última serie recibida…»), primeros pasos. |
-| **Registrar**    | Captura web: selector de ejercicio con búsqueda, «Guardar serie» o «Guardar calentamiento». |
-| Historial        | Sesiones con sus series crudas; calentamiento marcado; fecha por confirmar señalada.        |
+| **Registrar**    | Captura web desde la rutina del día (ADR-022), con la búsqueda libre debajo; carga en lb; «Guardar serie» o «Guardar calentamiento». |
+| Historial        | Tabla de diez en diez: fecha, área, series efectivas, carga media (lb) y progreso de −10 a +10 frente a la anterior de su área (ADR-024); cada fila despliega sus series crudas. |
 | Proyección       | Volumen previsto por semana relativa a hoy; cambiar de plan recalcula.                      |
 | Planes / rutinas | Constructor por día del ciclo, plantillas, volumen del borrador **leído del servidor**, publicar, asignar. |
 | Catálogo         | Grupos, ejercicios, coeficientes, umbral; **importación del catálogo base** con vista previa. |
@@ -1387,11 +1394,13 @@ correcto ante sospecha de compromiso.
 
 ### 16.3 Estado del repositorio
 
-Comprobado con `git status` el 29/09/2026: la rama es `main` y no queda nada
-sin commit. Tras `1a43544` (el primero) y `0a6770a`, un commit por cambio: la
-paleta en azules, la cabecera sin el correo, el alta pública con su auditoría
-(ADR-020) y «Ver ejemplo» con sus figuras (ADR-021). Localmente, pruebas, lint,
-las dos compilaciones y el ensayo están en verde.
+Comprobado con `git status` el 09/10/2026: la rama es `main`. Tras `1a43544`
+(el primero) y `0a6770a`, un commit por cambio: la paleta en azules, la cabecera
+sin el correo, el alta pública con su auditoría (ADR-020) y «Ver ejemplo» con sus
+figuras (ADR-021). Lo posterior —«Registrar» desde la rutina del día (ADR-022),
+las libras (ADR-023), el historial (ADR-024), sus gráficas (ADR-025) y «Ver
+ejemplo» donde se elige un ejercicio— está sin commit. Localmente, pruebas, lint, las dos compilaciones y el ensayo
+están en verde.
 
 ### 16.4 Lo único pendiente del plan original
 
@@ -1539,12 +1548,20 @@ que recomiendo atender antes.
    se respeta en los selectores, pero no hay ruta ni botón para ponerlo.
 4. **Confirmar una `fecha_por_confirmar`.** La marca se pone y el historial la
    muestra, pero no hay acción para confirmarla.
-5. **Conversión kg ↔ lb en presentación.** El invariante de unidad canónica la
-   anticipa y no está implementada; sería una preferencia de visualización, nunca
-   un cambio en el almacén.
+5. **Resuelto de otra forma (01/10/2026, ADR-023)**: la carga se guarda en
+   libras y el peso corporal en kilos; no hay conversión en presentación.
+   **Conversión kg ↔ lb en presentación.** El invariante de unidad canónica la
+   anticipaba como una preferencia de visualización, nunca un cambio en el
+   almacén.
 6. **Tonelaje como métrica secundaria** (ADR-003): útil para seguir la
    progresión de carga en un ejercicio concreto, en su propia vista y nunca junto
    a las series efectivas. Si se calcula, que sea en `src/domain/` y con pruebas.
+   El historial del ADR-024 usa carga media y progreso, no tonelaje.
+7. **Hecho (09/10/2026, ADR-025)**. **Gráficas del historial** (pedidas el
+   01/10/2026 y pospuestas por el usuario): una de cómo progresa cada músculo a lo largo de las sesiones, con
+   base en el rendimiento, y otra con el avance de las cargas por semana, dos
+   líneas (tren superior y tren inferior). Los datos tienen que salir del motor,
+   como el progreso; nada de datos de ejemplo.
 
 ### 19.3 Operación (horas o días)
 
