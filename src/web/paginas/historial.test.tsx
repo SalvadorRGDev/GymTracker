@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Historial as DatosDeHistorial, SesionDelHistorial } from '../../api/lectura/contrato';
+import type {
+  Historial as DatosDeHistorial,
+  GraficasDelHistorial,
+  SesionDelHistorial,
+} from '../../api/lectura/contrato';
 import { boton, type Montado, monta, pulsa, simulaFetch, textoDe } from '../prueba/utiles';
 import { Historial, paginasVisibles } from './historial';
 
@@ -82,6 +86,17 @@ const PAGINA_1: DatosDeHistorial = {
   ],
 };
 
+/** Lo mínimo para que las gráficas pinten; su contenido lo prueba su propio archivo. */
+const GRAFICAS: GraficasDelHistorial = {
+  semanas: [{ desde: '2026-03-02', hasta: '2026-03-08', en_curso: true }],
+  escala: [],
+  grupos: [{ id: 'g', nombre: 'Pectoral', semanas: [{ series_efectivas: '3.00', nivel: 1 }] }],
+  fuerza: [
+    { tren: 'superior', semanas: [{ lb: '180.00', tramo: 1, cambio: null, ejercicios: 1 }] },
+    { tren: 'inferior', semanas: [{ lb: null, tramo: null, cambio: null, ejercicios: 0 }] },
+  ],
+};
+
 let montado: Montado | undefined;
 
 beforeEach(() => {
@@ -98,6 +113,7 @@ afterEach(() => {
 async function pinta(datos: (url: string) => DatosDeHistorial = () => PAGINA_1) {
   const red = simulaFetch({
     'GET /api/lectura/v1/historial': (_c, url) => ({ cuerpo: datos(url) }),
+    'GET /api/lectura/v1/historial/graficas': { cuerpo: GRAFICAS },
   });
   montado = await monta(<Historial zona="America/Mexico_City" />);
   return { raiz: montado.raiz, red };
@@ -239,6 +255,16 @@ describe('Historial (ADR-024)', () => {
     expect(textoDe(raiz)).toContain('Todavía no hay sesiones');
     expect(raiz.querySelector('table')).toBeNull();
     expect(raiz.querySelector('.paginacion')).toBeNull();
+    expect(raiz.querySelector('.graficas-del-historial')).toBeNull();
+  });
+
+  it('debajo de la tabla, las gráficas de las últimas semanas, aparte de las páginas', async () => {
+    const { raiz, red } = await pinta();
+    await vi.waitFor(() => expect(raiz.querySelector('.graficas-del-historial')).not.toBeNull());
+    expect(textoDe(raiz)).toContain('Músculos trabajados');
+    expect(textoDe(raiz)).toContain('Fuerza estimada');
+    // La tabla y las gráficas son dos lecturas: las páginas no tocan la segunda.
+    expect(red.llamadas.map((l) => l.url)).toContain('/api/lectura/v1/historial/graficas');
   });
 });
 

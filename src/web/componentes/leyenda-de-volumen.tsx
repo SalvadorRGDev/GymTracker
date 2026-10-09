@@ -15,12 +15,18 @@ function posicionDelIndicador(nivel: number): string {
   return `calc(32px + ${nivel - 0.5} * ((100% - 52px) / 6) + ${(nivel - 1) * 4}px)`;
 }
 
+const EXPLICACION =
+  'El color indica cuántas series efectivas recibió cada grupo esta semana. Es una cantidad, no una nota: el rango de referencia de cada grupo está en la tabla.';
+
 export function LeyendaDeVolumen({
   escala,
   nivelActivo,
+  explicacion = EXPLICACION,
 }: {
   escala: readonly TramoDeEscala[];
   nivelActivo: number | null;
+  /** Lo que dice el color donde se usa: el resumen habla de esta semana; el historial, de cada una. */
+  explicacion?: string;
 }) {
   return (
     <div class="leyenda">
@@ -51,10 +57,7 @@ export function LeyendaDeVolumen({
           </li>
         ))}
       </ul>
-      <p class="leyenda-explicacion">
-        El color indica cuántas series efectivas recibió cada grupo esta semana. Es una cantidad, no
-        una nota: el rango de referencia de cada grupo está en la tabla.
-      </p>
+      <p class="leyenda-explicacion">{explicacion}</p>
     </div>
   );
 }

@@ -165,3 +165,12 @@ Sube en índigo (`--acento-suave` / `--acento-texto`), baja en ámbar
 «—» lleva su motivo. No usa la escala de la comparativa: «baja» frente a la sesión
 anterior no es «déficit» frente al plan. La página actual de la paginación va en
 el acento (`--acento` / `--sobre-acento`).
+
+## Las líneas de la fuerza estimada (ADR-025)
+
+`--serie-superior` (`#3a45b0`, índigo) y `--serie-inferior` (`#0e8a74`, verde
+azulado): ≥ 3:1 sobre la tarjeta y separadas con deuteranopía (lo comprueba
+`lenguaje-visual.test.ts`). No reutilizan la escala del mapa: una línea no es una
+cantidad de volumen. Los puntos son círculo y cuadrado con un anillo del color de
+la tarjeta; líneas de 2 px; rejilla y ejes en `--borde`. En las celdas del mapa
+semanal la cifra va debajo de la muestra: el nivel 5 no da 5:1 con ninguna tinta.

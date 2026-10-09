@@ -4,7 +4,7 @@ Aplicación personal de seguimiento de fuerza: **series efectivas por grupo
 muscular y semana**, lo planeado contra lo ejecutado. Dos personas, coste cero,
 un proceso de Node en la máquina del autor publicado por un túnel, datos en
 libros de Excel. Documento maestro: `Plan.md`. Decisiones: `docs/01-decisiones.md`
-(ADR-001 a 024). Reglas por directorio: `.claude/rules/`.
+(ADR-001 a 025). Reglas por directorio: `.claude/rules/`.
 
 Código, comentarios, documentación e identificadores en **español**: el dominio
 se piensa en español y traducir a medias hace que dos personas llamen distinto a
@@ -29,8 +29,9 @@ lo mismo.
 - **Cargas en libras** y peso corporal en kilos; un libro con `carga_kg` se
   convierte al cargarlo y un atajo viejo que manda kilos sigue valiendo (ADR-023).
 - **Historial** en tabla de diez en diez: área, series efectivas, carga media y
-  progreso de −10 a +10 frente a la sesión anterior de su área (ADR-024). Las
-  gráficas del historial, pendientes.
+  progreso de −10 a +10 frente a la sesión anterior de su área (ADR-024). Debajo,
+  las **gráficas** de las últimas ocho semanas: músculos trabajados por semana y
+  fuerza estimada por tren (ADR-025).
 - Pendiente: **probar los atajos en un iPhone real** (`atajos/PRUEBA-MANUAL.md`).
 
 ## Comandos

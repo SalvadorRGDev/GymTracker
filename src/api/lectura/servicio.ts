@@ -13,15 +13,20 @@ import {
 import {
   type Area,
   agrega,
+  agregaPorSemana,
   areaDe,
   type Centesimas,
   cargaMedia,
   centesimasDesdeDecimal,
   decimalDesdeCentesimas,
+  diasEntre,
+  fechaLogica,
+  fuerzaPorSemana,
   lunesDe,
   progreso,
   type SerieConCarga,
   sumaDias,
+  trenDeEjercicio,
   volumenDe,
 } from '../../domain/volume/index.js';
 import { conflicto, invalido, noEncontrado } from '../errores.js';
@@ -40,6 +45,7 @@ import type {
   CuerpoPropuestaDeParametros,
   Dashboard,
   Exportacion,
+  GraficasDelHistorial,
   Historial,
   ResultadoDeImportacion,
   ResultadoDeParametros,
@@ -206,6 +212,89 @@ export function historial(almacen: AlmacenDeUsuario, pagina: number): Historial 
     total,
     por_pagina: SESIONES_POR_PAGINA,
     sesiones: recientes.slice((actual - 1) * SESIONES_POR_PAGINA, actual * SESIONES_POR_PAGINA),
+  };
+}
+
+/** Semanas de las gráficas del historial: la actual y las siete anteriores. */
+export const SEMANAS_DE_GRAFICA = 8;
+
+/**
+ * Las gráficas del historial (ADR-025), de la semana más antigua a la actual:
+ * las series efectivas de cada grupo por semana —el mismo `agrega` y la misma
+ * escala que el mapa— y la fuerza estimada de cada tren. Nada se guarda.
+ */
+export function graficasDelHistorial(almacen: AlmacenDeUsuario): GraficasDelHistorial {
+  const hoy = hoyDe(almacen);
+  const desde = sumaDias(lunesDe(hoy), -7 * (SEMANAS_DE_GRAFICA - 1));
+  const hasta = sumaDias(lunesDe(hoy), 7);
+  const parametros = parametrosDe(almacen);
+  const { series, sesiones } = seriesEjecutadas(almacen, parametros, desde, hasta);
+  const porSemana = agregaPorSemana(
+    { series, umbrales: parametros.umbrales },
+    { desde, semanas: SEMANAS_DE_GRAFICA },
+  );
+  const grupos = [...almacen.lee('grupo_muscular')].sort(ordenDeGrupos);
+
+  // El tren de cada ejercicio, por los coeficientes de la versión abierta.
+  const regiones = new Map(
+    grupos.map((g) => {
+      const region = grupoBasePorNombre(g.nombre)?.region;
+      return [g.id, region === 'superior' || region === 'inferior' ? region : null] as const;
+    }),
+  );
+  const abierta = abiertaDe(almacen);
+  const trenDe = (ejercicioId: string) =>
+    trenDeEjercicio(
+      parametros.contribucionesDe(abierta.id).get(ejercicioId) ?? [],
+      (g) => regiones.get(g) ?? null,
+    );
+  const indiceDe = new Map(
+    sesiones.map((x) => [x.id, Math.floor(diasEntre(desde, fechaLogica(x.fecha_logica)) / 7)]),
+  );
+  const porTren = {
+    superior: Array.from({ length: SEMANAS_DE_GRAFICA }, () => [] as SerieConCarga[]),
+    inferior: Array.from({ length: SEMANAS_DE_GRAFICA }, () => [] as SerieConCarga[]),
+  };
+  for (const x of almacen.lee('serie')) {
+    const indice = indiceDe.get(x.sesion_id);
+    const tren = indice === undefined ? null : trenDe(x.ejercicio_id);
+    if (indice === undefined || tren === null) continue;
+    porTren[tren][indice]?.push({
+      ejercicioId: x.ejercicio_id,
+      tipo: x.es_calentamiento === 'true' ? 'calentamiento' : 'trabajo',
+      carga: centesimasDesdeDecimal(x.carga_lb),
+      repeticiones: Number(x.repeticiones),
+      rir: x.rir === null ? null : Number(x.rir),
+    });
+  }
+
+  return {
+    semanas: porSemana.map((w) => ({
+      desde: w.desde,
+      hasta: sumaDias(w.desde, 6),
+      en_curso: w.desde <= hoy && hoy < w.hasta,
+    })),
+    escala: ESCALA,
+    grupos: grupos.map((g) => ({
+      id: g.id,
+      nombre: g.nombre,
+      semanas: porSemana.map((w) => {
+        const volumen = volumenDe(w, g.id);
+        return {
+          series_efectivas: decimalDesdeCentesimas(volumen),
+          nivel: nivelDeVolumen(volumen),
+        };
+      }),
+    })),
+    fuerza: (['superior', 'inferior'] as const).map((tren) => ({
+      tren,
+      semanas: fuerzaPorSemana(porTren[tren]).map((punto) => ({
+        lb: punto.valor === null ? null : decimalDesdeCentesimas(punto.valor),
+        tramo: punto.tramo,
+        cambio: punto.cambio === null ? null : conSigno(punto.cambio as Centesimas),
+        ejercicios: punto.ejercicios,
+      })),
+    })),
   };
 }
 

@@ -113,6 +113,24 @@ llama al mismo servicio, así que hereda sus reglas enteras:
 - **La unidad va en la cabecera** de las tablas («Carga media (lb)», «Carga
   (lb)») y detrás de la cifra en el texto corrido («media 150.0 lb»).
 
+### Las gráficas (ADR-025)
+
+- Van **debajo de la tabla y aparte de sus páginas**: siempre las últimas ocho
+  semanas, con su propia lectura (`/historial/graficas`). Cambiar de página no
+  las vuelve a pedir.
+- **No calculan**: series, nivel, fuerza, tramo y cambio llegan del servidor. El
+  navegador sólo coloca: marcas del eje, posiciones y qué puntos se unen
+  (`tramosDeLinea`). Un hueco es una semana sin dato y nunca se dibuja como cero.
+- **Músculos trabajados es una tabla**, no un dibujo: la muestra de color va
+  `aria-hidden` y la cifra en texto, debajo. En el teléfono, las cuatro semanas
+  más recientes.
+- **La fuerza es SVG propio al ancho real** (`ResizeObserver`), no un `viewBox`
+  escalado: escalar encoge el texto. La rejilla de la tarjeta lleva
+  `minmax(0, 1fr)`; sin eso el SVG fijaba el ancho de la tarjeta y se dibujaba a
+  640 px en un teléfono. Colores `--serie-*` y forma distinta en los puntos; el
+  texto, en tinta, nunca en el color de la serie. El dibujo es `aria-hidden` y
+  los números están en «Ver los datos».
+
 ### El detalle es el registro, no un resumen
 
 - El calentamiento se **marca y se conserva**. No cuenta volumen —eso lo decide

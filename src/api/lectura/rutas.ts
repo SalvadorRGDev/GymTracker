@@ -19,6 +19,7 @@ import {
   type Dashboard,
   type DispositivoEmitido,
   type Dispositivos,
+  type GraficasDelHistorial,
   type Historial,
   Importacion,
   NuevoDispositivo,
@@ -36,6 +37,7 @@ import {
   creaGrupo,
   dashboard,
   exportacion,
+  graficasDelHistorial,
   guardaParametros,
   historial,
   importa,
@@ -74,6 +76,13 @@ export function rutasDeLectura(
       compruebaEsquema(request);
       const pagina = Number(request.query.pagina ?? '1');
       return conAlmacenDeUsuario(quien, (almacen) => historial(almacen, pagina));
+    },
+  );
+
+  app.get(
+    '/api/lectura/v1/historial/graficas',
+    async (request, reply): Promise<GraficasDelHistorial> => {
+      return conAlmacenDeUsuario(await identidad(request, reply), graficasDelHistorial);
     },
   );
 

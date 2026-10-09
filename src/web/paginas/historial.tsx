@@ -13,6 +13,7 @@ import {
   ErrorDeCarga,
   Vacio,
 } from '../componentes/basicos';
+import { GraficasDelHistorial } from '../componentes/graficas-del-historial';
 import { Icono } from '../componentes/iconos';
 import { pide } from '../estado/api';
 import { useRecurso } from '../estado/recurso';
@@ -439,6 +440,8 @@ export function Historial({ zona }: { zona: string }) {
           <Paginacion pagina={datos.pagina} paginas={datos.paginas} alIr={irA} />
         </section>
       )}
+      {/* Aparte de las páginas: siempre las últimas semanas (ADR-025). */}
+      {datos !== null && datos.total > 0 && <GraficasDelHistorial />}
     </>
   );
 }

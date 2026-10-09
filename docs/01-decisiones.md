@@ -35,6 +35,7 @@ no aprobar.
 | 022 | «Registrar» empieza por la rutina del día | ACEPTADO |
 | 023 | Las cargas, en libras | ACEPTADO (enmienda la unidad canónica del Plan) |
 | 024 | Historial: área, carga media y progreso por sesión | ACEPTADO (matiza el ADR-003) |
+| 025 | Gráficas del historial: músculos por semana y fuerza estimada | ACEPTADO |
 
 ---
 
@@ -695,3 +696,58 @@ lectura del historial recorre todas las series del libro; con miles de sesiones
 sería la caché derivada y descartable que prevé el ADR-003. Lo fijan
 `area.test.ts`, `rendimiento.test.ts`, `historial.integracion.test.ts` e
 `historial.test.tsx`.
+
+## ADR-025 — Gráficas del historial: músculos por semana y fuerza estimada
+
+**Estado**: ACEPTADO
+
+**Contexto.** El ADR-024 dejó las gráficas para después. El usuario pidió dos:
+cómo se fueron trabajando los músculos a lo largo del tiempo y el avance de los
+pesos por semana, en dos líneas, tren superior y tren inferior. Se eligieron las
+opciones recomendadas: series efectivas por grupo y semana, fuerza estimada en
+vez de carga media literal, y ocho semanas.
+
+**Decisión.**
+
+- **Una lectura aparte**, `GET /api/lectura/v1/historial/graficas`: la semana
+  actual y las siete anteriores (semanas naturales, de lunes a domingo), sin
+  relación con las páginas de la tabla. Se calcula al leer y no se guarda nada.
+- **Músculos trabajados**: una cuadrícula de grupo × semana con las series
+  efectivas de `agregaPorSemana` —el mismo `agrega` que el resumen— y el nivel de
+  `nivelDeVolumen`, la escala del mapa (ADR-018). Es una tabla de verdad: cada
+  celda lleva la muestra del color y la cifra **debajo**, nunca encima, porque el
+  nivel 5 no da 5:1 con ninguna tinta. En el teléfono, las cuatro semanas más
+  recientes.
+- **Fuerza estimada** (`fuerzaPorSemana`, en el motor), en libras y por tren.
+  Cada ejercicio va al tren que se lleva más coeficiente en la versión abierta
+  (`trenDeEjercicio`); el centro, un empate o un grupo fuera del catálogo base no
+  van a ninguno. Sólo cuentan series de trabajo con carga. La primera semana con
+  datos vale la media de la mejor marca de cada ejercicio (Epley con el RIR, como
+  el progreso del ADR-024); cada semana siguiente encadena el `progreso` frente a
+  la semana anterior **más reciente que comparta algún ejercicio** y sigue su
+  tramo. Así sólo lo repetido mueve la línea: cambiar de ejercicio no la sube ni
+  la baja, y una semana con otros ejercicios no rompe la de siempre. Sin ninguna
+  semana en común empieza un tramo nuevo, que se dibuja aparte. Una semana sin
+  datos deja hueco, nunca un cero.
+- **La pantalla**: SVG propio, dibujado al ancho real del contenedor. Dos colores
+  validados para daltonismo (`--serie-superior` índigo, `--serie-inferior` verde
+  azulado) y además forma distinta en los puntos (círculo y cuadrado); leyenda
+  arriba y rótulo directo con el último valor. Al pasar el puntero, una línea
+  vertical y un globo con los dos valores y su cambio; en el teléfono el globo va
+  debajo del dibujo. El dibujo es `aria-hidden`: los números, para todos, en la
+  tabla «Ver los datos».
+
+**Alternativas descartadas.** Carga media literal por semana: sube o baja según
+qué ejercicios se hicieron, no según la fuerza. Dieciséis líneas, una por grupo:
+ilegible. Comparar sólo con la semana inmediatamente anterior: una semana con
+otros ejercicios partía la línea en tres tramos al volver a los de siempre (se
+vio en la revisión con datos sembrados). Una biblioteca de gráficas: regla del
+proyecto (cliente-web), y cuatro funciones de geometría bastan.
+
+**Consecuencias.** La fuerza estimada es una estimación: compara bien contigo
+mismo semana a semana, no es un 1RM medido. Un tramo nuevo empieza en la media de
+sus propios ejercicios, así que su altura no se compara con la de otro tramo; por
+eso se dibuja aparte. Lo fijan `rendimiento.test.ts`, `area.test.ts`,
+`historial.integracion.test.ts`, `graficas-del-historial.test.tsx` y
+`lenguaje-visual.test.ts` (contraste ≥ 3:1 y separación con deuteranopía de las
+dos líneas).

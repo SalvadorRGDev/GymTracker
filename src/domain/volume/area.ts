@@ -1,4 +1,4 @@
-import type { Agregado } from './tipos.js';
+import type { Agregado, Contribucion } from './tipos.js';
 
 /**
  * De qué fue una sesión (ADR-024): tren superior si se lleva al menos 2/3 de las
@@ -26,4 +26,24 @@ export function areaDe(agregado: Agregado, regionDe: RegionDeGrupo): Area | null
   if (3 * superior >= 2 * total) return 'superior';
   if (3 * inferior >= 2 * total) return 'inferior';
   return 'completo';
+}
+
+/**
+ * A qué tren pertenece un ejercicio (ADR-025): al que se lleva más coeficiente de
+ * sus contribuciones. Empate, sólo centro o sin contribuciones: a ninguno.
+ */
+export function trenDeEjercicio(
+  contribuciones: readonly Contribucion[],
+  regionDe: RegionDeGrupo,
+): 'superior' | 'inferior' | null {
+  let superior = 0;
+  let inferior = 0;
+  for (const c of contribuciones) {
+    const region = regionDe(c.grupoId);
+    if (region === 'superior') superior += c.coeficiente;
+    else if (region === 'inferior') inferior += c.coeficiente;
+  }
+  if (superior > inferior) return 'superior';
+  if (inferior > superior) return 'inferior';
+  return null;
 }

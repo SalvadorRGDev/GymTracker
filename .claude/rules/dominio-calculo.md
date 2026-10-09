@@ -134,5 +134,9 @@ siempre deben estar cubiertos:
 - Ejercicio que contribuye a varios grupos musculares con coeficientes
   distintos.
 - Semana sin datos: devuelve cero, no error ni null.
+- Fuerza por semana (`fuerzaPorSemana`, ADR-025): sólo series con carga; encadena
+  con la semana más reciente que comparta ejercicios y sigue su tramo; un
+  ejercicio nuevo no mueve la línea. `trenDeEjercicio` reparte por coeficiente y
+  el centro no cuenta.
 - Progreso sin ejercicios en común: `null`, nunca cero (al revés que la semana:
   ahí cero es un dato y aquí sería inventarlo).

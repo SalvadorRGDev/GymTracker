@@ -1,5 +1,5 @@
 export { agrega, agregaPorSemana, ErrorDeMotor, volumenDe } from './agrega.js';
-export { type Area, areaDe, type RegionDeGrupo } from './area.js';
+export { type Area, areaDe, type RegionDeGrupo, trenDeEjercicio } from './area.js';
 export {
   CERO,
   type Centesimas,
@@ -48,7 +48,9 @@ export {
 } from './plan.js';
 export {
   cargaMedia,
+  fuerzaPorSemana,
   type Progreso,
+  type PuntoDeFuerza,
   progreso,
   type SerieConCarga,
   TOPE_DE_PROGRESO,

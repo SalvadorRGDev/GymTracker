@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { areaDe } from './area.js';
+import { areaDe, trenDeEjercicio } from './area.js';
 import type { Centesimas } from './centesimas.js';
 import type { Agregado } from './tipos.js';
 
@@ -40,5 +40,24 @@ describe('el área de una sesión (ADR-024)', () => {
     expect(area({ pecho: 100, abdomen: 5000 })).toBe('superior');
     expect(area({ abdomen: 300, desconocido: 300 })).toBeNull();
     expect(area({})).toBeNull();
+  });
+});
+
+describe('el tren de un ejercicio (ADR-025)', () => {
+  const tren = (c: Record<string, number>) =>
+    trenDeEjercicio(
+      Object.entries(c).map(([grupoId, coeficiente]) => ({
+        grupoId,
+        coeficiente: coeficiente as Centesimas,
+      })),
+      (g) => REGIONES[g] ?? null,
+    );
+  it('el que se lleva más coeficiente; el centro no cuenta; empate o nada, ninguno', () => {
+    expect(tren({ pecho: 100, gluteo: 50 })).toBe('superior');
+    expect(tren({ pierna: 100, gluteo: 50, espalda: 100 })).toBe('inferior');
+    expect(tren({ abdomen: 100, pierna: 25 })).toBe('inferior');
+    expect(tren({ pecho: 50, pierna: 50 })).toBeNull();
+    expect(tren({ abdomen: 100 })).toBeNull();
+    expect(tren({})).toBeNull();
   });
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { type Centesimas, centesimasDesdeDecimal } from './centesimas.js';
-import { cargaMedia, progreso, type SerieConCarga } from './rendimiento.js';
+import { cargaMedia, fuerzaPorSemana, progreso, type SerieConCarga } from './rendimiento.js';
 
 /** Una serie de trabajo: `libras` como texto, `rir` por defecto 2. */
 function t(ejercicioId: string, libras: string, repeticiones: number, rir = 2): SerieConCarga {
@@ -97,5 +97,68 @@ describe('progreso frente a la sesión anterior de la misma área (ADR-024)', ()
     expect(r).toEqual({ puntos: 0, cambio: 40, ejercicios: 1 });
     expect(Number.isInteger((r as { cambio: number }).cambio)).toBe(true);
     expect(cargaMedia([t('a', '0.01', 1)])).toBe(0 as Centesimas);
+  });
+});
+
+describe('fuerza estimada por semana de un tren (ADR-025)', () => {
+  it('arranca en la media de las mejores marcas y avanza con lo repetido; un hueco no corta el tramo', () => {
+    const puntos = fuerzaPorSemana([
+      // 135 × (1 + 10/30) = 180.00; 100 × (1 + 12/30) = 140.00 → media 160.00
+      [
+        t('press', '135', 8),
+        t('press', '125', 8),
+        t('remo', '100', 10),
+        calentamiento('press', '95'),
+      ],
+      [],
+      // press +3.70 % (140 frente a 135), remo igual: media +1.85 %
+      [t('press', '140', 8), t('remo', '100', 10)],
+    ]);
+    expect(puntos).toEqual([
+      { valor: 16000, tramo: 1, cambio: null, ejercicios: 2 },
+      { valor: null, tramo: null, cambio: null, ejercicios: 0 },
+      { valor: 16296, tramo: 1, cambio: 185, ejercicios: 2 },
+    ]);
+  });
+
+  it('cambiar de ejercicio no mueve la línea: un ejercicio nuevo y pesado no la sube', () => {
+    const [antes, despues] = fuerzaPorSemana([
+      [t('press', '135', 8)],
+      [t('press', '135', 8), t('sentadilla', '315', 5)],
+    ]);
+    expect(despues?.valor).toBe(antes?.valor);
+    expect(despues).toMatchObject({ cambio: 0, ejercicios: 2 });
+  });
+
+  it('sin ejercicios en común empieza tramo nuevo; el peso corporal no se pinta en libras', () => {
+    const puntos = fuerzaPorSemana([
+      [t('press', '135', 8)],
+      [t('curl', '50', 10)], // 50 × (1 + 12/30) = 70.00
+      [t('dominadas', '0', 10)],
+    ]);
+    expect(puntos.map((x) => [x.valor, x.tramo, x.cambio])).toEqual([
+      [18000, 1, null],
+      [7000, 2, null],
+      [null, null, null],
+    ]);
+  });
+
+  it('al volver a los ejercicios de antes, sigue su tramo: compara con la última semana que los tuvo', () => {
+    const puntos = fuerzaPorSemana([
+      [t('press', '135', 8)], // 180.00, tramo 1
+      [t('curl', '50', 10)], // otros ejercicios: tramo 2
+      [t('press', '140', 8)], // vuelve el press: frente a la semana 1, +3.70 %
+    ]);
+    expect(puntos.map((x) => [x.valor, x.tramo, x.cambio])).toEqual([
+      [18000, 1, null],
+      [7000, 2, null],
+      [18666, 1, 370],
+    ]);
+  });
+
+  it('una semana que baja, baja: 140 → 130 es −7.14 %', () => {
+    const [, segunda] = fuerzaPorSemana([[t('press', '140', 8)], [t('press', '130', 8)]]);
+    // 140 × 40/30 = 186.67; × (1 − 0.0714) = 173.34
+    expect(segunda).toMatchObject({ valor: 17334, cambio: -714 });
   });
 });

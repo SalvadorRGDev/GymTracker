@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { Historial, SesionDelHistorial } from './lectura/contrato.js';
+import type { GraficasDelHistorial, Historial, SesionDelHistorial } from './lectura/contrato.js';
 import { type Cuenta, type ServidorDePrueba, servidorDePrueba } from './prueba/servidor.js';
 
 /**
@@ -174,5 +174,76 @@ describe('GET /api/lectura/v1/historial (ADR-024)', () => {
 
   it('sin sesiones, una página vacía: nada inventado', async () => {
     expect(await lee()).toEqual({ pagina: 1, paginas: 1, total: 0, por_pagina: 10, sesiones: [] });
+  });
+});
+
+describe('GET /api/lectura/v1/historial/graficas (ADR-025)', () => {
+  async function graficas(): Promise<GraficasDelHistorial> {
+    // Miércoles 18 de marzo: la ventana va del lunes 26 de enero al domingo 22 de marzo.
+    s.reloj.fija('2026-03-18T18:00:00.000Z');
+    const r = await s.pide({
+      method: 'GET',
+      url: '/api/lectura/v1/historial/graficas',
+      headers: { cookie: ana.cookie },
+    });
+    expect(r.statusCode, r.body).toBe(200);
+    return r.json() as GraficasDelHistorial;
+  }
+
+  it('sin cookie, 401', async () => {
+    const r = await s.pide({ method: 'GET', url: '/api/lectura/v1/historial/graficas' });
+    expect(r.statusCode).toBe(401);
+  });
+
+  it('ocho semanas naturales, de la más antigua a la actual; las de antes no entran', async () => {
+    await entrena('2026-01-20', [['Press banca', '300', 8, 2]]); // antes de la ventana
+    const g = await graficas();
+    expect(g.semanas).toHaveLength(8);
+    expect(g.semanas[0]).toEqual({ desde: '2026-01-26', hasta: '2026-02-01', en_curso: false });
+    expect(g.semanas[7]).toEqual({ desde: '2026-03-16', hasta: '2026-03-22', en_curso: true });
+    expect(g.escala).toHaveLength(7);
+    const pectoral = g.grupos.find((x) => x.nombre === 'Pectoral');
+    expect(pectoral?.semanas.every((w) => w.series_efectivas === '0.00' && w.nivel === 0)).toBe(
+      true,
+    );
+    expect(g.fuerza.flatMap((f) => f.semanas.map((w) => w.lb))).toEqual(Array(16).fill(null));
+  });
+
+  it('series efectivas por grupo y semana, con el nivel del mapa', async () => {
+    await entrena('2026-03-03', [
+      ['Press banca', '135', 8, 2],
+      ['Press banca', '135', 8, 5], // por encima del umbral: no cuenta
+      ['Press banca', '95', 10, null],
+    ]);
+    const pectoral = (await graficas()).grupos.find((x) => x.nombre === 'Pectoral');
+    expect(pectoral?.semanas[5]).toEqual({ series_efectivas: '1.00', nivel: 1 });
+    expect(pectoral?.semanas[6]).toEqual({ series_efectivas: '0.00', nivel: 0 });
+  });
+
+  it('fuerza estimada por tren: cada ejercicio a su tren, lo repetido mueve la línea', async () => {
+    await entrena('2026-03-03', [
+      ['Press banca', '135', 8, 2],
+      ['Sentadilla', '225', 5, 2],
+    ]);
+    await entrena('2026-03-10', [
+      ['Press banca', '140', 8, 2],
+      ['Remo con barra', '100', 10, 2], // nuevo: no mueve la línea
+      ['Sentadilla', '225', 5, 2],
+    ]);
+    await entrena('2026-03-17', [['Crunch', '0', 15, 1]]); // centro y sin carga
+    const g = await graficas();
+    const superior = g.fuerza.find((f) => f.tren === 'superior')?.semanas;
+    const inferior = g.fuerza.find((f) => f.tren === 'inferior')?.semanas;
+    // 135 × (1 + 10/30) = 180.00; +3.70 % → 186.66
+    expect(superior?.slice(5)).toEqual([
+      { lb: '180.00', tramo: 1, cambio: null, ejercicios: 1 },
+      { lb: '186.66', tramo: 1, cambio: '+3.70', ejercicios: 2 },
+      { lb: null, tramo: null, cambio: null, ejercicios: 0 },
+    ]);
+    // 225 × (1 + 7/30) = 277.50, igual la semana siguiente
+    expect(inferior?.slice(5, 7)).toEqual([
+      { lb: '277.50', tramo: 1, cambio: null, ejercicios: 1 },
+      { lb: '277.50', tramo: 1, cambio: '0.00', ejercicios: 1 },
+    ]);
   });
 });

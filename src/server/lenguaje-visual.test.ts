@@ -359,6 +359,26 @@ describe('lenguaje visual: la escala divergente de la comparativa (ADR-019)', ()
   });
 });
 
+describe('lenguaje visual: las líneas de la fuerza estimada (ADR-025)', () => {
+  it('se ven sobre la tarjeta (≥ 3:1) y se separan entre sí también con deuteranopía', () => {
+    const [superior, inferior] = ['--serie-superior', '--serie-inferior'].map((k) =>
+      color(CLARO.get(k) ?? '', CLARO),
+    ) as [Rgba, Rgba];
+    for (const serie of [superior, inferior]) {
+      for (const fondo of ['--fondo', '--fondo-sutil']) {
+        expect(contraste(serie, color(CLARO.get(fondo) ?? '', CLARO))).toBeGreaterThanOrEqual(3);
+      }
+    }
+    expect(distancia(deuteranopia(superior), deuteranopia(inferior))).toBeGreaterThanOrEqual(40);
+  });
+
+  it('no reutilizan los colores del mapa: una línea no es una cantidad de volumen', () => {
+    const mapa = new Set([0, 1, 2, 3, 4, 5, 6].map((n) => CLARO.get(`--nivel-${n}`)));
+    expect(mapa.has(CLARO.get('--serie-superior'))).toBe(false);
+    expect(mapa.has(CLARO.get('--serie-inferior'))).toBe(false);
+  });
+});
+
 describe('lenguaje visual: apagados, vidrio y movimiento', () => {
   it('los tres apagados existen, juntos y al principio, y reescriben tokens', () => {
     const apagados = [

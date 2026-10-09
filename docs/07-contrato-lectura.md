@@ -96,6 +96,29 @@ más se acota a la última:
 - Se calcula con todas las sesiones y nada se guarda. Las series van crudas: el
   calentamiento se marca, no se borra; `rir` es `null` cuando no hay dato.
 
+## `GET /api/lectura/v1/historial/graficas`
+
+Las gráficas del historial (ADR-025): la semana actual y las siete anteriores,
+de la más antigua a la actual, aparte de las páginas.
+
+```json
+{
+  "semanas": [{ "desde": "2026-08-17", "hasta": "2026-08-23", "en_curso": false }],
+  "escala": [{ "nivel": 0, "desde": "0.00", "hasta": "0.00", "rotulo": "Sin trabajo", "descripcion": "…" }],
+  "grupos": [{ "id": "…", "nombre": "Pectoral",
+               "semanas": [{ "series_efectivas": "3.00", "nivel": 1 }] }],
+  "fuerza": [{ "tren": "superior",
+               "semanas": [{ "lb": "186.66", "tramo": 1, "cambio": "+3.70", "ejercicios": 2 }] }]
+}
+```
+
+- `grupos[].semanas` va en el orden de `semanas`; el `nivel` es el del mapa y lo
+  decide el servidor.
+- `fuerza`: siempre `superior` e `inferior`. `lb` es `null` en una semana sin
+  series con carga de ese tren; `tramo` cambia cuando no hay ninguna semana
+  anterior con ejercicios en común; `cambio` es frente a la semana del mismo tramo
+  con la que se comparó, en puntos porcentuales con signo.
+
 ## Catálogo
 
 | Ruta | Qué hace |

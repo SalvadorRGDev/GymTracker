@@ -139,6 +139,36 @@ export const ConsultaDeHistorial = Type.Object(
 );
 export type ParametrosDeHistorial = Static<typeof ConsultaDeHistorial>;
 
+/** Las gráficas del historial (ADR-025): las últimas semanas naturales, de la más antigua a la actual. */
+export interface GraficasDelHistorial {
+  readonly semanas: readonly {
+    readonly desde: string;
+    /** Inclusiva: el domingo. */
+    readonly hasta: string;
+    readonly en_curso: boolean;
+  }[];
+  /** La leyenda del mapa muscular: los mismos niveles y rótulos. */
+  readonly escala: readonly TramoDeEscala[];
+  /** Cada grupo, con sus series efectivas de cada semana, en el orden de `semanas`. */
+  readonly grupos: readonly {
+    readonly id: string;
+    readonly nombre: string;
+    readonly semanas: readonly { readonly series_efectivas: string; readonly nivel: Nivel }[];
+  }[];
+  /** La fuerza estimada de cada tren, en libras, una por semana. */
+  readonly fuerza: readonly {
+    readonly tren: 'superior' | 'inferior';
+    readonly semanas: readonly {
+      /** `null`: esa semana no hubo series con carga de ese tren. */
+      readonly lb: string | null;
+      readonly tramo: number | null;
+      /** Frente a la semana anterior del tramo, en %, con signo: `"+1.85"`. */
+      readonly cambio: string | null;
+      readonly ejercicios: number;
+    }[];
+  }[];
+}
+
 // ── Catálogo ────────────────────────────────────────────────────────────────
 
 export interface Catalogo {
