@@ -24,6 +24,8 @@ import {
 import { compruebaEsquema } from '../credenciales.js';
 import { noEncontrado } from '../errores.js';
 import { usuarioDeLaSesion } from '../sesion/rutas.js';
+import { ConsultaDeRutina, type ParametrosDeRutina, type RutinaDelDia } from './contrato.js';
+import { rutinaDelDia } from './rutina.js';
 
 /**
  * `/api/registro/v1`: la pantalla «Registrar» del cliente web (ADR-011).
@@ -80,6 +82,24 @@ export function rutasDeRegistro(
       compruebaEsquema(request);
       const entrada = pesoDesde(request.body, 'registro', reloj());
       return conAlmacenDeUsuario(quien, (almacen) => registraPeso(almacen, entrada));
+    },
+  );
+
+  // La rutina del día (ADR-022): qué toca y cuánto va hecho. Sólo lee.
+  app.get<{ Querystring: ParametrosDeRutina }>(
+    '/api/registro/v1/rutina',
+    { schema: { querystring: ConsultaDeRutina }, attachValidation: true },
+    async (request, reply): Promise<RutinaDelDia> => {
+      const quien = await identidad(request, reply);
+      compruebaEsquema(request);
+      const { sesion, version, dia } = request.query;
+      return conAlmacenDeUsuario(quien, (almacen) =>
+        rutinaDelDia(almacen, {
+          ...(sesion === undefined ? {} : { sesion }),
+          ...(version === undefined ? {} : { version }),
+          ...(dia === undefined ? {} : { dia: Number(dia) }),
+        }),
+      );
     },
   );
 

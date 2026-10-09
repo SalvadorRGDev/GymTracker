@@ -142,6 +142,7 @@ Además, sólo desde la web y a la vista:
 | Ruta | Qué hace |
 | ---- | -------- |
 | `GET /api/registro/v1/catalogo` | Igual que el de captura. |
+| `GET /api/registro/v1/rutina` `?sesion=&version=&dia=` | La rutina del día (ADR-022): qué rutina toca, qué día de su ciclo y cuánto va hecho. Sólo lee. 404 `no-encontrado`, 409 `borrador`, 422 `dia`. |
 | `DELETE /api/registro/v1/serie/:id` | Borra una serie mal capturada (entera: no hay edición en sitio). 204 o 404. |
 | `DELETE /api/registro/v1/sesion/:id` | Borra una sesión con sus series (fecha gravemente equivocada). 204 o 404. |
 | `POST /api/registro/v1/sesion/:id/confirmacion` | Confirma una fecha por confirmar. 204 o 404. |
@@ -149,3 +150,25 @@ Además, sólo desde la web y a la vista:
 La pantalla guarda del entrenamiento abierto **la clave y un instante** en
 `sessionStorage`, vigentes seis horas por antigüedad, para que recargar no parta
 la sesión. No hay cola: nada pendiente, nada que reintentar.
+
+### `GET /api/registro/v1/rutina` (ADR-022)
+
+Todo lo decide el servidor; la pantalla sólo pinta.
+
+- **La fecha**: la del entrenamiento abierto si `sesion` es la clave de una
+  sesión que ya existe (el de las 23:50 no cambia de lista a medianoche); si no,
+  hoy en la zona de la cuenta. `de_entrenamiento_abierto` dice cuál fue.
+- **`de_hoy`**: la asignación que cubre la fecha y el día de su ciclo, contado
+  desde el ancla. `null` sin asignación.
+- **`vista`**: la de hoy, o la rutina (`version`, sólo publicadas) y el día
+  (`dia`, 1 a su ciclo) pedidos. Sin rutina que enseñar, `null`.
+  `es_la_de_hoy` es falso en cuanto la rutina o el día no son los que tocan.
+- **`rutinas`**: la última versión publicada de cada rutina, más la asignada y
+  la que se ve si son otras; la asignada primero.
+- **Cada entrada** trae `objetivo` y `hechas` en series efectivas, como las da
+  el motor, y `completa`. Una de ejercicio cuenta sus series efectivas del día;
+  una de grupo, el volumen del grupo en el día con los ejercicios que **no**
+  tienen fila propia ese día, y ofrece los del catálogo que lo trabajan (1.00 o
+  0.50), sin archivados ni los que ya tienen fila. Un ejercicio archivado
+  después de publicar la rutina llega con `archivado: true`.
+- Guardar una serie no cambia: la serie no guarda de qué rutina salió.

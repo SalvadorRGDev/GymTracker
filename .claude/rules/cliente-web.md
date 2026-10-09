@@ -68,6 +68,19 @@ llama al mismo servicio, así que hereda sus reglas enteras:
 - **El mensaje que se enseña es el del servidor**, palabra por palabra, acepte o
   rechace. Reescribirlo aquí sería mantener dos textos para el mismo rechazo,
   uno por cliente, y son los que divergen.
+- **Empieza por la rutina del día** (ADR-022). Qué rutina toca, qué día de su
+  ciclo, cuánto va hecho y si está completo lo manda
+  `GET /api/registro/v1/rutina`: la pantalla no deduce el día —convertiría
+  fechas lógicas— ni cuenta series —sería el motor duplicado—. Con entrenamiento
+  abierto se manda su clave y la fecha es la suya. Tras guardar, lo elegido se
+  queda y el progreso se vuelve a pedir.
+- **La rutina o el día elegidos a mano van en la consulta** (`?rutina=…&dia=…`) y
+  la pantalla lo dice: «Estás viendo el día 3…, no el que toca», con «Volver a la
+  de hoy». Elegir la asignada limpia la consulta, para que siga al día que toque.
+- **La búsqueda libre sigue, debajo y rotulada** («¿Vas a hacer algo que no está
+  en la rutina?»); lo elegido que no está en la lista del día se avisa: se guarda
+  igual y cuenta para la semana. Sin rutina, la búsqueda es lo principal y lo
+  dice.
 - **Del entrenamiento abierto se guarda la identidad y nada más.** Una clave y
   un instante en `sessionStorage`, vigentes seis horas por ANTIGÜEDAD igual que
   el archivo del atajo. No es la cola offline que el ADR-008 descarta —no hay

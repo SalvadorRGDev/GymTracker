@@ -4,7 +4,7 @@ Aplicación personal de seguimiento de fuerza: **series efectivas por grupo
 muscular y semana**, lo planeado contra lo ejecutado. Dos personas, coste cero,
 un proceso de Node en la máquina del autor publicado por un túnel, datos en
 libros de Excel. Documento maestro: `Plan.md`. Decisiones: `docs/01-decisiones.md`
-(ADR-001 a 021). Reglas por directorio: `.claude/rules/`.
+(ADR-001 a 022). Reglas por directorio: `.claude/rules/`.
 
 Código, comentarios, documentación e identificadores en **español**: el dominio
 se piensa en español y traducir a medias hace que dos personas llamen distinto a
@@ -23,6 +23,8 @@ lo mismo.
   (`ALTA_ABIERTA`, `MAXIMO_DE_CUENTAS`; ADR-020).
 - «Ver ejemplo» en el catálogo: cada uno de los 182 ejercicios base tiene su
   figura animada propia en una ventana modal (ADR-021).
+- «Registrar» empieza por la rutina del día: la asignada, el día de su ciclo que
+  toca y lo que va hecho, con la búsqueda libre debajo (ADR-022).
 - Pendiente: **probar los atajos en un iPhone real** (`atajos/PRUEBA-MANUAL.md`).
 
 ## Comandos

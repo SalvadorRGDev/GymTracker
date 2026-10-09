@@ -1812,6 +1812,129 @@ button:disabled,
   gap: var(--e3);
 }
 
+/* La rutina del día (ADR-022): lo que toca, con lo que va hecho. */
+.tarjeta-de-rutina {
+  display: grid;
+  gap: var(--e2);
+  align-content: start;
+}
+
+.selectores-de-rutina {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.lista-rutina,
+.opciones-de-grupo {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fila-rutina,
+.opciones-de-grupo button {
+  display: flex;
+  width: 100%;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--borde);
+  border-radius: var(--r2);
+  background: var(--fondo);
+  color: var(--texto);
+  text-align: left;
+  cursor: pointer;
+}
+
+.fila-rutina:hover,
+.opciones-de-grupo button:hover {
+  border-color: var(--borde-fuerte);
+  background: var(--fondo-sutil);
+}
+
+.fila-rutina[aria-pressed="true"],
+.opciones-de-grupo button[aria-pressed="true"] {
+  border-color: var(--acento-texto);
+  background: var(--acento-suave);
+  color: var(--acento-texto);
+}
+
+.fila-rutina[aria-expanded="true"] {
+  border-color: var(--borde-fuerte);
+}
+
+.fila-rutina:disabled {
+  cursor: not-allowed;
+  background: var(--fondo-apagado);
+  color: var(--texto-2);
+}
+
+.fila-rutina-nombre {
+  display: grid;
+  gap: 2px;
+  font-weight: 600;
+}
+
+.fila-rutina-detalle {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--texto-3);
+}
+
+.opciones-de-grupo .fila-rutina-detalle,
+.progreso-cifras {
+  white-space: nowrap;
+}
+
+.progreso-de-rutina {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.progreso-cifras {
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--texto-2);
+}
+
+.fila-rutina[aria-pressed="true"] .progreso-cifras {
+  color: var(--acento-texto);
+}
+
+.grupo-de-rutina {
+  display: grid;
+  gap: 8px;
+  margin: 6px 0 4px 12px;
+  padding-left: 12px;
+  border-left: 2px solid var(--borde);
+}
+
+.opciones-de-grupo {
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.opciones-de-grupo button {
+  min-height: 44px;
+  font-weight: 500;
+}
+
+.busqueda-elegido {
+  margin: 0;
+}
+
+.acciones-de-aviso {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2);
+  margin: 6px 0 0;
+}
+
 .buscador {
   position: relative;
 }
@@ -2274,9 +2397,25 @@ button:disabled,
     display: table-cell;
   }
 
+  /* La rutina arriba y la búsqueda debajo; la serie, al lado de las dos. */
   .registrar-rejilla {
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    grid-template-areas:
+      "rutina serie"
+      "busqueda serie";
     align-items: start;
+  }
+
+  .tarjeta-de-rutina {
+    grid-area: rutina;
+  }
+
+  .tarjeta-de-serie {
+    grid-area: serie;
+  }
+
+  .busqueda-libre {
+    grid-area: busqueda;
   }
 
   .dias-del-ciclo {
@@ -2308,6 +2447,12 @@ button:disabled,
 
   .resumen-mapa {
     order: 0;
+    position: sticky;
+    top: 88px;
+  }
+
+  /* La serie no se va al elegir más abajo: queda a la vista mientras se baja. */
+  .tarjeta-de-serie {
     position: sticky;
     top: 88px;
   }
@@ -2354,7 +2499,9 @@ button:disabled,
   .segmentado button,
   .tarjeta-interactiva,
   .entrada,
-  .selector {
+  .selector,
+  .fila-rutina,
+  .opciones-de-grupo button {
     transition:
       background-color var(--duracion) ease,
       border-color var(--duracion) ease,

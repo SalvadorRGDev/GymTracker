@@ -1,6 +1,7 @@
 import { useState } from 'preact/hooks';
 import type { RespuestaDeCaptura } from '../../api/captura/contrato';
 import type { Catalogo } from '../../api/lectura/contrato';
+import type { RutinaDelDia } from '../../api/registro/contrato';
 import type { CatalogoBase } from '../../catalogo/tipos';
 import {
   Aviso,
@@ -13,14 +14,31 @@ import {
 } from '../componentes/basicos';
 import { Icono } from '../componentes/iconos';
 import { SelectorDeEjercicio } from '../componentes/selector-de-ejercicio';
+import { lugarEnLaRutina, TarjetaDeRutina } from '../componentes/tarjeta-de-rutina';
 import { mensajeDe, pide } from '../estado/api';
 import { useRecurso } from '../estado/recurso';
+import { useUbicacion } from '../estado/ruta';
 
 /**
  * Captura web (ADR-011): la misma operación que los atajos, contra el mismo
  * servicio. No calcula, no crea catálogo, la fecha lógica la pone el servidor
  * y el mensaje que se enseña es el suyo, palabra por palabra.
+ *
+ * Empieza por la rutina del día (ADR-022): la asignada y el día de su ciclo que
+ * toca, con lo que va hecho; cualquier otro ejercicio se busca abajo.
  */
+
+/** La lectura de la rutina: la fecha la manda el entrenamiento abierto, si lo hay. */
+function urlDeRutina(clave: string | null, consulta: URLSearchParams): string {
+  const parametros = new URLSearchParams();
+  if (clave !== null) parametros.set('sesion', clave);
+  const rutina = consulta.get('rutina');
+  const dia = consulta.get('dia');
+  if (rutina !== null) parametros.set('version', rutina);
+  if (dia !== null) parametros.set('dia', dia);
+  const texto = parametros.toString();
+  return `/api/registro/v1/rutina${texto === '' ? '' : `?${texto}`}`;
+}
 
 const CLAVE_DE_SESION = 'sigir:entrenamiento-abierto';
 /** Vigente por ANTIGÜEDAD, como el archivo del atajo: la sesión de 23:50 a 00:15 no se parte. */
@@ -80,8 +98,10 @@ const RIRS = Array.from({ length: 11 }, (_, i) => i);
 export function Registrar() {
   const completo = useRecurso<Catalogo>('/api/lectura/v1/catalogo');
   const base = useRecurso<CatalogoBase>('/api/lectura/v1/catalogo/base');
+  const { consulta } = useUbicacion();
 
   const [elegido, setElegido] = useState<string | null>(null);
+  const [desdeLaBusqueda, setDesdeLaBusqueda] = useState(false);
   const [repeticiones, setRepeticiones] = useState('');
   const [carga, setCarga] = useState('');
   const [rir, setRir] = useState<number | null>(null);
@@ -91,9 +111,17 @@ export function Registrar() {
   const [abierto, setAbierto] = useState(() => entrenamientoVigente());
   const [peso, setPeso] = useState('');
   const [respuestaPeso, setRespuestaPeso] = useState<RespuestaDeCaptura | null>(null);
+  const rutina = useRecurso<RutinaDelDia>(urlDeRutina(abierto?.clave ?? null, consulta));
 
   const ejercicios = (completo.datos?.ejercicios ?? []).filter((e) => !e.archivado);
   const nombreElegido = ejercicios.find((e) => e.id === elegido)?.nombre ?? null;
+  const vista = rutina.datos?.vista ?? null;
+  const lugar = lugarEnLaRutina(vista, elegido);
+  // Tras guardar, lo elegido se queda: casi siempre viene otra serie de lo mismo.
+  const elige = (id: string, busqueda: boolean) => {
+    setElegido(id);
+    setDesdeLaBusqueda(busqueda);
+  };
 
   const faltas: string[] = [];
   if (nombreElegido === null) faltas.push('elige un ejercicio');
@@ -127,6 +155,8 @@ export function Registrar() {
         },
       });
       setRespuesta(r);
+      // El progreso de la rutina lo vuelve a contar el servidor.
+      rutina.recarga();
     } catch (e) {
       setError(mensajeDe(e));
     } finally {
@@ -201,39 +231,49 @@ export function Registrar() {
         }
       >
         <p>
-          Lo mismo que hacen los atajos del iPhone, por si no tienes uno a mano. La fecha la pone el
-          servidor; el total de la semana lo calcula el motor y llega en la respuesta.
+          Empieza por lo que toca hoy en tu rutina; cualquier otro ejercicio se busca abajo. La
+          fecha la pone el servidor, y lo que llevas lo cuenta el motor.
         </p>
       </CabeceraDePagina>
 
       <div class="registrar-rejilla">
-        <section class="tarjeta" aria-labelledby="titulo-ejercicio">
-          <div class="tarjeta-titulo">
-            <h3 id="titulo-ejercicio">Ejercicio</h3>
-          </div>
-          {base.estado === 'error' && (
-            <Aviso tipo="info">Sin el catálogo base, la búsqueda por sinónimo no está.</Aviso>
-          )}
-          <SelectorDeEjercicio
-            ejercicios={ejercicios}
-            base={base.datos}
-            elegido={elegido}
-            alElegir={setElegido}
-          />
-        </section>
+        <TarjetaDeRutina
+          recurso={rutina}
+          elegido={elegido}
+          alElegir={(id) => elige(id, false)}
+          entrenamientoAbierto={abierto !== null}
+          eleccionAMano={consulta.has('rutina') || consulta.has('dia')}
+        />
 
-        <section class="tarjeta formulario" aria-labelledby="titulo-serie">
+        <section class="tarjeta formulario tarjeta-de-serie" aria-labelledby="titulo-serie">
           <div class="tarjeta-titulo">
             <h3 id="titulo-serie">La serie</h3>
             {abierto !== null && <span class="etiqueta-pequena exito">Entrenamiento abierto</span>}
           </div>
           {nombreElegido !== null ? (
-            <div class="ejercicio-elegido">
-              <span>{nombreElegido}</span>
-              <Icono nombre="dumbbell" tamano={18} />
-            </div>
+            <>
+              <div class="ejercicio-elegido">
+                <span>{nombreElegido}</span>
+                <Icono nombre="dumbbell" tamano={18} />
+              </div>
+              {lugar?.tipo === 'ejercicio' && (
+                <p class="ayuda">
+                  Llevas {lugar.hechas} de {lugar.objetivo} series efectivas de las que pide el día.
+                </p>
+              )}
+              {lugar?.tipo === 'grupo' && (
+                <p class="ayuda">
+                  Suma a {lugar.grupo.nombre}: llevas {lugar.hechas} de {lugar.objetivo}.
+                </p>
+              )}
+              {lugar === null && vista !== null && vista.entradas.length > 0 && (
+                <Aviso tipo="info">
+                  No está en la lista del día: se guarda igual y cuenta para tu semana.
+                </Aviso>
+              )}
+            </>
           ) : (
-            <p class="ayuda">Elige un ejercicio de la lista.</p>
+            <p class="ayuda">Elige un ejercicio de tu rutina o búscalo abajo.</p>
           )}
           <div class="fila-de-campos">
             <div class="campo">
@@ -303,6 +343,41 @@ export function Registrar() {
               </Aviso>
             )}
           </Respuesta>
+        </section>
+
+        <section class="tarjeta busqueda-libre" aria-labelledby="titulo-busqueda">
+          <div class="tarjeta-titulo">
+            <h3 id="titulo-busqueda">
+              {vista !== null && vista.entradas.length > 0
+                ? '¿Vas a hacer algo que no está en la rutina?'
+                : 'Busca el ejercicio'}
+            </h3>
+          </div>
+          <p class="ayuda">
+            En todo tu catálogo, por nombre o por sinónimo. Lo que registres cuenta igual para tu
+            semana.
+          </p>
+          {base.estado === 'error' && (
+            <Aviso tipo="info">Sin el catálogo base, la búsqueda por sinónimo no está.</Aviso>
+          )}
+          <SelectorDeEjercicio
+            ejercicios={ejercicios}
+            base={base.datos}
+            elegido={elegido}
+            alElegir={(id) => elige(id, true)}
+          />
+          {desdeLaBusqueda && nombreElegido !== null && (
+            <p class="ayuda busqueda-elegido">
+              Elegido: {nombreElegido}.{' '}
+              <button
+                type="button"
+                class="boton-texto"
+                onClick={() => document.getElementById('repeticiones')?.focus()}
+              >
+                Rellenar la serie
+              </button>
+            </p>
+          )}
         </section>
       </div>
 

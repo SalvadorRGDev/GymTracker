@@ -1,6 +1,9 @@
+import { act } from 'preact/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Catalogo } from '../../api/lectura/contrato';
+import type { RutinaDelDia, VistaDeRutina } from '../../api/registro/contrato';
 import {
+  asienta,
   boton,
   campo,
   escribe,
@@ -18,6 +21,7 @@ const CATALOGO: Catalogo = {
     { id: 'e1', nombre: 'Press banca', archivado: false, sin_grupos: false },
     { id: 'e2', nombre: 'Flexiones', archivado: false, sin_grupos: false },
     { id: 'e3', nombre: 'Remo viejo', archivado: true, sin_grupos: false },
+    { id: 'e4', nombre: 'Sentadilla', archivado: false, sin_grupos: false },
   ],
   parametros: {
     version_id: 'v1',
@@ -51,8 +55,65 @@ const BASE = {
 const MENSAJE = 'Guardada. Esta semana: Pectoral 12.00 · Tríceps 6.00.';
 let montado: Montado | undefined;
 
+/** Martes 3 de marzo, día 2 de 4 de «Torso-Pierna»: press banca y pectoral a elegir. */
+const HOY: VistaDeRutina = {
+  version_id: 'v-torso',
+  plan_nombre: 'Torso-Pierna',
+  numero: 1,
+  ciclo_dias: 4,
+  dia: 2,
+  es_la_de_hoy: true,
+  completa: false,
+  entradas: [
+    {
+      tipo: 'ejercicio',
+      id: 'en1',
+      ejercicio: { id: 'e1', nombre: 'Press banca', archivado: false },
+      objetivo: '3.00',
+      hechas: '1.00',
+      completa: false,
+    },
+    {
+      tipo: 'grupo',
+      id: 'en2',
+      grupo: { id: 'g1', nombre: 'Pectoral' },
+      objetivo: '2.00',
+      hechas: '0.50',
+      completa: false,
+      ejercicios: [{ id: 'e2', nombre: 'Flexiones', coeficiente: '1.00' }],
+    },
+  ],
+};
+
+function rutina(vista: VistaDeRutina | null, extra: Partial<RutinaDelDia> = {}): RutinaDelDia {
+  return {
+    fecha: '2026-03-03',
+    de_entrenamiento_abierto: false,
+    rutinas: [
+      {
+        version_id: 'v-torso',
+        plan_nombre: 'Torso-Pierna',
+        numero: 1,
+        ciclo_dias: 4,
+        asignada: true,
+      },
+      {
+        version_id: 'v-entero',
+        plan_nombre: 'Cuerpo entero',
+        numero: 2,
+        ciclo_dias: 7,
+        asignada: false,
+      },
+    ],
+    de_hoy: { version_id: 'v-torso', dia: 2 },
+    vista,
+    ...extra,
+  };
+}
+
 beforeEach(() => {
   window.sessionStorage.clear();
+  window.history.replaceState(null, '', '/registrar');
 });
 
 afterEach(() => {
@@ -62,10 +123,13 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-async function pinta() {
+async function pinta(
+  deRutina: (url: string) => RutinaDelDia = () => rutina(null, { rutinas: [], de_hoy: null }),
+) {
   const red = simulaFetch({
     'GET /api/lectura/v1/catalogo': { cuerpo: CATALOGO },
     'GET /api/lectura/v1/catalogo/base': { cuerpo: BASE },
+    'GET /api/registro/v1/rutina': (_cuerpo, url) => ({ cuerpo: deRutina(url) }),
     'POST /api/registro/v1/serie': { cuerpo: { estado: 'aceptada', mensaje: MENSAJE } },
     'POST /api/registro/v1/sesion/cerrar': {
       cuerpo: { estado: 'aceptada', mensaje: 'Entrenamiento cerrado. 2 series, 1 efectivas.' },
@@ -74,6 +138,19 @@ async function pinta() {
   montado = await monta(<Registrar />);
   return { raiz: montado.raiz, red };
 }
+
+async function eligeEn(select: HTMLSelectElement, valor: string) {
+  await act(async () => {
+    select.value = valor;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  await asienta();
+}
+
+const filaDe = (raiz: HTMLElement, nombre: string) =>
+  [...raiz.querySelectorAll<HTMLButtonElement>('.lista-rutina button')].find((b) =>
+    b.textContent?.includes(nombre),
+  );
 
 async function eligeYRellena(raiz: HTMLElement, nombre: string) {
   const radio = [...raiz.querySelectorAll<HTMLInputElement>('input[type="radio"]')].find((r) =>
@@ -163,5 +240,237 @@ describe('Registrar', () => {
     await pulsa(boton(raiz, 'Terminar entrenamiento'));
     expect(entrenamientoVigente()).toBeNull();
     expect(textoDe(raiz)).toContain('Entrenamiento cerrado. 2 series, 1 efectivas.');
+  });
+});
+
+describe('Registrar desde la rutina del día (ADR-022)', () => {
+  it('empieza por lo que toca hoy: dice qué rutina y qué día, y lista lo que pide con lo que llevas', async () => {
+    const { raiz } = await pinta(() => rutina(HOY));
+    const texto = textoDe(raiz);
+    expect(texto).toContain(
+      'Hoy, martes 3 de marzo, toca el día 2 de 4 de «Torso-Pierna»: 2 ejercicios.',
+    );
+    expect(filaDe(raiz, 'Press banca')?.textContent).toContain('1.00 de 3.00');
+    expect(filaDe(raiz, 'Pectoral')?.textContent).toContain('con el ejercicio que elijas');
+    const rutinas = campo(raiz, 'Rutina') as HTMLSelectElement;
+    expect(rutinas.value).toBe('v-torso');
+    expect([...rutinas.options].map((o) => o.textContent)).toEqual([
+      'Torso-Pierna · asignada',
+      'Cuerpo entero',
+    ]);
+    expect((campo(raiz, 'Día') as HTMLSelectElement).selectedOptions[0]?.textContent).toBe(
+      'Día 2 de 4 · toca hoy',
+    );
+    // La búsqueda libre sigue, abajo y con su rótulo.
+    expect(texto).toContain('¿Vas a hacer algo que no está en la rutina?');
+  });
+
+  it('elegir de la rutina lleva a la serie con lo que llevas; tras guardar sigue elegido y el progreso se vuelve a pedir', async () => {
+    const { raiz, red } = await pinta(() => rutina(HOY));
+    await pulsa(filaDe(raiz, 'Press banca') as HTMLButtonElement);
+    expect(filaDe(raiz, 'Press banca')?.getAttribute('aria-pressed')).toBe('true');
+    expect(textoDe(raiz)).toContain('Llevas 1.00 de 3.00 series efectivas de las que pide el día.');
+    await escribe(campo(raiz, 'Repeticiones') as HTMLInputElement, '8');
+    await escribe(campo(raiz, 'Carga (kg)') as HTMLInputElement, '135');
+    await pulsa(boton(raiz, '2'));
+    const antes = red.llamadas.filter((l) => l.url.startsWith('/api/registro/v1/rutina')).length;
+    await pulsa(boton(raiz, 'Guardar serie'));
+    const lecturas = red.llamadas.filter((l) => l.url.startsWith('/api/registro/v1/rutina'));
+    expect(lecturas.length).toBeGreaterThan(antes);
+    // Ya hay entrenamiento abierto: la fecha la manda él.
+    expect(lecturas.at(-1)?.url).toMatch(/[?&]sesion=/);
+    expect(filaDe(raiz, 'Press banca')?.getAttribute('aria-pressed')).toBe('true');
+    // La segunda serie ya no cambia la dirección (misma clave): el progreso se pide igual.
+    const tras = red.llamadas.filter((l) => l.url.startsWith('/api/registro/v1/rutina')).length;
+    await pulsa(boton(raiz, 'Guardar serie'));
+    expect(
+      red.llamadas.filter((l) => l.url.startsWith('/api/registro/v1/rutina')).length,
+    ).toBeGreaterThan(tras);
+    const envio = red.llamadas.find((l) => l.url === '/api/registro/v1/serie');
+    expect(envio?.cuerpo).toMatchObject({ serie: { ejercicio: 'Press banca', rir: 2 } });
+  });
+
+  it('un objetivo de grupo se despliega con sus ejercicios, y elegir uno dice a qué suma', async () => {
+    const { raiz } = await pinta(() => rutina(HOY));
+    const grupo = filaDe(raiz, 'Pectoral') as HTMLButtonElement;
+    expect(grupo.getAttribute('aria-expanded')).toBe('false');
+    await pulsa(grupo);
+    expect(grupo.getAttribute('aria-expanded')).toBe('true');
+    const opcion = [...raiz.querySelectorAll<HTMLButtonElement>('.opciones-de-grupo button')].find(
+      (b) => b.textContent?.includes('Flexiones'),
+    );
+    expect(opcion?.textContent).toContain('cuenta 1.00');
+    await pulsa(opcion as HTMLButtonElement);
+    expect(textoDe(raiz)).toContain('Suma a Pectoral: llevas 0.50 de 2.00.');
+  });
+
+  it('lo que se elige en la búsqueda y no está en la lista del día se avisa, y se guarda igual', async () => {
+    const { raiz } = await pinta(() => rutina(HOY));
+    const radio = [...raiz.querySelectorAll<HTMLInputElement>('input[type="radio"]')].find((r) =>
+      r.closest('label')?.textContent?.includes('Sentadilla'),
+    );
+    await pulsa(radio as HTMLInputElement);
+    const texto = textoDe(raiz);
+    expect(texto).toContain(
+      'No está en la lista del día: se guarda igual y cuenta para tu semana.',
+    );
+    expect(texto).toContain('Elegido: Sentadilla.');
+    expect(boton(raiz, 'Rellenar la serie')).toBeDefined();
+  });
+
+  it('otra rutina u otro día van a la consulta, avisan de que no es lo de hoy y se vuelve con un botón', async () => {
+    const { raiz, red } = await pinta((url) =>
+      url.includes('dia=3')
+        ? rutina({ ...HOY, dia: 3, es_la_de_hoy: false, entradas: [] })
+        : rutina(HOY),
+    );
+    await eligeEn(campo(raiz, 'Día') as HTMLSelectElement, '3');
+    expect(window.location.search).toBe('?dia=3');
+    expect(red.llamadas.at(-1)?.url).toContain('dia=3');
+    expect(textoDe(raiz)).toContain(
+      'Estás viendo el día 3 de «Torso-Pierna», que es de descanso, no el que toca: el día 2 de «Torso-Pierna». Lo que registres cuenta para el martes 3 de marzo.',
+    );
+    await pulsa(boton(raiz, 'Volver a la de hoy'));
+    expect(window.location.search).toBe('');
+    expect(textoDe(raiz)).toContain('toca el día 2 de 4');
+    // Otra rutina: se fija en la consulta, y el día empieza de nuevo.
+    await eligeEn(campo(raiz, 'Rutina') as HTMLSelectElement, 'v-entero');
+    expect(window.location.search).toBe('?rutina=v-entero');
+    expect(red.llamadas.at(-1)?.url).toContain('version=v-entero');
+    // Volver a elegir la asignada no la fija: así sigue al día que toque mañana.
+    await eligeEn(campo(raiz, 'Rutina') as HTMLSelectElement, 'v-torso');
+    expect(window.location.search).toBe('');
+  });
+
+  it('dos versiones de la misma rutina se distinguen por su número', async () => {
+    const { raiz } = await pinta(() =>
+      rutina(HOY, {
+        rutinas: [
+          {
+            version_id: 'v-torso',
+            plan_nombre: 'Torso-Pierna',
+            numero: 1,
+            ciclo_dias: 4,
+            asignada: true,
+          },
+          {
+            version_id: 'v-torso-2',
+            plan_nombre: 'Torso-Pierna',
+            numero: 2,
+            ciclo_dias: 4,
+            asignada: false,
+          },
+        ],
+      }),
+    );
+    expect(
+      [...(campo(raiz, 'Rutina') as HTMLSelectElement).options].map((o) => o.textContent),
+    ).toEqual(['Torso-Pierna · versión 1 · asignada', 'Torso-Pierna · versión 2']);
+  });
+
+  it('sin rutinas publicadas, la búsqueda pasa a ser lo principal y lo dice', async () => {
+    const { raiz } = await pinta();
+    const texto = textoDe(raiz);
+    expect(texto).toContain('No tienes rutinas publicadas.');
+    expect(texto).toContain('Busca el ejercicio');
+    expect(raiz.querySelector('#rutina')).toBeNull();
+  });
+
+  it('con rutinas pero ninguna asignada, invita a elegir una sin inventarla', async () => {
+    const { raiz } = await pinta(() => rutina(null, { de_hoy: null }));
+    expect(textoDe(raiz)).toContain('no tienes ninguna rutina asignada');
+    expect((campo(raiz, 'Rutina') as HTMLSelectElement).value).toBe('');
+  });
+
+  it('el día de descanso lo dice, y el día completo invita a terminar el entrenamiento abierto', async () => {
+    const descanso = await pinta(() => rutina({ ...HOY, entradas: [] }));
+    expect(textoDe(descanso.raiz)).toContain(
+      'toca el día 2 de 4 de «Torso-Pierna»: es de descanso.',
+    );
+    montado?.desmonta();
+
+    window.sessionStorage.setItem(
+      'sigir:entrenamiento-abierto',
+      JSON.stringify({ clave: 'clave-abierta-1', iniciado: Date.now() }),
+    );
+    const lleno = await pinta(() =>
+      rutina({
+        ...HOY,
+        completa: true,
+        entradas: HOY.entradas.map((e) => ({ ...e, completa: true })),
+      }),
+    );
+    expect(
+      lleno.red.llamadas.find((l) => l.url.startsWith('/api/registro/v1/rutina'))?.url,
+    ).toContain('sesion=clave-abierta-1');
+    expect(textoDe(lleno.raiz)).toContain(
+      'Terminaste lo que pide el día 2. Si has acabado, pulsa «Terminar entrenamiento».',
+    );
+    expect(filaDe(lleno.raiz, 'Press banca')?.textContent).toContain('Hecho');
+  });
+
+  it('si la rutina no se puede leer, lo dice, deja reintentar y la búsqueda sigue', async () => {
+    let intentos = 0;
+    const red = simulaFetch({
+      'GET /api/lectura/v1/catalogo': { cuerpo: CATALOGO },
+      'GET /api/lectura/v1/catalogo/base': { cuerpo: BASE },
+      'GET /api/registro/v1/rutina': () => {
+        intentos += 1;
+        return intentos === 1
+          ? { estado: 404, cuerpo: { codigo: 'no-encontrado', mensaje: 'Ruta desconocida' } }
+          : { cuerpo: rutina(HOY) };
+      },
+    });
+    montado = await monta(<Registrar />);
+    const raiz = montado.raiz;
+    expect(textoDe(raiz)).toContain(
+      'No se pudo leer tu rutina («Ruta desconocida»). Mientras, busca el ejercicio abajo: se guarda igual.',
+    );
+    // Sin rutina ni día en la consulta, «Volver a la de hoy» no arreglaría nada.
+    expect(() => boton(raiz, 'Volver a la de hoy')).toThrow();
+    expect(raiz.querySelectorAll('.lista-de-ejercicios label').length).toBeGreaterThan(0);
+    await pulsa(boton(raiz, 'Reintentar'));
+    expect(red.llamadas.filter((l) => l.url.startsWith('/api/registro/v1/rutina'))).toHaveLength(2);
+    expect(textoDe(raiz)).toContain('toca el día 2 de 4');
+  });
+
+  it('si lo que se rechaza es la rutina o el día elegidos, ofrece volver a los de hoy', async () => {
+    window.history.replaceState(null, '', '/registrar?dia=9');
+    simulaFetch({
+      'GET /api/lectura/v1/catalogo': { cuerpo: CATALOGO },
+      'GET /api/lectura/v1/catalogo/base': { cuerpo: BASE },
+      'GET /api/registro/v1/rutina': (_cuerpo, url) =>
+        url.includes('dia=9')
+          ? {
+              estado: 422,
+              cuerpo: { codigo: 'dia', mensaje: 'El día 9 no cabe en un ciclo de 4 días' },
+            }
+          : { cuerpo: rutina(HOY) },
+    });
+    montado = await monta(<Registrar />);
+    expect(textoDe(montado.raiz)).toContain('El día 9 no cabe en un ciclo de 4 días');
+    await pulsa(boton(montado.raiz, 'Volver a la de hoy'));
+    expect(window.location.search).toBe('');
+    expect(textoDe(montado.raiz)).toContain('toca el día 2 de 4');
+  });
+
+  it('un ejercicio archivado de la rutina no se puede elegir y dice cómo recuperarlo', async () => {
+    const { raiz } = await pinta(() =>
+      rutina({
+        ...HOY,
+        entradas: [
+          {
+            tipo: 'ejercicio',
+            id: 'en9',
+            ejercicio: { id: 'e3', nombre: 'Remo viejo', archivado: true },
+            objetivo: '2.00',
+            hechas: '0.00',
+            completa: false,
+          },
+        ],
+      }),
+    );
+    expect(filaDe(raiz, 'Remo viejo')?.disabled).toBe(true);
+    expect(textoDe(raiz)).toContain('Archivado: recupéralo en el catálogo para registrarlo.');
   });
 });

@@ -32,6 +32,7 @@ no aprobar.
 | 019 | Comparativa: ventana desde el ancla y línea semanal del atajo | ACEPTADO (enmienda al 009) |
 | 020 | Alta pública con tope | ACEPTADO (enmienda al 007) |
 | 021 | «Ver ejemplo»: figuras animadas propias | ACEPTADO |
+| 022 | «Registrar» empieza por la rutina del día | ACEPTADO |
 
 ---
 
@@ -504,3 +505,61 @@ la cámara en algún momento y que una región de la espalda no se pinte vista d
 frente. Los colores los vigila `lenguaje-visual.test.ts`. Sigue sin tocar el
 motor ni el almacén, y el módulo diferido de las poses pasa a unos 24 kB
 comprimidos.
+
+## ADR-022 — «Registrar» empieza por la rutina del día
+
+**Estado**: ACEPTADO
+
+**Contexto.** Registrar era buscar cada ejercicio en el catálogo entero y
+guardar serie a serie. El usuario pidió que lo predeterminado fuera su rutina
+publicada: un desplegable con las rutinas, en la lista sólo los ejercicios del
+día que toca («si es lunes, los del lunes») y, abajo, una búsqueda manual para
+añadir otro; que la pantalla lo indique y dé retroalimentación.
+
+**Decisión.**
+
+- **Una lectura nueva, `GET /api/registro/v1/rutina`, decide en el servidor**
+  la fecha que manda (la del entrenamiento abierto si ya existe; si no, hoy en
+  la zona de la cuenta), la asignación que la cubre, el día de su ciclo
+  (contado desde el ancla, como la comparativa) y lo que pide ese día.
+  `?version=` y `?dia=` enseñan otra rutina publicada u otro día; un borrador es
+  409 `borrador` y un día fuera del ciclo, 422 `dia`. Con un ciclo que no es de
+  siete días, «lunes» no es siempre el mismo día de la rutina: la pantalla dice
+  «día 2 de 4».
+- **El progreso lo cuenta el motor, en la unidad de la rutina** (series
+  efectivas). Por ejercicio, sus series efectivas del día: `seriesEfectivas` de
+  `agrega`, que cuenta entradas, y para lo registrado una entrada es una serie.
+  Por grupo, el volumen del grupo en el día (`volumenDe`) con los ejercicios que
+  no tienen fila propia ese día: lo de la lista ya cuenta en su fila. `completa`
+  lo decide el servidor. Una serie que no cuenta ya lo dice el mensaje de
+  siempre al guardarla («RIR 5 por encima de tu umbral…»).
+- **Guardar no cambia.** La serie se guarda igual y no recuerda de qué rutina
+  salió: la comparativa compara por grupo y semana, y hacer el día 1 en martes
+  es desplazamiento, no incumplimiento. Ningún cambio de esquema en el almacén,
+  y los atajos del iPhone siguen como estaban.
+- **La pantalla**: arriba, la rutina (la última publicada de cada una, la
+  asignada primero) y el día, con la elección a mano en la consulta
+  (`?rutina=…&dia=…`); un aviso que dice qué se ve y por qué —hoy toca el día N de
+  M de «X», es descanso, no hay rutina, o «no es el de hoy» con «Volver a la de
+  hoy»—; la lista del día con «hechas de objetivo» y «Hecho»; un objetivo por
+  grupo se despliega con los ejercicios del catálogo que lo trabajan (1.00 o
+  0.50) sin los que tienen fila propia. Debajo, la búsqueda libre de siempre,
+  rotulada, con un aviso cuando lo elegido no está en la lista del día. Tras
+  guardar, lo elegido se queda —casi siempre sigue otra serie de lo mismo— y el
+  progreso se vuelve a pedir; con el día completo, la pantalla invita a terminar
+  el entrenamiento.
+
+**Alternativas descartadas.** Guardar en cada serie la entrada de rutina de la
+que salió: daría un progreso por entrada sin reglas, pero es un cambio de esquema
+y una segunda verdad sobre lo que ya dicen el ejercicio y la fecha. Contar
+cualquier serie de trabajo: no es la unidad de la rutina y enseñaría como hecha
+una serie que el motor no cuenta. Enseñar en un objetivo por grupo todo el
+volumen del grupo en el día: contaría dos veces lo que ya tiene su fila.
+Deducir el día en el navegador: convertiría fechas lógicas y partiría el
+entrenamiento de medianoche.
+
+**Consecuencias.** Una lectura más por serie guardada. `rutina.integracion.test.ts`
+fija el día desde el ancla y su rotación, la fecha del entrenamiento abierto, qué
+cuenta como hecho (efectivas, la frontera del umbral, calentamientos,
+coeficientes, sin contar dos veces) y los rechazos; `registrar.test.tsx`, lo que
+se ve, lo que se avisa y lo que va a la consulta.

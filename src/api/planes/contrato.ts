@@ -9,7 +9,7 @@ import type { ReferenciaDeGrupo } from '../../catalogo/tipos.js';
  */
 
 const cerrado = { additionalProperties: false } as const;
-const Uuid = Type.String({
+export const Uuid = Type.String({
   pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
 });
 const Fecha = Type.String({ pattern: '^\\d{4}-\\d{2}-\\d{2}$' });
