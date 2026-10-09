@@ -58,13 +58,43 @@ Semana natural (lunes a domingo) del hoy lógico del usuario.
 - `frescura`: lo que el servidor sabe de verdad. La web no ve la cola del
   teléfono; no hay «pendientes».
 
-## `GET /api/lectura/v1/historial?limite=30`
+## `GET /api/lectura/v1/historial?pagina=1`
 
-Hasta 100 sesiones, de la más reciente a la más antigua, con sus series crudas:
-`{ sesiones: [{ id, fecha_logica, iniciada_en, finalizada_en, fecha_por_confirmar,
-origen, series: [{ id, orden, ejercicio, repeticiones, carga_lb, rir,
-es_calentamiento, realizada_en }] }] }`. El calentamiento se marca, no se borra;
-`rir` es `null` cuando no hay dato.
+Diez sesiones por página, de la más reciente a la más antigua (ADR-024).
+`pagina` es opcional (1 por omisión, `^[1-9]\d{0,3}$`; otra cosa es 400) y una de
+más se acota a la última:
+
+```json
+{
+  "pagina": 1, "paginas": 3, "total": 23, "por_pagina": 10,
+  "sesiones": [{
+    "id": "…", "fecha_logica": "2026-03-04", "iniciada_en": "…", "finalizada_en": "…",
+    "fecha_por_confirmar": false, "origen": "registro",
+    "area": "superior",
+    "series_efectivas": 3,
+    "carga_media_lb": "178.3",
+    "progreso": { "estado": "comparada", "puntos": 6, "cambio": "+5.71",
+                  "ejercicios": 1, "frente_a": "2026-03-02" },
+    "series": [{ "id": "…", "orden": 1, "ejercicio": "Press banca", "repeticiones": 8,
+                 "carga_lb": "185.00", "rir": 2, "es_calentamiento": false,
+                 "realizada_en": "…" }]
+  }]
+}
+```
+
+- `area`: `superior`, `inferior`, `completo` o `null` (nada en ninguno de los dos
+  trenes). Lo decide el motor (`areaDe`) con 2/3 de las series efectivas.
+- `series_efectivas`: las de `agrega` para esa sesión. Número, no cadena: es un
+  conteo de series, igual que en el resumen.
+- `carga_media_lb`: media de las series de trabajo con carga, a la décima; `null`
+  si ninguna llevó carga.
+- `progreso`, según `estado`: `comparada` (`puntos` de −10 a +10, un punto por
+  cada 1 %; `cambio` en puntos porcentuales con signo; `ejercicios` comparados;
+  `frente_a`, la fecha de la sesión anterior de su área), `sin-comunes`
+  (`frente_a`, pero ningún ejercicio en común), `primera` (la primera de su área)
+  o `sin-area`. **Nunca un cero inventado.**
+- Se calcula con todas las sesiones y nada se guarda. Las series van crudas: el
+  calentamiento se marca, no se borra; `rir` es `null` cuando no hay dato.
 
 ## Catálogo
 
@@ -75,7 +105,7 @@ es_calentamiento, realizada_en }] }] }`. El calentamiento se marca, no se borra;
 | `POST /api/lectura/v1/catalogo/ejercicios` `{nombre}` | 201; 409 `duplicado`. |
 | `PUT /api/lectura/v1/catalogo/ejercicios/:id/archivo` `{archivado}` | Borrado lógico reversible. 204 o 404. |
 | `PUT /api/lectura/v1/catalogo/parametros` `{umbral_rir, contribuciones}` | Reemplaza la propuesta ENTERA. Si nadie fija la versión abierta → `{"camino":"en-sitio"}` y rige ya (ADR-013); si una sesión la fija → cierra la vigente y crea la sucesora desde mañana `{"camino":"sucesora","vigente_desde":…}` (ADR-003); si la fija una sesión futura → 409 `fijada-por-futura`. Referencias ajenas, pares repetidos o coeficientes fuera de (0, 2] → 422. |
-| `GET /api/lectura/v1/catalogo/base` | La semilla del repositorio más `ejercicios_por_perfil`. |
+| `GET /api/lectura/v1/catalogo/base` | La semilla del repositorio más `ejercicios_por_perfil`. Cada grupo lleva su `region` (`superior`, `inferior` o `centro`, ADR-024). |
 | `POST /api/lectura/v1/catalogo/importa` `{grupos: [id], ejercicios: [id]}` | Importa **por identificadores**. Idempotente y reconciliadora: reutiliza por nombre, crea lo que falta, **no pisa** un coeficiente existente; con la versión fijada, la sucesora copia todo antes de añadir. Devuelve conteos y `camino` (`en-sitio`, `sucesora` o `sin-cambios`). Identificador desconocido → 422. Un coeficiente en el cuerpo → 400 (no hay forma de colar un valor). |
 
 ## Dispositivos y exportación

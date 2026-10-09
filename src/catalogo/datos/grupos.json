@@ -2,81 +2,97 @@
   {
     "id": "pectoral",
     "nombre": "Pectoral",
-    "descripcion": "Pectoral mayor, porciones clavicular y esternal."
+    "descripcion": "Pectoral mayor, porciones clavicular y esternal.",
+    "region": "superior"
   },
   {
     "id": "deltoides-anterior",
     "nombre": "Deltoides anterior",
-    "descripcion": "Porción frontal del hombro."
+    "descripcion": "Porción frontal del hombro.",
+    "region": "superior"
   },
   {
     "id": "deltoides-lateral",
     "nombre": "Deltoides lateral",
-    "descripcion": "Porción media del hombro; da la anchura."
+    "descripcion": "Porción media del hombro; da la anchura.",
+    "region": "superior"
   },
   {
     "id": "deltoides-posterior",
     "nombre": "Deltoides posterior",
-    "descripcion": "Porción trasera del hombro."
+    "descripcion": "Porción trasera del hombro.",
+    "region": "superior"
   },
   {
     "id": "biceps",
     "nombre": "Bíceps",
-    "descripcion": "Bíceps braquial y braquial anterior."
+    "descripcion": "Bíceps braquial y braquial anterior.",
+    "region": "superior"
   },
   {
     "id": "triceps",
     "nombre": "Tríceps",
-    "descripcion": "Las tres cabezas del tríceps."
+    "descripcion": "Las tres cabezas del tríceps.",
+    "region": "superior"
   },
   {
     "id": "antebrazo",
     "nombre": "Antebrazo",
-    "descripcion": "Flexores y extensores de muñeca y dedos; braquiorradial."
+    "descripcion": "Flexores y extensores de muñeca y dedos; braquiorradial.",
+    "region": "superior"
   },
   {
     "id": "abdomen",
     "nombre": "Abdomen",
-    "descripcion": "Recto abdominal y oblicuos."
+    "descripcion": "Recto abdominal y oblicuos.",
+    "region": "centro"
   },
   {
     "id": "trapecio",
     "nombre": "Trapecio y romboides",
-    "descripcion": "Trapecio en sus tres porciones y romboides."
+    "descripcion": "Trapecio en sus tres porciones y romboides.",
+    "region": "superior"
   },
   {
     "id": "dorsal",
     "nombre": "Dorsal",
-    "descripcion": "Dorsal ancho y redondo mayor."
+    "descripcion": "Dorsal ancho y redondo mayor.",
+    "region": "superior"
   },
   {
     "id": "lumbares",
     "nombre": "Lumbares",
-    "descripcion": "Erectores de la columna en la zona lumbar."
+    "descripcion": "Erectores de la columna en la zona lumbar.",
+    "region": "centro"
   },
   {
     "id": "gluteo",
     "nombre": "Glúteo",
-    "descripcion": "Glúteo mayor y medio."
+    "descripcion": "Glúteo mayor y medio.",
+    "region": "inferior"
   },
   {
     "id": "cuadriceps",
     "nombre": "Cuádriceps",
-    "descripcion": "Los cuatro vientres del cuádriceps."
+    "descripcion": "Los cuatro vientres del cuádriceps.",
+    "region": "inferior"
   },
   {
     "id": "isquiosurales",
     "nombre": "Isquiosurales",
-    "descripcion": "Bíceps femoral, semitendinoso y semimembranoso."
+    "descripcion": "Bíceps femoral, semitendinoso y semimembranoso.",
+    "region": "inferior"
   },
   {
     "id": "aductores",
     "nombre": "Aductores",
-    "descripcion": "Aductor mayor, largo y corto; cara interna del muslo."
+    "descripcion": "Aductor mayor, largo y corto; cara interna del muslo.",
+    "region": "inferior"
   },
   {
     "id": "gemelo",
     "nombre": "Gemelo y sóleo",
-    "descripcion": "Tríceps sural: gemelos y sóleo."
+    "descripcion": "Tríceps sural: gemelos y sóleo.",
+    "region": "inferior"
   }
 ]

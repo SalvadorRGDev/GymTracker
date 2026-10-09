@@ -37,10 +37,17 @@ export type Patron = (typeof PATRONES)[number];
 /** Los únicos coeficientes de la semilla: principal, sinergista y menor. */
 export const COEFICIENTES_DE_SEMILLA = ['1.00', '0.50', '0.25'] as const;
 
+/**
+ * Dónde está un grupo, para decir de qué es una sesión: tren superior, tren
+ * inferior o —abdomen y lumbares— el centro, que no inclina la balanza.
+ */
+export type Region = 'superior' | 'inferior' | 'centro';
+
 export interface GrupoBase {
   readonly id: string;
   readonly nombre: string;
   readonly descripcion: string;
+  readonly region: Region;
 }
 
 export interface EjercicioBase {

@@ -11,16 +11,28 @@ import {
   zonaPara,
 } from '../../catalogo/index.js';
 import {
+  type Area,
   agrega,
+  areaDe,
+  type Centesimas,
+  cargaMedia,
   centesimasDesdeDecimal,
   decimalDesdeCentesimas,
   lunesDe,
+  progreso,
+  type SerieConCarga,
   sumaDias,
   volumenDe,
 } from '../../domain/volume/index.js';
 import { conflicto, invalido, noEncontrado } from '../errores.js';
 import { ESCALA, nivelDeVolumen } from '../escala.js';
-import { hoyDe, parametrosDe, seriesEjecutadas, versionAbierta } from '../volumen.js';
+import {
+  hoyDe,
+  parametrosDe,
+  serieDelMotor,
+  seriesEjecutadas,
+  versionAbierta,
+} from '../volumen.js';
 import type {
   Catalogo,
   CatalogoBaseConPerfiles,
@@ -92,38 +104,108 @@ export function dashboard(almacen: AlmacenDeUsuario): Dashboard {
 
 // ── Historial: el registro, no un resumen ───────────────────────────────────
 
-export function historial(almacen: AlmacenDeUsuario, limite: number): Historial {
+/** Sesiones por página del historial: las diez últimas en la primera. */
+export const SESIONES_POR_PAGINA = 10;
+
+function conSigno(c: Centesimas): string {
+  return c > 0 ? `+${decimalDesdeCentesimas(c)}` : decimalDesdeCentesimas(c);
+}
+
+/**
+ * El historial (ADR-024): cada sesión con su área, sus series efectivas, la carga
+ * media y el progreso frente a la anterior de su misma área; de diez en diez, de
+ * la más reciente a la más antigua. Se calcula con TODAS las sesiones —la
+ * anterior de su área puede estar en otra página— y nada de esto se guarda.
+ * Las series siguen ahí, crudas: borrar y confirmar fechas vive en el detalle.
+ */
+export function historial(almacen: AlmacenDeUsuario, pagina: number): Historial {
   const nombres = new Map(almacen.lee('ejercicio').map((e) => [e.id, e.nombre]));
-  const sesiones = [...almacen.lee('sesion')]
-    .sort((a, b) =>
-      a.fecha_logica === b.fecha_logica
-        ? b.iniciada_en.localeCompare(a.iniciada_en)
-        : b.fecha_logica.localeCompare(a.fecha_logica),
-    )
-    .slice(0, limite);
-  const series = almacen.lee('serie');
-  return {
-    sesiones: sesiones.map((s) => ({
+  const parametros = parametrosDe(almacen);
+  const regiones = new Map(
+    almacen.lee('grupo_muscular').map((g) => {
+      const region = grupoBasePorNombre(g.nombre)?.region;
+      return [g.id, region === 'superior' || region === 'inferior' ? region : null] as const;
+    }),
+  );
+  const seriesPorSesion = new Map<string, Fila<'serie'>[]>();
+  for (const x of almacen.lee('serie')) {
+    const lista = seriesPorSesion.get(x.sesion_id) ?? [];
+    lista.push(x);
+    seriesPorSesion.set(x.sesion_id, lista);
+  }
+  // En orden de calendario: la anterior de cada área es la última vista de esa área.
+  const cronologicas = [...almacen.lee('sesion')].sort(
+    (a, b) =>
+      a.fecha_logica.localeCompare(b.fecha_logica) || a.iniciada_en.localeCompare(b.iniciada_en),
+  );
+  const ultimaDe = new Map<Area, { fecha: string; series: SerieConCarga[] }>();
+  const calculadas = cronologicas.map((s) => {
+    const filas = (seriesPorSesion.get(s.id) ?? []).sort(
+      (a, b) => Number(a.orden) - Number(b.orden),
+    );
+    const agregado = agrega({
+      series: filas.map((x) => serieDelMotor(x, s, parametros)),
+      umbrales: parametros.umbrales,
+    });
+    const conCarga: SerieConCarga[] = filas.map((x) => ({
+      ejercicioId: x.ejercicio_id,
+      tipo: x.es_calentamiento === 'true' ? 'calentamiento' : 'trabajo',
+      carga: centesimasDesdeDecimal(x.carga_lb),
+      repeticiones: Number(x.repeticiones),
+      rir: x.rir === null ? null : Number(x.rir),
+    }));
+    const area = areaDe(agregado, (g) => regiones.get(g) ?? null);
+    const anterior = area === null ? undefined : ultimaDe.get(area);
+    const comparado = anterior === undefined ? null : progreso(conCarga, anterior.series);
+    const media = cargaMedia(conCarga);
+    if (area !== null) ultimaDe.set(area, { fecha: s.fecha_logica, series: conCarga });
+    return {
       id: s.id,
       fecha_logica: s.fecha_logica,
       iniciada_en: s.iniciada_en,
       finalizada_en: s.finalizada_en,
       fecha_por_confirmar: s.fecha_por_confirmar === 'true',
-      origen: s.origen === 'captura' ? 'captura' : 'registro',
-      series: series
-        .filter((x) => x.sesion_id === s.id)
-        .sort((a, b) => Number(a.orden) - Number(b.orden))
-        .map((x) => ({
-          id: x.id,
-          orden: Number(x.orden),
-          ejercicio: nombres.get(x.ejercicio_id) ?? 'Ejercicio desconocido',
-          repeticiones: Number(x.repeticiones),
-          carga_lb: x.carga_lb,
-          rir: x.rir === null ? null : Number(x.rir),
-          es_calentamiento: x.es_calentamiento === 'true',
-          realizada_en: x.realizada_en,
-        })),
-    })),
+      origen: s.origen === 'captura' ? ('captura' as const) : ('registro' as const),
+      area,
+      series_efectivas: agregado.seriesEfectivas,
+      // A la décima: la media es un resumen, no una carga que alguien levantó.
+      carga_media_lb: media === null ? null : decimalDesdeCentesimas(media).slice(0, -1),
+      progreso:
+        area === null
+          ? ({ estado: 'sin-area' } as const)
+          : anterior === undefined
+            ? ({ estado: 'primera' } as const)
+            : comparado === null
+              ? ({ estado: 'sin-comunes', frente_a: anterior.fecha } as const)
+              : ({
+                  estado: 'comparada',
+                  puntos: comparado.puntos,
+                  cambio: conSigno(comparado.cambio as Centesimas),
+                  ejercicios: comparado.ejercicios,
+                  frente_a: anterior.fecha,
+                } as const),
+      series: filas.map((x) => ({
+        id: x.id,
+        orden: Number(x.orden),
+        ejercicio: nombres.get(x.ejercicio_id) ?? 'Ejercicio desconocido',
+        repeticiones: Number(x.repeticiones),
+        carga_lb: x.carga_lb,
+        rir: x.rir === null ? null : Number(x.rir),
+        es_calentamiento: x.es_calentamiento === 'true',
+        realizada_en: x.realizada_en,
+      })),
+    };
+  });
+  const total = calculadas.length;
+  const paginas = Math.max(1, Math.ceil(total / SESIONES_POR_PAGINA));
+  const actual = Math.min(Math.max(1, pagina), paginas);
+  const recientes = calculadas.reverse();
+  return {
+    pagina: actual,
+    paginas,
+    total,
+    por_pagina: SESIONES_POR_PAGINA,
+    sesiones: recientes.slice((actual - 1) * SESIONES_POR_PAGINA, actual * SESIONES_POR_PAGINA),
   };
 }
 

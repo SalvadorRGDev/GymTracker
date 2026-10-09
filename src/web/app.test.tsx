@@ -70,7 +70,9 @@ describe('la sesión', () => {
       'GET /api/sesion/v1/actual': {
         cuerpo: { correo: 'ana@ejemplo.com', zona_horaria: 'America/Mexico_City' },
       },
-      'GET /api/lectura/v1/historial': { cuerpo: { sesiones: [] } },
+      'GET /api/lectura/v1/historial': {
+        cuerpo: { pagina: 1, paginas: 1, total: 0, por_pagina: 10, sesiones: [] },
+      },
     });
     window.history.replaceState(null, '', '/historial');
     montado = await monta(<App />);
@@ -89,7 +91,9 @@ describe('la sesión', () => {
       'GET /api/sesion/v1/actual': {
         cuerpo: { correo: 'ana@ejemplo.com', zona_horaria: 'America/Mexico_City' },
       },
-      'GET /api/lectura/v1/historial': { cuerpo: { sesiones: [] } },
+      'GET /api/lectura/v1/historial': {
+        cuerpo: { pagina: 1, paginas: 1, total: 0, por_pagina: 10, sesiones: [] },
+      },
       'POST /api/sesion/v1/salir': { estado: 204 },
     });
     window.history.replaceState(null, '', '/historial');

@@ -65,6 +65,24 @@ const TRAZOS = {
     ['path', { d: 'm16 9-5.5 5.5L8 12' }],
   ],
   'chevron-down': [['path', { d: 'm6 9 6 6 6-6' }]],
+  'chevron-right': [['path', { d: 'm9 18 6-6-6-6' }]],
+  'chevron-left': [['path', { d: 'm15 18-6-6 6-6' }]],
+  'chevrons-left': [
+    ['path', { d: 'm11 17-5-5 5-5' }],
+    ['path', { d: 'm18 17-5-5 5-5' }],
+  ],
+  'chevrons-right': [
+    ['path', { d: 'm6 17 5-5-5-5' }],
+    ['path', { d: 'm13 17 5-5-5-5' }],
+  ],
+  'trending-down': [
+    ['path', { d: 'M16 17h6v-6' }],
+    ['path', { d: 'm22 17-8.5-8.5-5 5L2 7' }],
+  ],
+  equal: [
+    ['line', { x1: '5', x2: '19', y1: '9', y2: '9' }],
+    ['line', { x1: '5', x2: '19', y1: '15', y2: '15' }],
+  ],
   'arrow-right': [
     ['path', { d: 'M5 12h14' }],
     ['path', { d: 'm12 5 7 7-7 7' }],

@@ -48,8 +48,8 @@ const CATALOGO: DatosDeCatalogo = {
 
 const BASE: CatalogoBaseConPerfiles = {
   grupos: [
-    { id: 'pectoral', nombre: 'Pectoral', descripcion: '' },
-    { id: 'triceps', nombre: 'Tríceps', descripcion: '' },
+    { id: 'pectoral', nombre: 'Pectoral', descripcion: '', region: 'superior' },
+    { id: 'triceps', nombre: 'Tríceps', descripcion: '', region: 'superior' },
   ],
   perfiles: [],
   plantillas: [],

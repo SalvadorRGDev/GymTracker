@@ -2127,13 +2127,72 @@ button:disabled,
   border-color: var(--acento-texto);
 }
 
-/* ── Historial ──────────────────────────────────────────────────────────── */
+/* ── Historial (ADR-024) ───────────────────────────────────────────────── */
 
-.sesiones {
+.historial {
   display: grid;
   gap: var(--e2);
 }
 
+.historial .tarjeta-titulo h3:focus-visible {
+  outline: 3px solid var(--acento-vivo);
+  outline-offset: 4px;
+}
+
+/* La cabecera de fila es la fecha: se lee como un dato, no como un rótulo. */
+.historial-tabla .fila-sesion > th {
+  padding: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--texto);
+}
+
+.historial-tabla .fila-sesion > th .etiqueta-pequena {
+  margin-left: 6px;
+}
+
+.historial-tabla .fila-sesion:hover > * {
+  background: var(--fondo-sutil);
+}
+
+.desplegar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 4px 6px 4px 2px;
+  border: 0;
+  border-radius: var(--r1);
+  background: none;
+  color: var(--texto);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.desplegar-icono {
+  flex-shrink: 0;
+  color: var(--texto-3);
+}
+
+.desplegar[aria-expanded="true"] .desplegar-icono {
+  transform: rotate(90deg);
+}
+
+.historial-tabla .fila-detalle > td {
+  padding: 4px 8px 16px;
+  background: var(--fondo-sutil);
+}
+
+.detalle-de-sesion {
+  display: grid;
+  gap: 12px;
+}
+
+/* Cabecera y metadatos de una ficha: también las de Dispositivos. */
 .sesion-cabecera {
   display: flex;
   flex-wrap: wrap;
@@ -2162,6 +2221,180 @@ button:disabled,
 
 .tabla-desplazable {
   overflow-x: auto;
+}
+
+/* El progreso: signo, flecha y número; el color sólo acompaña. */
+.progreso-celda {
+  display: inline-grid;
+  justify-items: end;
+  gap: 2px;
+}
+
+.progreso-sesion {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 9px;
+  border-radius: var(--r-pastilla);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.progreso-sube {
+  background: var(--acento-suave);
+  color: var(--acento-texto);
+}
+
+.progreso-baja {
+  background: var(--aviso-fondo);
+  color: var(--aviso-texto);
+}
+
+.progreso-igual {
+  background: var(--fondo-apagado);
+  color: var(--texto-2);
+}
+
+.progreso-sin {
+  font-weight: 600;
+  color: var(--texto-2);
+}
+
+.progreso-detalle {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--texto-3);
+  white-space: nowrap;
+}
+
+/* Paginación: números en tabla, la actual en el acento. */
+.paginacion {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding-top: var(--e1);
+}
+
+.paginacion ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.paginacion button {
+  display: inline-flex;
+  min-width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border: 1px solid var(--borde);
+  border-radius: var(--r2);
+  background: var(--fondo);
+  color: var(--texto-2);
+  font: inherit;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.paginacion button:hover:not(:disabled) {
+  border-color: var(--borde-fuerte);
+  color: var(--texto);
+}
+
+.paginacion button[aria-current="page"] {
+  border-color: var(--acento-texto);
+  background: var(--acento);
+  color: var(--sobre-acento);
+}
+
+.paginacion button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.paginacion-hueco {
+  display: inline-flex;
+  min-width: 24px;
+  align-items: center;
+  justify-content: center;
+  color: var(--texto-3);
+}
+
+/* En el teléfono, una sola columna: la fecha y, debajo, lo demás (como la
+   comparativa). Las celdas se ocultan, no se convierten en bloques: la tabla
+   sigue siendo una tabla para el lector de pantalla. */
+.historial-tabla .col-amplia {
+  display: none;
+}
+
+/* Con las demás columnas ocultas, la primera ocupa todo y el detalle desplegado
+   (que abarca las cinco) no le quita sitio. Sólo la de la tabla principal: la de
+   las series va dentro. */
+.historial-tabla > thead > tr > th:first-child {
+  width: 100%;
+}
+
+/* Las series de una sesión, en 390 px: celdas más juntas y sin «#» (el orden lo
+   dice la fila, y el botón de borrar lo nombra). Nada detrás de un desplazamiento. */
+.detalle-de-sesion .tabla th,
+.detalle-de-sesion .tabla td {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.resumen-en-movil {
+  display: grid;
+  gap: 6px;
+  padding: 0 0 2px 26px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--texto-2);
+}
+
+.resumen-en-movil .sin-partir {
+  white-space: nowrap;
+}
+
+.resumen-en-movil .progreso-celda {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.resumen-en-movil .progreso-detalle {
+  white-space: normal;
+}
+
+@media (min-width: 720px) {
+  .historial-tabla .col-amplia {
+    display: table-cell;
+  }
+
+  .historial-tabla > thead > tr > th:first-child {
+    width: auto;
+  }
+
+  .detalle-de-sesion .tabla th,
+  .detalle-de-sesion .tabla td {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .resumen-en-movil {
+    display: none;
+  }
+
+  .historial-tabla .fila-detalle > td {
+    padding: 4px 12px 16px 36px;
+  }
 }
 
 /* ── Planes ─────────────────────────────────────────────────────────────── */
@@ -2526,6 +2759,10 @@ button:disabled,
  */
 
 @media (prefers-reduced-motion: no-preference) {
+  .desplegar-icono {
+    transition: transform var(--duracion) var(--curva);
+  }
+
   .navegacion a,
   .boton,
   .boton-fantasma,
@@ -2537,7 +2774,8 @@ button:disabled,
   .entrada,
   .selector,
   .fila-rutina,
-  .opciones-de-grupo button {
+  .opciones-de-grupo button,
+  .paginacion button {
     transition:
       background-color var(--duracion) ease,
       border-color var(--duracion) ease,

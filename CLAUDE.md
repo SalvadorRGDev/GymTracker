@@ -4,7 +4,7 @@ Aplicación personal de seguimiento de fuerza: **series efectivas por grupo
 muscular y semana**, lo planeado contra lo ejecutado. Dos personas, coste cero,
 un proceso de Node en la máquina del autor publicado por un túnel, datos en
 libros de Excel. Documento maestro: `Plan.md`. Decisiones: `docs/01-decisiones.md`
-(ADR-001 a 023). Reglas por directorio: `.claude/rules/`.
+(ADR-001 a 024). Reglas por directorio: `.claude/rules/`.
 
 Código, comentarios, documentación e identificadores en **español**: el dominio
 se piensa en español y traducir a medias hace que dos personas llamen distinto a
@@ -28,6 +28,9 @@ lo mismo.
   toca y lo que va hecho, con la búsqueda libre debajo (ADR-022).
 - **Cargas en libras** y peso corporal en kilos; un libro con `carga_kg` se
   convierte al cargarlo y un atajo viejo que manda kilos sigue valiendo (ADR-023).
+- **Historial** en tabla de diez en diez: área, series efectivas, carga media y
+  progreso de −10 a +10 frente a la sesión anterior de su área (ADR-024). Las
+  gráficas del historial, pendientes.
 - Pendiente: **probar los atajos en un iPhone real** (`atajos/PRUEBA-MANUAL.md`).
 
 ## Comandos
@@ -61,6 +64,9 @@ almacén real en un experimento: un libro corrompido no tiene deshacer.
 - **Calentamiento** como variante del tipo; el motor lo descarta él mismo.
 - **Carga en libras, peso corporal en kilos** (ADR-023). La conversión de kilos
   a libras es la del motor (`librasDesdeKilos`, factor exacto, enteros).
+- **Área, carga media y progreso** son rendimiento, no volumen: los calcula el
+  motor al leer, nunca se guardan y no entran en la semana ni en la comparativa
+  (ADR-024).
 - **Fecha lógica** de la sesión, puesta por el servidor desde la zona de la
   cuenta; en la web, con el reloj del servidor. Nunca se convierte a `Date` para
   pintarla.

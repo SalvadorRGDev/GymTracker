@@ -81,6 +81,29 @@ export interface SerieDelHistorial {
   readonly realizada_en: string;
 }
 
+/**
+ * Frente a la sesión anterior de la misma área (ADR-024). Sin comparación se
+ * dice por qué: nunca un cero, que significaría «igual».
+ */
+export type ProgresoDeSesion =
+  | {
+      readonly estado: 'comparada';
+      /** De −10 a +10: un punto por cada 1 % de mejora media de las mejores series. */
+      readonly puntos: number;
+      /** El cambio medio en %, con signo y dos decimales: «+2.86», «-0.40», «0.00». */
+      readonly cambio: string;
+      /** Los ejercicios que estaban en las dos y se pudieron comparar. */
+      readonly ejercicios: number;
+      /** La fecha de la sesión con la que se compara. */
+      readonly frente_a: string;
+    }
+  /** Hubo una anterior de su área, pero ningún ejercicio en común que comparar. */
+  | { readonly estado: 'sin-comunes'; readonly frente_a: string }
+  /** La primera de su área: no hay con qué comparar. */
+  | { readonly estado: 'primera' }
+  /** Sin series efectivas de tren superior ni inferior: no tiene área. */
+  | { readonly estado: 'sin-area' };
+
 export interface SesionDelHistorial {
   readonly id: string;
   readonly fecha_logica: string;
@@ -89,15 +112,29 @@ export interface SesionDelHistorial {
   readonly finalizada_en: string | null;
   readonly fecha_por_confirmar: boolean;
   readonly origen: 'captura' | 'registro';
+  /** Tren superior o inferior con 2/3 de sus series efectivas; si no, completo. */
+  readonly area: 'superior' | 'inferior' | 'completo' | null;
+  /** Como las cuenta el motor: el calentamiento y lo que pasa del umbral no cuentan. */
+  readonly series_efectivas: number;
+  /** Media de las cargas de las series de trabajo con carga, a la décima, en libras. */
+  readonly carga_media_lb: string | null;
+  readonly progreso: ProgresoDeSesion;
   readonly series: readonly SerieDelHistorial[];
 }
 
 export interface Historial {
+  /** La que se devuelve: una pedida de más se acota a la última. */
+  readonly pagina: number;
+  /** Al menos una, aunque no haya sesiones. */
+  readonly paginas: number;
+  readonly total: number;
+  readonly por_pagina: number;
+  /** De la más reciente a la más antigua. */
   readonly sesiones: readonly SesionDelHistorial[];
 }
 
 export const ConsultaDeHistorial = Type.Object(
-  { limite: Type.Optional(Type.String({ pattern: '^\\d{1,3}$' })) },
+  { pagina: Type.Optional(Type.String({ pattern: '^[1-9]\\d{0,3}$' })) },
   cerrado,
 );
 export type ParametrosDeHistorial = Static<typeof ConsultaDeHistorial>;

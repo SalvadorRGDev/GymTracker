@@ -15,6 +15,7 @@ import {
   type PerfilBase,
   type PlantillaBase,
   type RangosBase,
+  type Region,
 } from './tipos.js';
 
 /**
@@ -127,16 +128,23 @@ class Validador {
   }
 }
 
+const REGIONES: readonly Region[] = ['superior', 'inferior', 'centro'];
+
 function grupos(v: Validador, datos: unknown): GrupoBase[] {
   const salida = v.lista(datos, 'grupos').flatMap((g, i) => {
     const r = v.objeto(g, `grupos[${i}]`);
     if (r === null) return [];
     const donde = `grupos[${i}]`;
+    const region = v.texto(r, 'region', donde);
+    if (!REGIONES.includes(region as Region)) {
+      v.falla(donde, `región «${region}» desconocida: superior, inferior o centro`);
+    }
     return [
       {
         id: v.identificador(r, donde),
         nombre: v.texto(r, 'nombre', donde),
         descripcion: v.texto(r, 'descripcion', donde),
+        region: region as Region,
       },
     ];
   });

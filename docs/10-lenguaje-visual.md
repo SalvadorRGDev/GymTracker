@@ -30,8 +30,10 @@ ADR-018 (mapa muscular) y el ADR-021 (figuras de «Ver ejemplo»). Implementaci�
   interactivas cambian el borde al pasar, sin elevarse.
 - **Botones**: primario relleno, secundario fantasma; suben 2 px al pasar y
   vuelven al pulsar.
-- **Tablas**: separadores finos, cifras alineadas a la derecha, nada de vidrio en
-  filas.
+- **Tablas**: separadores finos, cifras alineadas a la derecha, la unidad en la
+  cabecera («Carga (lb)»), nada de vidrio en filas. En el teléfono las columnas
+  secundarias se ocultan y su contenido va bajo el nombre de la fila (comparativa,
+  historial): nada detrás de un desplazamiento.
 - **Estados vacíos** con trama diagonal y un icono; la trama nunca va detrás de un
   número.
 - **Decoración**: líneas discontinuas en los bordes de la columna y un brillo
@@ -151,3 +153,13 @@ cifra con signo, un icono y la palabra.
 
 Con deuteranopía, déficit y superávit quedan a ΔE ≥ 40, y en la figura los cuatro
 estados y la trama a ΔE ≥ 25 entre sí. Lo comprueba la misma prueba.
+
+## El progreso del historial (ADR-024)
+
+Sin escala propia: reutiliza pares que ya pasan la prueba de contraste (≥ 5:1).
+Sube en índigo (`--acento-suave` / `--acento-texto`), baja en ámbar
+(`--aviso-fondo` / `--aviso-texto`) e igual en gris (`--fondo-apagado` /
+`--texto-2`). El color acompaña: cada pastilla lleva signo, flecha y número, y
+«—» lleva su motivo. No usa la escala de la comparativa: «baja» frente a la sesión
+anterior no es «déficit» frente al plan. La página actual de la paginación va en
+el acento (`--acento` / `--sobre-acento`).

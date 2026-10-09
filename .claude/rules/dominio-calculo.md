@@ -78,13 +78,23 @@ redondean distinto.
   **más** del 15 % y 30 efectivas o más, en aritmética entera. Las dos cifras son
   convenciones declaradas.
 
-## Lo que no es volumen (ADR-023)
+## Lo que no es volumen (ADR-023, ADR-024)
 
 Viven aquí porque son aritmética exacta y puros, no porque sean estímulo.
 
 - **`librasDesdeKilos`** (`unidades.ts`): el factor es exacto por definición
   (0.45359237), así que lb = kg × 100000000 / 45359237 en enteros, con un solo
   redondeo a la centésima, a la mitad par. Nada de `* 2.2046`.
+- **`areaDe`** (`area.ts`) recibe el `Agregado` que dio `agrega` y no vuelve a
+  contar series: superior o inferior con 2/3 del volumen de los dos trenes, en
+  enteros (`3 · parte ≥ 2 · total`); el centro no cuenta. Sin nada en los trenes,
+  `null`.
+- **`cargaMedia` y `progreso`** (`rendimiento.ts`) son indicadores de
+  **rendimiento**. Nunca entran en `agrega`, ni en la comparativa, ni en el mapa,
+  ni tienen umbral u objetivo: la métrica de estímulo sigue siendo una (ADR-003).
+  El progreso compara la mejor serie de cada ejercicio común con Epley y el RIR,
+  sólo con carga contra carga o sin carga contra sin carga, y **sin ejercicios en
+  común devuelve `null`**: un cero diría «igual» sin haber comparado nada.
 
 ## Reproducibilidad
 
@@ -124,3 +134,5 @@ siempre deben estar cubiertos:
 - Ejercicio que contribuye a varios grupos musculares con coeficientes
   distintos.
 - Semana sin datos: devuelve cero, no error ni null.
+- Progreso sin ejercicios en común: `null`, nunca cero (al revés que la semana:
+  ahí cero es un dato y aquí sería inventarlo).

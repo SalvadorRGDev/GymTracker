@@ -90,7 +90,30 @@ llama al mismo servicio, así que hereda sus reglas enteras:
   nada pendiente de enviar y no se reintenta nada—: es lo que evita que recargar
   la página parta un entrenamiento en dos sesiones. Ninguna serie vive ahí.
 
-## El historial es el registro, no un resumen
+## El historial (ADR-024)
+
+- **Una fila por sesión**: fecha, área, series efectivas, carga media (lb) y
+  progreso. Todo llega del servidor: el navegador no deduce el área, no promedia
+  cargas y no compara sesiones. Hacerlo aquí sería el motor duplicado (R10).
+- **El progreso no va sólo en color**: signo, flecha y número («+6», «-4», «0»),
+  con el cambio en % y la fecha con que se compara; el color (índigo sube, ámbar
+  baja, gris igual) acompaña. Sin comparación es «—» **con su motivo** —primera
+  de su área, sin ejercicios en común, sin tren superior ni inferior—, nunca un
+  cero.
+- **De diez en diez**, con la página en la consulta (`?pagina=2`; la primera
+  limpia la consulta). La paginación es una `nav` con nombre, la página actual
+  con `aria-current`, y al cambiar de página el foco sube al resumen («Sesiones
+  11–20 de 23»): el teclado no se queda abajo mientras arriba cambia todo.
+- **La fecha despliega el detalle** (`aria-expanded`, `aria-controls`). En el
+  teléfono, como en la comparativa, las otras columnas se ocultan y lo suyo va
+  bajo la fecha («Tren superior · 3 series efectivas · media 178.3 lb» y el
+  progreso): cinco columnas no caben en 390 px y la cifra no puede quedar detrás
+  de un desplazamiento. Las celdas se **ocultan**, no se convierten en bloques:
+  así la tabla sigue siendo una tabla para el lector de pantalla.
+- **La unidad va en la cabecera** de las tablas («Carga media (lb)», «Carga
+  (lb)») y detrás de la cifra en el texto corrido («media 150.0 lb»).
+
+### El detalle es el registro, no un resumen
 
 - El calentamiento se **marca y se conserva**. No cuenta volumen —eso lo decide
   el motor— pero borrarlo de la historia sería reescribir lo que pasó.
@@ -98,11 +121,11 @@ llama al mismo servicio, así que hereda sus reglas enteras:
   nunca un cero: cero significa fallo muscular y es lo contrario de no saberlo.
 - Una sesión sin cerrar se dice sin cerrar. El final lo pone el atajo «Terminar
   entrenamiento»; inventarle una hora es inventar un dato.
-- `fecha_por_confirmar` se muestra. La fecha llegó del reloj de un teléfono y el
-  riesgo R3 pide que esa duda se vea, no que se esconda.
-- El historial no agrega, así que no declara frescura: la regla de frescura
-  aplica a las vistas que agregan. Deducirla de las sesiones que se ven sería
-  afirmar sobre lo que no se ve.
+- `fecha_por_confirmar` se muestra, en la fila y en el detalle. La fecha llegó
+  del reloj de un teléfono y el riesgo R3 pide que esa duda se vea.
+- El historial no declara frescura: sus cifras son de cada sesión que se ve, no
+  de la semana. Deducirla de las sesiones que se ven sería afirmar sobre lo que
+  no se ve.
 
 ## El catálogo se importa antes que teclearse
 

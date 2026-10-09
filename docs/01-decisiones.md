@@ -34,6 +34,7 @@ no aprobar.
 | 021 | «Ver ejemplo»: figuras animadas propias | ACEPTADO |
 | 022 | «Registrar» empieza por la rutina del día | ACEPTADO |
 | 023 | Las cargas, en libras | ACEPTADO (enmienda la unidad canónica del Plan) |
+| 024 | Historial: área, carga media y progreso por sesión | ACEPTADO (matiza el ADR-003) |
 
 ---
 
@@ -627,3 +628,70 @@ al menos una copia en kilos sobrevive; aun así, antes de arrancar el servidor
 nuevo sobre el almacén real conviene un respaldo completo (`deploy/respaldo.sh`).
 Lo fijan `unidades.test.ts`, `almacen.test.ts` («libros anteriores a las
 libras») y `captura.integracion.test.ts`.
+
+## ADR-024 — Historial: área, carga media y progreso por sesión
+
+**Estado**: ACEPTADO (matiza el ADR-003)
+
+**Contexto.** El historial era una lista de sesiones con sus series crudas y sin
+páginas. El usuario pidió una tabla: sesión (fecha), área (tren superior, tren
+inferior o cuerpo completo), series efectivas, carga media en libras y una
+evaluación de −10 a +10 frente a la sesión anterior de la misma área, de diez en
+diez con botones numerados abajo. Las gráficas quedan para después.
+
+**Decisión.**
+
+- **Área** (`areaDe`, en el motor). Cada grupo del catálogo base lleva su región
+  (superior, inferior o centro), y un grupo del usuario la toma por su nombre,
+  como la `zona` del ADR-018. Una sesión es de tren superior si se lleva al menos
+  2/3 de las series efectivas que fueron a un tren o al otro; de tren inferior,
+  igual; si no, cuerpo completo. El centro —abdomen, lumbares— y un grupo que no
+  está en el catálogo base no inclinan la balanza, y una sesión sin nada en los
+  dos trenes no tiene área.
+- **Series efectivas**: las de `agrega` para esa sesión, el mismo número que
+  cuenta la semana.
+- **Carga media**: la de las series de trabajo con carga —sin calentamientos ni
+  peso corporal—, a la décima. Dice qué cargas se movieron y no compara nada:
+  cambia con los ejercicios que se hicieron.
+- **Progreso** (`progreso`, en el motor). Por cada ejercicio de la sesión que
+  también estuvo en la anterior de su área, su mejor serie frente a la de
+  entonces. La marca de una serie con carga es la fórmula de Epley con el RIR,
+  carga × (1 + (repeticiones + RIR) / 30), porque repeticiones + RIR son las que
+  se podían hacer; sin carga, repeticiones + RIR a secas. Un ejercicio con carga
+  en una sesión y sin ella en la otra no se compara. El cambio medio pesa cada
+  ejercicio por sus series de trabajo de hoy y da **un punto por cada 1 %**, a la
+  mitad par, con tope en ±10. Sin ejercicios en común no hay número: «—» con el
+  motivo, nunca un cero. Aritmética entera; el /30 se cancela al dividir.
+- **Nada se guarda.** Se calcula al leer con todas las sesiones —la anterior de su
+  área puede estar en otra página— y después se pagina: diez por página, de la
+  más reciente a la más antigua (`?pagina=`; una página de más se acota a la
+  última).
+- **La pantalla**: la fecha es la cabecera de cada fila y despliega el detalle
+  (las series como llegaron, borrar, confirmar la fecha); el progreso lleva signo,
+  flecha y número y el color sólo acompaña; paginación numerada con primera,
+  anterior, siguiente y última, y el foco vuelve al resumen al cambiar de página.
+  La unidad va en la cabecera («Carga media (lb)»). En el teléfono, como en la
+  comparativa, las otras columnas se ocultan y lo suyo va bajo la fecha.
+
+**Relación con el ADR-003.** La métrica de estímulo sigue siendo una: series
+efectivas. Carga media y progreso son indicadores de **rendimiento**: no entran en
+la semana, ni en la comparativa, ni en el mapa, y no tienen umbral ni objetivo.
+El ADR-003 dejaba la carga como métrica secundaria y nunca como estímulo; aquí va
+en la misma fila que las series efectivas porque el usuario lo pidió, con su
+unidad en el rótulo y sin operar nunca con ellas.
+
+**Alternativas descartadas.** Comparar la carga media: sube con sólo cambiar de
+ejercicio sin haber mejorado nada. Comparar con la sesión anterior a secas: un
+día de pierna tras uno de pecho no tiene nada en común. Tonelaje (carga ×
+repeticiones): premia hacer más series, que es volumen, y castiga subir la carga
+con menos repeticiones. Una marca sin RIR: una serie fácil y otra al fallo con
+la misma carga y repeticiones valdrían lo mismo. Paginar en el navegador: tendría
+que recibirlo todo. Guardar el progreso: un segundo sitio donde vive la verdad, y
+dejaría de ser cierto al borrar una serie anterior.
+
+**Consecuencias.** Borrar una serie vieja puede cambiar el progreso de la
+siguiente sesión de su área, y es lo correcto: se calcula con lo que hay. Cada
+lectura del historial recorre todas las series del libro; con miles de sesiones
+sería la caché derivada y descartable que prevé el ADR-003. Lo fijan
+`area.test.ts`, `rendimiento.test.ts`, `historial.integracion.test.ts` e
+`historial.test.tsx`.

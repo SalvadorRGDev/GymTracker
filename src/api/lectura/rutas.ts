@@ -72,8 +72,8 @@ export function rutasDeLectura(
     async (request, reply): Promise<Historial> => {
       const quien = await identidad(request, reply);
       compruebaEsquema(request);
-      const limite = Math.min(100, Math.max(1, Number(request.query.limite ?? '30')));
-      return conAlmacenDeUsuario(quien, (almacen) => historial(almacen, limite));
+      const pagina = Number(request.query.pagina ?? '1');
+      return conAlmacenDeUsuario(quien, (almacen) => historial(almacen, pagina));
     },
   );
 
