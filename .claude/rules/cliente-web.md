@@ -118,10 +118,16 @@ llama al mismo servicio, así que hereda sus reglas enteras:
   equipamiento. Los sinónimos salen del catálogo base y viven sólo en el
   navegador: en el almacén serían una segunda clave por la que dos ejercicios
   pueden colisionar.
-- **«Ver ejemplo»** (ADR-021) va en cada fila de la lista, **fuera de la
-  etiqueta** de la casilla: dentro, el clic marcaría o desmarcaría el ejercicio.
-  Su nombre accesible dice de qué ejercicio es («Ver ejemplo de Press banca») y su
-  tono (menta) no es el del nombre (índigo al marcarlo).
+- **«Ver ejemplo»** (ADR-021) va **donde se elige un ejercicio**: la lista del
+  catálogo base, «Tus ejercicios» (archivar), cada entrada del editor de rutinas,
+  junto al selector de «Registrar» y en cada fila de la rutina del día. Siempre
+  **fuera de la etiqueta** de la casilla: dentro, el clic marcaría o desmarcaría
+  el ejercicio. Su nombre accesible dice de qué ejercicio es («Ver ejemplo de
+  Press banca») y su tono (menta) no es el del nombre (índigo al marcarlo); junto
+  a un desplegable es sólo el icono, en 44 × 44.
+- Un ejercicio del usuario enseña la figura del catálogo base **por el
+  `base_id` que manda el servidor** (nombre normalizado). Uno propio o renombrado
+  llega con `null` y no lleva botón: enseñar la figura de otro sería inventar.
 - La ventana es el `<dialog>` nativo en modo modal: el foco entra por «Cerrar» y
   vuelve a «Ver ejemplo» al salir; Escape y un clic fuera también cierran. Las
   poses se cargan con `import()` al abrirla, no con la página.

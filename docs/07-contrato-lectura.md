@@ -70,7 +70,7 @@ es_calentamiento, realizada_en }] }] }`. El calentamiento se marca, no se borra;
 
 | Ruta | Qué hace |
 | ---- | -------- |
-| `GET /api/lectura/v1/catalogo` | `{ grupos: [{id, nombre, zona}], ejercicios: [{id, nombre, archivado, sin_grupos}], parametros: { version_id, umbral_rir, vigente_desde, fijada, manana, contribuciones: [{ejercicio_id, grupo_id, coeficiente}] } }` — la versión ABIERTA. |
+| `GET /api/lectura/v1/catalogo` | `{ grupos: [{id, nombre, zona}], ejercicios: [{id, nombre, archivado, sin_grupos, base_id}], parametros: { version_id, umbral_rir, vigente_desde, fijada, manana, contribuciones: [{ejercicio_id, grupo_id, coeficiente}] } }` — la versión ABIERTA. `base_id`: el ejercicio del catálogo base con el mismo nombre normalizado, para «Ver ejemplo»; `null` si es propio o se renombró. |
 | `POST /api/lectura/v1/catalogo/grupos` `{nombre}` | 201; duplicado (sin mayúsculas ni espacios) → 409 `duplicado`. |
 | `POST /api/lectura/v1/catalogo/ejercicios` `{nombre}` | 201; 409 `duplicado`. |
 | `PUT /api/lectura/v1/catalogo/ejercicios/:id/archivo` `{archivado}` | Borrado lógico reversible. 204 o 404. |

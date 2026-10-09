@@ -21,8 +21,9 @@ lo mismo.
 - Baja de cuenta real con `npm run baja` y aviso de privacidad
   (`docs/11-privacidad.md`). Alta pública opcional desde la web con tope
   (`ALTA_ABIERTA`, `MAXIMO_DE_CUENTAS`; ADR-020).
-- «Ver ejemplo» en el catálogo: cada uno de los 182 ejercicios base tiene su
-  figura animada propia en una ventana modal (ADR-021).
+- «Ver ejemplo»: cada uno de los 182 ejercicios base tiene su figura animada
+  propia en una ventana modal, y el botón está donde se elige un ejercicio:
+  catálogo, archivar, rutinas y «Registrar» (ADR-021).
 - «Registrar» empieza por la rutina del día: la asignada, el día de su ciclo que
   toca y lo que va hecho, con la búsqueda libre debajo (ADR-022).
 - **Cargas en libras** y peso corporal en kilos; un libro con `carga_kg` se

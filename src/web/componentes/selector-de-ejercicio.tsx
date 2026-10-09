@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'preact/hooks';
 import type { CatalogoBase, EjercicioBase, Equipamiento } from '../../catalogo/tipos';
 import { normalizaNombre, paraBuscar } from '../formato/numeros';
+import { BotonVerEjemplo } from './boton-ver-ejemplo';
 import { Icono } from './iconos';
 
 /**
@@ -15,6 +16,8 @@ import { Icono } from './iconos';
 export interface EjercicioElegible {
   readonly id: string;
   readonly nombre: string;
+  /** De qué ejercicio base sale su figura de «Ver ejemplo»; sin él, no hay botón. */
+  readonly base_id?: string | null;
 }
 
 export const NOMBRE_DE_EQUIPO: Record<Equipamiento | 'peso-corporal', string> = {
@@ -160,6 +163,10 @@ export function SelectorDeEjercicio({
                     {e.equipo.map((q) => NOMBRE_DE_EQUIPO[q as Equipamiento] ?? q).join(' · ')}
                   </span>
                 </label>
+                {/* Fuera de la etiqueta: dentro, el clic elegiría el ejercicio. */}
+                {e.base_id !== undefined && e.base_id !== null && (
+                  <BotonVerEjemplo baseId={e.base_id} nombre={e.nombre} base={base} compacto />
+                )}
               </li>
             ))}
           </ul>

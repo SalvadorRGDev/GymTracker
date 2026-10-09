@@ -50,6 +50,20 @@ export function zonaPara(nombreDeGrupo: string): string | null {
   return grupoBasePorNombre(nombreDeGrupo)?.id ?? null;
 }
 
+const EJERCICIO_POR_NOMBRE = new Map<string, EjercicioBase>(
+  CATALOGO_BASE.ejercicios.map((e) => [normaliza(e.nombre), e]),
+);
+
+/**
+ * El ejercicio del catálogo base de un ejercicio del usuario, si su nombre
+ * coincide con el de la semilla: de ahí sale su figura de «Ver ejemplo»
+ * (ADR-021). Como con los grupos, uno renombrado o creado a mano no hereda la
+ * figura de otro.
+ */
+export function ejercicioBasePorNombre(nombre: string): EjercicioBase | null {
+  return EJERCICIO_POR_NOMBRE.get(normaliza(nombre)) ?? null;
+}
+
 export function ejerciciosDePerfil(perfil: PerfilBase): EjercicioBase[] {
   return CATALOGO_BASE.ejercicios.filter((e) => estaEnPerfil(perfil, e));
 }

@@ -116,6 +116,11 @@ export interface Catalogo {
     readonly archivado: boolean;
     /** Sin grupos en la versión abierta: es el origen de «sin mapeo» en el resumen. */
     readonly sin_grupos: boolean;
+    /**
+     * El ejercicio del catálogo base del que sale su figura de «Ver ejemplo»,
+     * por nombre; `null` si es propio o se renombró: no se le inventa una.
+     */
+    readonly base_id: string | null;
   }[];
   readonly parametros: {
     readonly version_id: string;

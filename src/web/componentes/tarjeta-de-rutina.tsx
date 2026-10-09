@@ -9,6 +9,7 @@ import type { Recurso } from '../estado/recurso';
 import { actualizaConsulta } from '../estado/ruta';
 import { fechaLarga } from '../formato/fechas';
 import { Aviso, Enlace } from './basicos';
+import { BotonVerEjemplo } from './boton-ver-ejemplo';
 import { Icono } from './iconos';
 
 /**
@@ -41,11 +42,14 @@ export function TarjetaDeRutina({
   alElegir,
   entrenamientoAbierto,
   eleccionAMano,
+  figuraDe,
 }: {
   recurso: Recurso<RutinaDelDia>;
   elegido: string | null;
   alElegir: (ejercicioId: string) => void;
   entrenamientoAbierto: boolean;
+  /** De qué ejercicio base sale la figura de «Ver ejemplo» de un ejercicio, si de alguno. */
+  figuraDe: (ejercicioId: string) => string | null;
   /** La consulta fija rutina o día: puede ser ella la que el servidor rechaza. */
   eleccionAMano: boolean;
 }) {
@@ -80,7 +84,12 @@ export function TarjetaDeRutina({
           {datos.rutinas.length > 0 && <Selectores datos={datos} />}
           <Explicacion datos={datos} entrenamientoAbierto={entrenamientoAbierto} />
           {datos.vista !== null && datos.vista.entradas.length > 0 && (
-            <ListaDelDia vista={datos.vista} elegido={elegido} alElegir={alElegir} />
+            <ListaDelDia
+              vista={datos.vista}
+              elegido={elegido}
+              alElegir={alElegir}
+              figuraDe={figuraDe}
+            />
           )}
         </>
       )}
@@ -257,14 +266,30 @@ function Progreso({ entrada }: { entrada: EntradaDelDia }) {
   );
 }
 
+/** El «Ver ejemplo» compacto de una fila, si el ejercicio tiene figura. */
+function Ejemplo({
+  id,
+  nombre,
+  figuraDe,
+}: {
+  id: string;
+  nombre: string;
+  figuraDe: (id: string) => string | null;
+}) {
+  const figura = figuraDe(id);
+  return figura === null ? null : <BotonVerEjemplo baseId={figura} nombre={nombre} compacto />;
+}
+
 function ListaDelDia({
   vista,
   elegido,
   alElegir,
+  figuraDe,
 }: {
   vista: VistaDeRutina;
   elegido: string | null;
   alElegir: (ejercicioId: string) => void;
+  figuraDe: (ejercicioId: string) => string | null;
 }) {
   // El grupo que contiene lo elegido empieza abierto: no se esconde la elección.
   const [abierto, setAbierto] = useState<string | null>(() => {
@@ -273,21 +298,28 @@ function ListaDelDia({
   });
   return (
     <>
-      <p class="ayuda">Cada fila dice cuántas series efectivas llevas de las que pide el día.</p>
+      <p class="ayuda">
+        Cada fila dice cuántas series efectivas llevas de las que pide el día. Con el botón de
+        reproducir ves cómo se hace cada ejercicio.
+      </p>
       <ul class="lista-rutina" aria-label={`Ejercicios del día ${vista.dia}`}>
         {vista.entradas.map((e) =>
           e.tipo === 'ejercicio' ? (
             <li key={e.id}>
-              <button
-                type="button"
-                class="fila-rutina"
-                aria-pressed={elegido === e.ejercicio.id}
-                disabled={e.ejercicio.archivado}
-                onClick={() => alElegir(e.ejercicio.id)}
-              >
-                <span class="fila-rutina-nombre">{e.ejercicio.nombre}</span>
-                <Progreso entrada={e} />
-              </button>
+              <div class="fila-con-ejemplo">
+                <button
+                  type="button"
+                  class="fila-rutina"
+                  aria-pressed={elegido === e.ejercicio.id}
+                  disabled={e.ejercicio.archivado}
+                  onClick={() => alElegir(e.ejercicio.id)}
+                >
+                  <span class="fila-rutina-nombre">{e.ejercicio.nombre}</span>
+                  <Progreso entrada={e} />
+                </button>
+                {/* Fuera de la fila: dentro, el clic elegiría el ejercicio. */}
+                <Ejemplo id={e.ejercicio.id} nombre={e.ejercicio.nombre} figuraDe={figuraDe} />
+              </div>
               {e.ejercicio.archivado && (
                 <p class="ayuda">
                   Archivado: recupéralo en el <Enlace href="/catalogo">catálogo</Enlace> para
@@ -323,7 +355,7 @@ function ListaDelDia({
                   ) : (
                     <ul class="opciones-de-grupo">
                       {e.ejercicios.map((x) => (
-                        <li key={x.id}>
+                        <li key={x.id} class="fila-con-ejemplo">
                           <button
                             type="button"
                             aria-pressed={elegido === x.id}
@@ -332,6 +364,7 @@ function ListaDelDia({
                             <span>{x.nombre}</span>
                             <span class="fila-rutina-detalle">cuenta {x.coeficiente}</span>
                           </button>
+                          <Ejemplo id={x.id} nombre={x.nombre} figuraDe={figuraDe} />
                         </li>
                       ))}
                     </ul>

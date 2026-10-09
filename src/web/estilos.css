@@ -2062,6 +2062,33 @@ button:disabled,
   outline-offset: 2px;
 }
 
+/* Compacto: sólo el icono, en un círculo de 44 px (lo que pide un dedo). */
+.ver-ejemplo-compacto {
+  width: 44px;
+  height: 44px;
+  justify-content: center;
+  margin-right: 0;
+  padding: 0;
+}
+
+/* Una fila que elige y, a su lado —no dentro—, su «Ver ejemplo». */
+.fila-con-ejemplo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fila-con-ejemplo > .fila-rutina,
+.fila-con-ejemplo > button:not(.ver-ejemplo) {
+  flex: 1;
+  min-width: 0;
+}
+
+.fila-de-lista > span:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
 .ejercicio-elegido {
   display: flex;
   align-items: center;
@@ -2162,10 +2189,19 @@ button:disabled,
 }
 
 .entrada-de-plan {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 84px auto;
+  display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.entrada-de-plan .selector {
+  flex: 1;
+  min-width: 0;
+}
+
+.entrada-de-plan .entrada {
+  flex: 0 0 84px;
+  width: 84px;
 }
 
 .entrada-de-plan .selector,

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import type { EjercicioBase, GrupoBase } from '../../catalogo/tipos';
+import type { CatalogoBase } from '../../catalogo/tipos';
+import { useRecurso } from '../estado/recurso';
 import { Demostracion } from './demostracion/demostracion';
 import type { Ejemplo } from './demostracion/ejemplos';
 import { NOMBRE_DE_EQUIPO } from './selector-de-ejercicio';
@@ -21,27 +22,36 @@ const PESOS = [
 ] as const;
 
 export function VentanaDeEjemplo({
-  ejercicio,
-  grupos,
+  baseId,
+  nombre,
+  base,
   alCerrar,
 }: {
-  ejercicio: EjercicioBase;
-  grupos: readonly GrupoBase[];
+  /** El ejercicio del catálogo base cuya figura se enseña. */
+  baseId: string;
+  /** Cómo se llama donde se pulsó: el del catálogo del usuario o el de la semilla. */
+  nombre: string;
+  /** El catálogo base, si la página ya lo tiene; si no, se pide al abrir. */
+  base: Pick<CatalogoBase, 'ejercicios' | 'grupos'> | null;
   alCerrar: () => void;
 }) {
   const ventana = useRef<HTMLDialogElement>(null);
   // undefined: cargando; null: el ejercicio no tiene figura.
   const [ejemplo, setEjemplo] = useState<Ejemplo | null | undefined>(undefined);
+  const pedido = useRecurso<CatalogoBase>(base === null ? '/api/lectura/v1/catalogo/base' : null);
+  const datos = base ?? pedido.datos;
+  const ejercicio = datos?.ejercicios.find((e) => e.id === baseId) ?? null;
+  const grupos = datos?.grupos ?? [];
 
   useEffect(() => {
     let vigente = true;
     void import('./demostracion/ejemplos').then((m) => {
-      if (vigente) setEjemplo(m.ejemploDe(ejercicio.id));
+      if (vigente) setEjemplo(m.ejemploDe(baseId));
     });
     return () => {
       vigente = false;
     };
-  }, [ejercicio.id]);
+  }, [baseId]);
 
   const cierra = () => {
     const d = ventana.current;
@@ -74,23 +84,25 @@ export function VentanaDeEjemplo({
   }, []);
 
   const ids = (coeficiente: string) =>
-    Object.entries(ejercicio.coeficientes)
+    Object.entries(ejercicio?.coeficientes ?? {})
       .filter(([, c]) => c === coeficiente)
       .map(([g]) => g);
   const nombres = (coeficiente: string) =>
     ids(coeficiente).map((g) => grupos.find((x) => x.id === g)?.nombre ?? g);
   const musculos = { principales: ids('1.00'), ayudan: ids('0.50') };
   const material =
-    ejercicio.equipamiento.length === 0
-      ? 'Ninguno: el propio peso del cuerpo'
-      : ejercicio.equipamiento.map((q) => NOMBRE_DE_EQUIPO[q]).join(', ');
+    ejercicio === null
+      ? null
+      : ejercicio.equipamiento.length === 0
+        ? 'Ninguno: el propio peso del cuerpo'
+        : ejercicio.equipamiento.map((q) => NOMBRE_DE_EQUIPO[q]).join(', ');
 
   return (
     <dialog ref={ventana} class="ventana" aria-labelledby="titulo-ejemplo" onClose={alCerrar}>
       <div class="ventana-cuerpo">
         <div>
           <p class="ventana-antetitulo">Cómo se hace</p>
-          <h2 id="titulo-ejemplo">{ejercicio.nombre}</h2>
+          <h2 id="titulo-ejemplo">{nombre}</h2>
         </div>
         {ejemplo === undefined && <output class="demo demo-cargando">Cargando la figura…</output>}
         {ejemplo === null && <p class="ventana-nota">Este ejercicio todavía no tiene figura.</p>}
@@ -123,10 +135,12 @@ export function VentanaDeEjemplo({
               )
             );
           })}
-          <div>
-            <dt>Material</dt>
-            <dd>{material}</dd>
-          </div>
+          {material !== null && (
+            <div>
+              <dt>Material</dt>
+              <dd>{material}</dd>
+            </div>
+          )}
         </dl>
       </div>
       <div class="ventana-pie">

@@ -11,6 +11,7 @@ import {
   monta,
   pulsa,
   simulaFetch,
+  simulaMovimiento,
   textoDe,
 } from '../prueba/utiles';
 import { entrenamientoVigente, Registrar } from './registrar';
@@ -18,10 +19,16 @@ import { entrenamientoVigente, Registrar } from './registrar';
 const CATALOGO: Catalogo = {
   grupos: [{ id: 'g1', nombre: 'Pectoral', zona: 'pectoral' }],
   ejercicios: [
-    { id: 'e1', nombre: 'Press banca', archivado: false, sin_grupos: false },
-    { id: 'e2', nombre: 'Flexiones', archivado: false, sin_grupos: false },
-    { id: 'e3', nombre: 'Remo viejo', archivado: true, sin_grupos: false },
-    { id: 'e4', nombre: 'Sentadilla', archivado: false, sin_grupos: false },
+    {
+      id: 'e1',
+      nombre: 'Press banca',
+      archivado: false,
+      sin_grupos: false,
+      base_id: 'press-banca',
+    },
+    { id: 'e2', nombre: 'Flexiones', archivado: false, sin_grupos: false, base_id: 'flexiones' },
+    { id: 'e3', nombre: 'Remo viejo', archivado: true, sin_grupos: false, base_id: null },
+    { id: 'e4', nombre: 'Sentadilla', archivado: false, sin_grupos: false, base_id: null },
   ],
   parametros: {
     version_id: 'v1',
@@ -452,6 +459,28 @@ describe('Registrar desde la rutina del día (ADR-022)', () => {
     await pulsa(boton(montado.raiz, 'Volver a la de hoy'));
     expect(window.location.search).toBe('');
     expect(textoDe(montado.raiz)).toContain('toca el día 2 de 4');
+  });
+
+  it('cada ejercicio de la rutina y de la búsqueda lleva «Ver ejemplo» al lado, no dentro', async () => {
+    simulaMovimiento(true);
+    const { raiz } = await pinta(() => rutina(HOY));
+    const fila = filaDe(raiz, 'Press banca') as HTMLButtonElement;
+    const ejemplo = fila.parentElement?.querySelector('button.ver-ejemplo');
+    expect(ejemplo?.textContent).toBe('Ver ejemplo de Press banca');
+    expect(fila.contains(ejemplo ?? null)).toBe(false);
+    // Pulsarlo enseña, no elige.
+    await pulsa(ejemplo as HTMLButtonElement);
+    expect(fila.getAttribute('aria-pressed')).toBe('false');
+    expect(raiz.querySelector('dialog')?.open).toBe(true);
+    await pulsa(boton(raiz.querySelector('dialog') as HTMLElement, 'Cerrar'));
+    // En la búsqueda libre, igual; uno sin figura (propio o renombrado) no lo lleva.
+    const enLaBusqueda = (nombre: string) =>
+      [...raiz.querySelectorAll('.busqueda-libre li')].find((li) =>
+        li.textContent?.includes(nombre),
+      );
+    expect(enLaBusqueda('Flexiones')?.querySelector('label button')).toBeNull();
+    expect(enLaBusqueda('Flexiones')?.textContent).toContain('Ver ejemplo de Flexiones');
+    expect(enLaBusqueda('Sentadilla')?.textContent).not.toContain('Ver ejemplo');
   });
 
   it('un ejercicio archivado de la rutina no se puede elegir y dice cómo recuperarlo', async () => {

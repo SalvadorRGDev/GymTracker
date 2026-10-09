@@ -507,6 +507,17 @@ frente. Los colores los vigila `lenguaje-visual.test.ts`. Sigue sin tocar el
 motor ni el almacén, y el módulo diferido de las poses pasa a unos 24 kB
 comprimidos.
 
+**Ampliación: «Ver ejemplo» donde se elige un ejercicio.** El usuario pidió el
+botón también al archivar, al armar una rutina y al registrar. Va en la lista del
+catálogo base (importar), en «Tus ejercicios» (archivar), en cada entrada de
+ejercicio del editor de rutinas, junto al selector de «Registrar» y en cada fila
+de la rutina del día. Un ejercicio del usuario se empareja con el del catálogo
+base **por su nombre normalizado** (`ejercicioBasePorNombre`, el mismo criterio
+que `zona` en el ADR-018) y el catálogo lo manda como `base_id`. Uno propio o
+renombrado no tiene figura y no enseña el botón: enseñar la de otro ejercicio
+sería inventar. Junto a un desplegable el botón es compacto —sólo el icono, en
+44 × 44— y su nombre accesible sigue siendo «Ver ejemplo de …».
+
 ## ADR-022 — «Registrar» empieza por la rutina del día
 
 **Estado**: ACEPTADO

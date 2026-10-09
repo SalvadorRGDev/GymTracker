@@ -16,6 +16,7 @@ import {
   Respuesta,
   Vacio,
 } from '../componentes/basicos';
+import { BotonVerEjemplo } from '../componentes/boton-ver-ejemplo';
 import { Icono } from '../componentes/iconos';
 import { mensajeDe, pide } from '../estado/api';
 import { useRecurso } from '../estado/recurso';
@@ -325,6 +326,19 @@ function EditorDeVersion({
                             </option>
                           ))}
                     </select>
+                    {(() => {
+                      const elegido =
+                        e.tipo === 'ejercicio'
+                          ? catalogo.ejercicios.find((x) => x.id === e.destino)
+                          : undefined;
+                      return elegido === undefined || elegido.base_id === null ? null : (
+                        <BotonVerEjemplo
+                          baseId={elegido.base_id}
+                          nombre={elegido.nombre}
+                          compacto
+                        />
+                      );
+                    })()}
                     <input
                       class="entrada"
                       aria-label={`Series del día ${dia}`}

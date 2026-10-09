@@ -4,6 +4,7 @@ import { type Fila, HOJAS_DE_LIBRO } from '../../almacen/esquema.js';
 import { normalizaNombre } from '../../almacen/invariantes.js';
 import {
   CATALOGO_BASE,
+  ejercicioBasePorNombre,
   ejerciciosDePerfil,
   grupoBasePorNombre,
   referenciaPara,
@@ -151,6 +152,7 @@ export function catalogo(almacen: AlmacenDeUsuario): Catalogo {
         nombre: e.nombre,
         archivado: e.archivado_en !== null,
         sin_grupos: !conGrupos.has(e.id),
+        base_id: ejercicioBasePorNombre(e.nombre)?.id ?? null,
       })),
     parametros: {
       version_id: abierta.id,

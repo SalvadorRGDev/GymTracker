@@ -76,7 +76,15 @@ describe('Nueva rutina', () => {
           grupos: [],
           parametros: PARAMETROS,
           ejercicios: importado
-            ? [{ id: 'e1', nombre: 'Press banca', archivado: false, sin_grupos: false }]
+            ? [
+                {
+                  id: 'e1',
+                  nombre: 'Press banca',
+                  archivado: false,
+                  sin_grupos: false,
+                  base_id: 'press-banca',
+                },
+              ]
             : [],
         } satisfies Catalogo,
       }),
@@ -107,5 +115,61 @@ describe('Nueva rutina', () => {
     expect((campo(raiz, 'Empezar desde') as HTMLSelectElement).value).toBe('torso');
     expect((campo(raiz, 'Nombre') as HTMLInputElement).value).toBe('Mi torso');
     expect(boton(raiz, 'Crear borrador').disabled).toBe(false);
+  });
+});
+
+describe('Editor de una rutina', () => {
+  it('junto al ejercicio de cada día va «Ver ejemplo»; junto a un grupo, no', async () => {
+    window.history.replaceState(null, '', '/planes?version=v1');
+    simulaFetch({
+      'GET /api/planes/v1': { cuerpo: PLANES },
+      'GET /api/lectura/v1/catalogo/base': { cuerpo: BASE },
+      'GET /api/lectura/v1/catalogo': {
+        cuerpo: {
+          grupos: [{ id: 'g1', nombre: 'Pectoral', zona: 'pectoral' }],
+          parametros: PARAMETROS,
+          ejercicios: [
+            {
+              id: 'e1',
+              nombre: 'Press banca',
+              archivado: false,
+              sin_grupos: false,
+              base_id: 'press-banca',
+            },
+          ],
+        } satisfies Catalogo,
+      },
+      'GET /api/planes/v1/versiones/v1': {
+        cuerpo: {
+          id: 'v1',
+          numero: 1,
+          ciclo_dias: 1,
+          copiada_de: null,
+          publicada_en: null,
+          entradas: 2,
+          plan_id: 'p1',
+          plan_nombre: 'Torso',
+          lista_de_entradas: [
+            { id: 'en1', dia: 1, ejercicio_id: 'e1', grupo_id: null, objetivo: '3' },
+            { id: 'en2', dia: 1, ejercicio_id: null, grupo_id: 'g1', objetivo: '2' },
+          ],
+        },
+      },
+      'GET /api/planes/v1/versiones/v1/volumen': {
+        cuerpo: {
+          version_id: 'v1',
+          ciclo_dias: 1,
+          semanas_de_la_ventana: 1,
+          grupos: [],
+          entradas_sin_mapeo: 0,
+        },
+      },
+    });
+    montado = await monta(<Planes />);
+    const filas = [...montado.raiz.querySelectorAll('.entrada-de-plan')];
+    expect(filas).toHaveLength(2);
+    expect(filas[0]?.textContent).toContain('Ver ejemplo de Press banca');
+    expect(filas[1]?.textContent).not.toContain('Ver ejemplo');
+    window.history.replaceState(null, '', '/');
   });
 });

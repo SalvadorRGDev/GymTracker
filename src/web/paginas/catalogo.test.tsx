@@ -23,8 +23,14 @@ const CATALOGO: DatosDeCatalogo = {
     { id: 'g-tri', nombre: 'Tríceps', zona: 'triceps' },
   ],
   ejercicios: [
-    { id: 'e-press', nombre: 'Press banca', archivado: false, sin_grupos: false },
-    { id: 'e-viejo', nombre: 'Remo viejo', archivado: true, sin_grupos: false },
+    {
+      id: 'e-press',
+      nombre: 'Press banca',
+      archivado: false,
+      sin_grupos: false,
+      base_id: 'press-banca',
+    },
+    { id: 'e-viejo', nombre: 'Remo viejo', archivado: true, sin_grupos: false, base_id: null },
   ],
   parametros: {
     version_id: 'v1',
@@ -223,5 +229,36 @@ describe('Catálogo: ver ejemplo', () => {
     await pulsa(boton(ventana, 'Cerrar'));
     expect(raiz.querySelector('dialog')).toBeNull();
     expect(document.activeElement).toBe(verEjemplo);
+  });
+
+  it('en tu lista, donde se archiva, también: los que tienen figura y ninguno propio', async () => {
+    simulaMovimiento(true);
+    simulaFetch({
+      'GET /api/lectura/v1/catalogo': {
+        cuerpo: {
+          ...CATALOGO,
+          ejercicios: [
+            ...CATALOGO.ejercicios,
+            {
+              id: 'e-mio',
+              nombre: 'Mi invento',
+              archivado: false,
+              sin_grupos: true,
+              base_id: null,
+            },
+          ],
+        },
+      },
+      'GET /api/lectura/v1/catalogo/base': { cuerpo: CON_PERFIL },
+    });
+    montado = await monta(<Catalogo />);
+    const lista = montado.raiz.querySelector('section[aria-labelledby="titulo-ejercicios"]');
+    if (!(lista instanceof HTMLElement)) throw new Error('sin la lista de ejercicios');
+    const fila = (nombre: string) =>
+      [...lista.querySelectorAll('li')].find((li) => li.textContent?.includes(nombre));
+    expect(fila('Press banca')?.textContent).toContain('Ver ejemplo de Press banca');
+    expect(fila('Mi invento')?.textContent).not.toContain('Ver ejemplo');
+    await pulsa(boton(lista, 'Ver ejemplo de Press banca'));
+    expect(montado.raiz.querySelector('dialog')?.open).toBe(true);
   });
 });

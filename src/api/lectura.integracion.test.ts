@@ -349,6 +349,17 @@ describe('catálogo: crear, archivar, importar', () => {
     expect(c.parametros.contribuciones).toHaveLength(3 + 4);
   });
 
+  it('cada ejercicio dice de qué ejercicio base sale su figura; uno propio no hereda ninguna', async () => {
+    await creaEjercicio(ana, '  press banca ');
+    await creaEjercicio(ana, 'Mi press raro');
+    const figuras = Object.fromEntries(
+      (await catalogo(ana)).ejercicios.map((e) => [e.nombre, e.base_id]),
+    );
+    // El nombre se compara como en la importación: sin espacios de más ni mayúsculas.
+    expect(figuras['press banca']).toBe('press-banca');
+    expect(figuras['Mi press raro']).toBeNull();
+  });
+
   it('el cliente manda identificadores: uno desconocido es 422 y un coeficiente no se puede ni enviar', async () => {
     const r = await escribe(ana, 'POST', '/api/lectura/v1/catalogo/importa', {
       grupos: [],

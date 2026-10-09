@@ -244,6 +244,7 @@ export function Registrar() {
           alElegir={(id) => elige(id, false)}
           entrenamientoAbierto={abierto !== null}
           eleccionAMano={consulta.has('rutina') || consulta.has('dia')}
+          figuraDe={(id) => ejercicios.find((e) => e.id === id)?.base_id ?? null}
         />
 
         <section class="tarjeta formulario tarjeta-de-serie" aria-labelledby="titulo-serie">
