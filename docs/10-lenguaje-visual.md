@@ -34,6 +34,8 @@ ADR-018 (mapa muscular) y el ADR-021 (figuras de «Ver ejemplo»). Implementaci�
   cabecera («Carga (lb)»), nada de vidrio en filas. En el teléfono las columnas
   secundarias se ocultan y su contenido va bajo el nombre de la fila (comparativa,
   historial): nada detrás de un desplazamiento.
+- **Lo que se desplaza contiene lo que lleva dentro**: `position` en la misma regla
+  que el `overflow`, para que el texto oculto para lectores no alargue la página.
 - **Estados vacíos** con trama diagonal y un icono; la trama nunca va detrás de un
   número.
 - **Decoración**: líneas discontinuas en los bordes de la columna y un brillo

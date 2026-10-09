@@ -440,6 +440,7 @@ fieldset.confirmacion legend {
   flex: 1 0 100%;
   display: flex;
   gap: 4px;
+  position: relative;
   overflow-x: auto;
   scrollbar-width: none;
   padding: 6px 0 10px;
@@ -1915,6 +1916,7 @@ button:disabled,
 }
 
 .opciones-de-grupo {
+  position: relative;
   max-height: 260px;
   overflow-y: auto;
 }
@@ -1980,7 +1982,10 @@ button:disabled,
   font-weight: 600;
 }
 
+/* Con `position`, lo oculto para lectores (absoluto) se queda dentro de su
+   recorte; sin ella, alargaba la página con un hueco bajo el pie. */
 .lista-de-ejercicios {
+  position: relative;
   margin: 0;
   padding: 4px;
   list-style: none;
@@ -2085,6 +2090,13 @@ button:disabled,
 }
 
 .fila-de-lista > span:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+/* En una lista cuyo `li` es flexible, la fila ocupa todo el ancho: si no, los
+   botones van pegados al nombre y zigzaguean con su largo. */
+.lista-de-ejercicios li > .fila-de-lista {
   flex: 1;
   min-width: 0;
 }
@@ -2220,6 +2232,7 @@ button:disabled,
 }
 
 .tabla-desplazable {
+  position: relative;
   overflow-x: auto;
 }
 
@@ -2410,6 +2423,7 @@ button:disabled,
   padding: var(--e2);
   background: var(--fondo);
   display: grid;
+  align-content: start;
   gap: 10px;
 }
 
@@ -3093,6 +3107,7 @@ button:disabled,
 }
 
 .ventana-cuerpo {
+  position: relative;
   display: grid;
   gap: var(--e2);
   padding: var(--e3) var(--e3) var(--e2);

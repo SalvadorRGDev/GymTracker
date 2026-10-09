@@ -8,7 +8,9 @@ import { NOMBRE_DE_EQUIPO } from './selector-de-ejercicio';
 /**
  * «Ver ejemplo»: el `<dialog>` nativo en modo modal, que oscurece la página
  * detrás y deja en el centro la figura animada del ejercicio, cómo se hace y
- * qué trabaja. Se cierra con «Cerrar», con Escape o pulsando fuera.
+ * qué trabaja. Se cierra con «Cerrar», con Escape o pulsando fuera. Devolver el
+ * foco a lo que la abrió es cosa de quien la abre (`BotonVerEjemplo`), que sabe
+ * cuál fue.
  *
  * Las figuras se cargan al abrir la ventana: son un módulo aparte que la página
  * del catálogo no necesita hasta entonces.
@@ -62,7 +64,6 @@ export function VentanaDeEjemplo({
   useEffect(() => {
     const d = ventana.current;
     if (d === null) return;
-    const antes = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     if (typeof d.showModal === 'function') {
       if (!d.open) d.showModal();
     } else {
@@ -76,11 +77,7 @@ export function VentanaDeEjemplo({
       if (evento.target === d) cierra();
     };
     d.addEventListener('click', alPulsarFuera);
-    return () => {
-      d.removeEventListener('click', alPulsarFuera);
-      // El foco vuelve a «Ver ejemplo», que es de donde salió.
-      antes?.focus();
-    };
+    return () => d.removeEventListener('click', alPulsarFuera);
   }, []);
 
   const ids = (coeficiente: string) =>

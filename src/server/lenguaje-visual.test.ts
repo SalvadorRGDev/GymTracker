@@ -414,6 +414,23 @@ describe('lenguaje visual: apagados, vidrio y movimiento', () => {
   });
 });
 
+describe('lenguaje visual: lo oculto a la vista no alarga la página', () => {
+  it('todo contenedor que se desplaza lleva `position`, en la misma regla', () => {
+    // `.solo-lectores` es absoluto. Dentro de una lista que se desplaza sin ser su
+    // bloque contenedor, escapa del recorte y alarga la página: «Registrar» y el
+    // catálogo tenían miles de píxeles en blanco bajo el pie.
+    expect(REGLAS.find((r) => r.selector === '.solo-lectores')?.cuerpo).toMatch(
+      /position\s*:\s*absolute/,
+    );
+    const sinBloque = REGLAS.filter(
+      (r) =>
+        /(^|[\s;])overflow(-x|-y)?\s*:\s*(auto|scroll)/.test(r.cuerpo) &&
+        !/(^|[\s;])position\s*:\s*(relative|absolute|fixed|sticky)/.test(r.cuerpo),
+    ).map((r) => r.selector);
+    expect(sinBloque).toEqual([]);
+  });
+});
+
 describe('lenguaje visual: «Ver ejemplo» y su figura', () => {
   it('el botón no se confunde con el nombre del ejercicio, que va en índigo al marcarlo', () => {
     for (const t of [CLARO]) {

@@ -152,7 +152,9 @@ llama al mismo servicio, así que hereda sus reglas enteras:
   `base_id` que manda el servidor** (nombre normalizado). Uno propio o renombrado
   llega con `null` y no lleva botón: enseñar la figura de otro sería inventar.
 - La ventana es el `<dialog>` nativo en modo modal: el foco entra por «Cerrar» y
-  vuelve a «Ver ejemplo» al salir; Escape y un clic fuera también cierran. Las
+  vuelve a «Ver ejemplo» al salir —lo devuelve el propio botón: en Safari pulsar
+  un botón no lo enfoca, y deducirlo de lo enfocado al abrir dejaba el foco en el
+  cuerpo de la página—; Escape y un clic fuera también cierran. Las
   poses se cargan con `import()` al abrirla, no con la página.
 - **La figura no inventa lo que no sabe.** Cada ejercicio del catálogo base
   tiene la suya por identificador (`ejemplos.ts`); lo que no puede enseñar (el
@@ -269,6 +271,10 @@ llama al mismo servicio, así que hereda sus reglas enteras:
   superficie opaca. La trama diagonal decora vacíos y el lienzo de la figura, y
   **nunca va detrás de un número**.
 - **Nada de vidrio en filas ni celdas.**
+- **Todo contenedor que se desplaza lleva `position`** en la misma regla (lo
+  exige `lenguaje-visual.test.ts`). `solo-lectores` es absoluto: dentro de una
+  lista que se desplaza sin ser su bloque contenedor, escapa del recorte y alarga
+  la página con un hueco en blanco bajo el pie.
 - **Los tres apagados no son opcionales**: `prefers-reduced-transparency`,
   `prefers-contrast: more` y `@supports not (backdrop-filter: …)`, juntos al
   principio del archivo. Reescriben tokens, no reglas.

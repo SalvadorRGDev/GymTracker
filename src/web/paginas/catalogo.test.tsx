@@ -231,6 +231,22 @@ describe('Catálogo: ver ejemplo', () => {
     expect(document.activeElement).toBe(verEjemplo);
   });
 
+  it('el foco vuelve a «Ver ejemplo» aunque pulsarlo no lo enfocara, como en Safari', async () => {
+    simulaMovimiento(true);
+    const raiz = await abreLaLista();
+    const verEjemplo = boton(raiz, 'Ver ejemplo de Press banca');
+    // En Safari (también el del iPhone) pulsar un botón no lo enfoca: antes de
+    // abrir, el foco está en el cuerpo de la página.
+    (document.activeElement as HTMLElement | null)?.blur();
+    expect(document.activeElement).toBe(document.body);
+    await pulsa(verEjemplo);
+    const ventana = raiz.querySelector('dialog');
+    if (ventana === null) throw new Error('no se abrió la ventana');
+    await pulsa(boton(ventana, 'Cerrar'));
+    expect(raiz.querySelector('dialog')).toBeNull();
+    expect(document.activeElement).toBe(verEjemplo);
+  });
+
   it('en tu lista, donde se archiva, también: los que tienen figura y ninguno propio', async () => {
     simulaMovimiento(true);
     simulaFetch({

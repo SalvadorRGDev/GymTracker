@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useRef, useState } from 'preact/hooks';
 import type { CatalogoBase } from '../../catalogo/tipos';
 import { Icono } from './iconos';
 import { VentanaDeEjemplo } from './ventana-de-ejemplo';
@@ -9,6 +9,10 @@ import { VentanaDeEjemplo } from './ventana-de-ejemplo';
  * el clic elegiría el ejercicio en vez de enseñarlo. Su nombre accesible dice de
  * cuál es. Compacto, sólo el icono —con el mismo nombre accesible—, para filas
  * donde el texto no cabe en un teléfono.
+ *
+ * Al cerrar la ventana el foco vuelve a ESTE botón, y lo devuelve él: no se
+ * deduce de lo que estaba enfocado al abrir, porque en Safari pulsar un botón no
+ * lo enfoca y el foco acabaría en el cuerpo de la página.
  */
 export function BotonVerEjemplo({
   baseId,
@@ -22,9 +26,11 @@ export function BotonVerEjemplo({
   compacto?: boolean;
 }) {
   const [abierto, setAbierto] = useState(false);
+  const boton = useRef<HTMLButtonElement>(null);
   return (
     <>
       <button
+        ref={boton}
         type="button"
         class={compacto ? 'ver-ejemplo ver-ejemplo-compacto' : 'ver-ejemplo'}
         onClick={() => setAbierto(true)}
@@ -44,7 +50,10 @@ export function BotonVerEjemplo({
           baseId={baseId}
           nombre={nombre}
           base={base}
-          alCerrar={() => setAbierto(false)}
+          alCerrar={() => {
+            setAbierto(false);
+            boton.current?.focus();
+          }}
         />
       )}
     </>
