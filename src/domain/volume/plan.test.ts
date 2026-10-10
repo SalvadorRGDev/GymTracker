@@ -7,7 +7,13 @@ import {
   UNA_SERIE,
 } from './centesimas.js';
 import { fechaLogica, sumaDias } from './fecha-logica.js';
-import { type AsignacionDePlan, expandePlan, type VersionDePlan } from './plan.js';
+import {
+  type AsignacionDePlan,
+  diaDelCiclo,
+  expandePlan,
+  fechaDelDiaDelCiclo,
+  type VersionDePlan,
+} from './plan.js';
 import type { Contribucion, Serie } from './tipos.js';
 
 const c = centesimasDesdeDecimal;
@@ -247,5 +253,33 @@ describe('expandePlan', () => {
         'pectoral',
       ),
     ).toBe('4.00');
+  });
+});
+
+describe('el día del ciclo y su fecha (ADR-026)', () => {
+  const ancla = fechaLogica('2026-09-28'); // un lunes: día 1 de un ciclo de 7
+
+  it('el día del ciclo se cuenta desde el ancla y da la vuelta', () => {
+    expect(diaDelCiclo(ancla, 7, fechaLogica('2026-09-28'))).toBe(1);
+    expect(diaDelCiclo(ancla, 7, fechaLogica('2026-09-29'))).toBe(2);
+    expect(diaDelCiclo(ancla, 7, fechaLogica('2026-10-05'))).toBe(1);
+    expect(diaDelCiclo(ancla, 4, fechaLogica('2026-10-05'))).toBe(4);
+  });
+
+  it('elegir un día lleva a la última vez que tocaba, sin pasar de la fecha de hoy', () => {
+    const martes = fechaLogica('2026-10-06'); // día 2
+    expect(fechaDelDiaDelCiclo(ancla, 7, 2, martes)).toBe('2026-10-06'); // el de hoy, hoy
+    expect(fechaDelDiaDelCiclo(ancla, 7, 1, martes)).toBe('2026-10-05'); // ayer, lunes
+    // El viernes de esta semana todavía no ha llegado: el de la anterior.
+    expect(fechaDelDiaDelCiclo(ancla, 7, 5, martes)).toBe('2026-10-02');
+    // Un ciclo de 4 días no es la semana: hoy toca el día 1 y el 4 fue ayer.
+    expect(fechaDelDiaDelCiclo(ancla, 4, 1, martes)).toBe('2026-10-06');
+    expect(fechaDelDiaDelCiclo(ancla, 4, 4, martes)).toBe('2026-10-05');
+  });
+
+  it('un día que caería antes del ancla no tiene fecha: no se inventa una', () => {
+    const miercoles = fechaLogica('2026-09-30'); // día 3 de la primera vuelta
+    expect(fechaDelDiaDelCiclo(ancla, 7, 1, miercoles)).toBe('2026-09-28'); // el ancla misma
+    expect(fechaDelDiaDelCiclo(ancla, 7, 6, miercoles)).toBeNull(); // sería el sábado 26
   });
 });

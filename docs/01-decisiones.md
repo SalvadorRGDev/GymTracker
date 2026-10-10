@@ -32,10 +32,11 @@ no aprobar.
 | 019 | Comparativa: ventana desde el ancla y línea semanal del atajo | ACEPTADO (enmienda al 009) |
 | 020 | Alta pública con tope | ACEPTADO (enmienda al 007) |
 | 021 | «Ver ejemplo»: figuras animadas propias | ACEPTADO |
-| 022 | «Registrar» empieza por la rutina del día | ACEPTADO |
+| 022 | «Registrar» empieza por la rutina del día | ACEPTADO (enmendado por 026) |
 | 023 | Las cargas, en libras | ACEPTADO (enmienda la unidad canónica del Plan) |
 | 024 | Historial: área, carga media y progreso por sesión | ACEPTADO (matiza el ADR-003) |
 | 025 | Gráficas del historial: músculos por semana y fuerza estimada | ACEPTADO |
+| 026 | Un día elegido de la rutina se registra en su fecha | ACEPTADO (enmienda al 022) |
 
 ---
 
@@ -522,7 +523,8 @@ sería inventar. Junto a un desplegable el botón es compacto —sólo el icono,
 
 ## ADR-022 — «Registrar» empieza por la rutina del día
 
-**Estado**: ACEPTADO
+**Estado**: ACEPTADO (enmendado por ADR-026: un día elegido se registra en su
+fecha)
 
 **Contexto.** Registrar era buscar cada ejercicio en el catálogo entero y
 guardar serie a serie. El usuario pidió que lo predeterminado fuera su rutina
@@ -751,3 +753,54 @@ eso se dibuja aparte. Lo fijan `rendimiento.test.ts`, `area.test.ts`,
 `historial.integracion.test.ts`, `graficas-del-historial.test.tsx` y
 `lenguaje-visual.test.ts` (contraste ≥ 3:1 y separación con deuteranopía de las
 dos líneas).
+
+## ADR-026 — Un día elegido de la rutina se registra en su fecha
+
+**Estado**: ACEPTADO (enmienda al ADR-022)
+
+**Contexto.** En «Registrar» se puede elegir otro día de la rutina, pero lo que
+se guardaba iba siempre a hoy: el ADR-022 decidió que «guardar no cambia» y que
+hacer el día 1 en martes era desplazamiento. El usuario lo vio como un fallo:
+si el martes elige el día del lunes es para registrar el lunes, y si el día
+elegido no cambia nada, no debería poder elegirse. Lo que toca hoy sale solo y
+así se queda; lo que cambia es qué pasa al elegir otro día.
+
+**Decisión.**
+
+- **El día elegido de la rutina asignada va a su fecha**: la última, sin pasar
+  de hoy, en que tocaba ese día del ciclo, contado desde el ancla
+  (`fechaDelDiaDelCiclo`, en el motor). El martes, el día del lunes es el lunes;
+  el viernes, que todavía no llega, es el de la semana pasada. Nunca una fecha
+  futura.
+- **Un día que caería antes del inicio de la asignación no tiene fecha**: la
+  pantalla lo dice y no deja guardar, y el servidor lo rechaza. No se inventa una
+  fecha fuera de la rutina.
+- **Otra rutina, no asignada, no tiene calendario**: lo que se registre con ella
+  va a hoy, y la pantalla lo dice.
+- **La fecha la calcula el servidor**, igual al leer que al guardar.
+  `GET /api/registro/v1/rutina` dice adónde va lo que se registre
+  (`vista.registro`) y a qué fecha llevaría cada día (`vista.fechas_del_ciclo`,
+  para el selector). `POST /api/registro/v1/serie` recibe opcionalmente `rutina`,
+  lo mismo con que se leyó (`sesion`, `version`, `dia`), y recalcula la fecha
+  con la misma función. El navegador nunca manda una fecha.
+- **Un entrenamiento es de un día.** La pantalla abre uno aparte para cada fecha
+  elegida, con la misma vigencia de seis horas que el de hoy, y el de hoy no se
+  toca. El servidor rechaza una serie de otra fecha con la clave de un
+  entrenamiento que ya existe, en vez de mezclarla.
+- **Lo hecho se cuenta en la fecha del día elegido**: «hechas de objetivo» del
+  lunes cuenta el lunes.
+- Lo registrado así es deliberado: no entra como «fecha por confirmar», que es
+  para la duda del reloj de un teléfono (riesgo R3).
+
+**Alternativas descartadas.** Quitar el selector de día: se pierde poder
+registrar un día olvidado y ver otro día de la rutina. Elegir la fecha en un
+calendario: abre fechas sin día de rutina y lleva la aritmética de fechas al
+navegador. Que el navegador mande la fecha que leyó: el servidor tendría que
+fiarse de ella; recalcularla con la misma función da lo mismo sin confiar en el
+cliente.
+
+**Consecuencias.** Las sesiones registradas para otro día llevan como hora de
+inicio el momento de guardar, no la del entrenamiento: la fecha lógica es la que
+manda en la semana, la comparativa y el historial. Los atajos del iPhone no
+cambian. Lo fijan `plan.test.ts`, `rutina.integracion.test.ts` y
+`registrar.test.tsx`.

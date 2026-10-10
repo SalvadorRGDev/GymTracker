@@ -8,15 +8,22 @@ import {
   centesimasDesdeEntero,
   decimalDesdeCentesimas,
   dentroDe,
-  diasEntre,
+  diaDelCiclo,
   type FechaLogica,
+  fechaDelDiaDelCiclo,
   fechaLogica,
   type Serie,
   volumenDe,
 } from '../../domain/volume/index.js';
 import { conflicto, invalido, noEncontrado } from '../errores.js';
 import { hoyDe, parametrosDe, serieDelMotor, versionVigenteEn } from '../volumen.js';
-import type { EntradaDelDia, RutinaDelDia, RutinaPublicada, VistaDeRutina } from './contrato.js';
+import type {
+  DestinoDeRegistro,
+  EntradaDelDia,
+  RutinaDelDia,
+  RutinaPublicada,
+  VistaDeRutina,
+} from './contrato.js';
 
 /**
  * La rutina del día para «Registrar» (ADR-022). Sólo lee: qué rutina toca en la
@@ -77,10 +84,11 @@ export function rutinaDelDia(
       : {
           version_id: asignada.id,
           // El día del ciclo se cuenta desde el ancla, nunca desde el lunes.
-          dia:
-            (diasEntre(fechaLogica(asignacion.vigente_desde), fecha) %
-              Number(asignada.ciclo_dias)) +
-            1,
+          dia: diaDelCiclo(
+            fechaLogica(asignacion.vigente_desde),
+            Number(asignada.ciclo_dias),
+            fecha,
+          ),
         };
 
   const elegida =
@@ -125,8 +133,40 @@ export function rutinaDelDia(
     vista:
       elegida === undefined
         ? null
-        : vistaDe(almacen, elegida, resumen(elegida), deHoy, consulta, fecha),
+        : vistaDe(almacen, elegida, resumen(elegida), deHoy, consulta, fecha, asignacion),
   };
+}
+
+/**
+ * Adónde va lo que se registre con esta consulta: lo mismo que enseña la
+ * lectura, porque sale de la misma función. Sin rutina que enseñar, a la fecha
+ * que manda (la del entrenamiento abierto o hoy).
+ */
+export function destinoDeRegistro(
+  almacen: AlmacenDeUsuario,
+  consulta: ConsultaNormalizada,
+): DestinoDeRegistro {
+  const { vista, fecha } = rutinaDelDia(almacen, consulta);
+  return vista?.registro ?? { como: 'hoy', fecha };
+}
+
+/** ADR-026: el día elegido de la rutina asignada va a su fecha; otra rutina, a la que manda. */
+function destinoDe(
+  version: Fila<'plan_version'>,
+  dia: number,
+  deHoy: RutinaDelDia['de_hoy'],
+  asignacion: Fila<'plan_asignacion'> | undefined,
+  fecha: FechaLogica,
+): DestinoDeRegistro {
+  if (deHoy === null || asignacion === undefined || deHoy.version_id !== version.id) {
+    return { como: 'otra-rutina', fecha };
+  }
+  if (deHoy.dia === dia) return { como: 'hoy', fecha };
+  const ancla = fechaLogica(asignacion.vigente_desde);
+  const suya = fechaDelDiaDelCiclo(ancla, Number(version.ciclo_dias), dia, fecha);
+  return suya === null
+    ? { como: 'antes-del-inicio', fecha: null, desde: ancla }
+    : { como: 'dia-del-ciclo', fecha: suya };
 }
 
 function vistaDe(
@@ -135,13 +175,17 @@ function vistaDe(
   rutina: RutinaPublicada,
   deHoy: RutinaDelDia['de_hoy'],
   consulta: ConsultaNormalizada,
-  fecha: FechaLogica,
+  base: FechaLogica,
+  asignacion: Fila<'plan_asignacion'> | undefined,
 ): VistaDeRutina {
   const ciclo = Number(version.ciclo_dias);
   const dia = consulta.dia ?? (deHoy?.version_id === version.id ? deHoy.dia : 1);
   if (!Number.isInteger(dia) || dia < 1 || dia > ciclo) {
     throw invalido('dia', `El día ${dia} no cabe en un ciclo de ${ciclo} días`);
   }
+  const registro = destinoDe(version, dia, deHoy, asignacion, base);
+  // Lo hecho se cuenta en la fecha a la que iría lo que se registre: la del día elegido.
+  const fecha = registro.fecha === null ? base : fechaLogica(registro.fecha);
 
   const parametros = parametrosDe(almacen);
   const sesiones = new Map(
@@ -240,6 +284,14 @@ function vistaDe(
     ciclo_dias: ciclo,
     dia,
     es_la_de_hoy: deHoy !== null && deHoy.version_id === version.id && deHoy.dia === dia,
+    registro,
+    fechas_del_ciclo:
+      registro.como === 'otra-rutina'
+        ? null
+        : Array.from(
+            { length: ciclo },
+            (_, i) => destinoDe(version, i + 1, deHoy, asignacion, base).fecha,
+          ),
     entradas,
     completa: entradas.length > 0 && entradas.every((e) => e.completa),
   };

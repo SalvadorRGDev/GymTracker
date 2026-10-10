@@ -1,6 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { ConAlmacenDeUsuario, Identidad } from '../../almacen/acceso.js';
 import type { Autenticacion } from '../../auth/sesiones.js';
+import { fechaLogica } from '../../domain/volume/index.js';
 import {
   type CatalogoDeCaptura,
   CierreDeRegistro,
@@ -25,7 +26,7 @@ import { compruebaEsquema } from '../credenciales.js';
 import { noEncontrado } from '../errores.js';
 import { usuarioDeLaSesion } from '../sesion/rutas.js';
 import { ConsultaDeRutina, type ParametrosDeRutina, type RutinaDelDia } from './contrato.js';
-import { rutinaDelDia } from './rutina.js';
+import { destinoDeRegistro, rutinaDelDia } from './rutina.js';
 
 /**
  * `/api/registro/v1`: la pantalla «Registrar» del cliente web (ADR-011).
@@ -57,7 +58,27 @@ export function rutasDeRegistro(
       const quien = await identidad(request, reply);
       compruebaEsquema(request);
       const entrada = serieDesdeRegistro(request.body, reloj());
-      return conAlmacenDeUsuario(quien, (almacen) => registraSerie(almacen, entrada));
+      const { rutina } = request.body;
+      return conAlmacenDeUsuario(quien, (almacen): RespuestaDeCaptura => {
+        if (rutina === undefined) return registraSerie(almacen, entrada);
+        // ADR-026: el día elegido de la rutina manda la fecha, calculada aquí
+        // con la misma función que la lectura que vio la pantalla.
+        const destino = destinoDeRegistro(almacen, {
+          ...(rutina.sesion === undefined ? {} : { sesion: rutina.sesion }),
+          ...(rutina.version === undefined ? {} : { version: rutina.version }),
+          ...(rutina.dia === undefined ? {} : { dia: Number(rutina.dia) }),
+        });
+        if (destino.fecha === null) {
+          return {
+            estado: 'rechazada',
+            mensaje: `Ese día de la rutina caería antes del ${destino.desde}, cuando empezó: no hay fecha a la que registrarlo. No se guardó nada.`,
+          };
+        }
+        return registraSerie(almacen, {
+          ...entrada,
+          sesion: { ...entrada.sesion, fecha: fechaLogica(destino.fecha) },
+        });
+      });
     },
   );
 

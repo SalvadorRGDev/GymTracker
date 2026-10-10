@@ -1931,6 +1931,24 @@ button:disabled,
   font-weight: 500;
 }
 
+/* Adónde va lo que se guarda, cuando no es hoy (ADR-026): junto a los botones. */
+.destino-del-registro {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--r2);
+  background: var(--info-fondo);
+  color: var(--info-texto);
+  font-size: 14px;
+}
+
+.destino-del-registro .icono {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
 .busqueda-elegido {
   margin: 0;
 }

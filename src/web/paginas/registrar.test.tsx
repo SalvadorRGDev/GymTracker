@@ -70,6 +70,9 @@ const HOY: VistaDeRutina = {
   ciclo_dias: 4,
   dia: 2,
   es_la_de_hoy: true,
+  // Anclada el jueves 26 de febrero: hoy, martes 3 de marzo, es el día 2.
+  registro: { como: 'hoy', fecha: '2026-03-03' },
+  fechas_del_ciclo: ['2026-03-02', '2026-03-03', '2026-02-28', '2026-03-01'],
   completa: false,
   entradas: [
     {
@@ -328,14 +331,20 @@ describe('Registrar desde la rutina del día (ADR-022)', () => {
   it('otra rutina u otro día van a la consulta, avisan de que no es lo de hoy y se vuelve con un botón', async () => {
     const { raiz, red } = await pinta((url) =>
       url.includes('dia=3')
-        ? rutina({ ...HOY, dia: 3, es_la_de_hoy: false, entradas: [] })
+        ? rutina({
+            ...HOY,
+            dia: 3,
+            es_la_de_hoy: false,
+            registro: { como: 'dia-del-ciclo', fecha: '2026-02-28' },
+            entradas: [],
+          })
         : rutina(HOY),
     );
     await eligeEn(campo(raiz, 'Día') as HTMLSelectElement, '3');
     expect(window.location.search).toBe('?dia=3');
     expect(red.llamadas.at(-1)?.url).toContain('dia=3');
     expect(textoDe(raiz)).toContain(
-      'Estás viendo el día 3 de «Torso-Pierna», que es de descanso, no el que toca: el día 2 de «Torso-Pierna». Lo que registres cuenta para el martes 3 de marzo.',
+      'Estás viendo el día 3 de «Torso-Pierna», que es de descanso, no el que toca: el día 2 de «Torso-Pierna». Lo que registres irá al sábado 28 de febrero, la última vez que tocó el día 3.',
     );
     await pulsa(boton(raiz, 'Volver a la de hoy'));
     expect(window.location.search).toBe('');
@@ -501,5 +510,110 @@ describe('Registrar desde la rutina del día (ADR-022)', () => {
     );
     expect(filaDe(raiz, 'Remo viejo')?.disabled).toBe(true);
     expect(textoDe(raiz)).toContain('Archivado: recupéralo en el catálogo para registrarlo.');
+  });
+});
+
+describe('registrar un día elegido de la rutina (ADR-026)', () => {
+  /** Hoy es el día 2; el día 1 tocó ayer, lunes 2; el 3 caería antes del inicio. */
+  const conDias = (url: string) => {
+    if (url.includes('dia=1')) {
+      return rutina({
+        ...HOY,
+        dia: 1,
+        es_la_de_hoy: false,
+        registro: { como: 'dia-del-ciclo', fecha: '2026-03-02' },
+      });
+    }
+    if (url.includes('dia=3')) {
+      return rutina({
+        ...HOY,
+        dia: 3,
+        es_la_de_hoy: false,
+        registro: { como: 'antes-del-inicio', fecha: null, desde: '2026-03-02' },
+        fechas_del_ciclo: ['2026-03-02', '2026-03-03', null, null],
+      });
+    }
+    return rutina(HOY);
+  };
+  const envios = (red: { llamadas: { url: string; cuerpo: unknown }[] }) =>
+    red.llamadas
+      .filter((l) => l.url === '/api/registro/v1/serie')
+      .map((l) => l.cuerpo as { sesion: { clave: string }; rutina?: Record<string, string> });
+
+  it('el selector dice a qué fecha lleva cada día, y el elegido se guarda en su fecha, no hoy', async () => {
+    const { raiz, red } = await pinta(conDias);
+    expect(
+      [...(campo(raiz, 'Día') as HTMLSelectElement).options].map((o) => o.textContent),
+    ).toEqual([
+      'Día 1 de 4 · lunes 2 de marzo',
+      'Día 2 de 4 · toca hoy',
+      'Día 3 de 4 · sábado 28 de febrero',
+      'Día 4 de 4 · domingo 1 de marzo',
+    ]);
+    // Primero una serie de hoy.
+    await eligeYRellena(raiz, 'Press banca');
+    await pulsa(boton(raiz, '2'));
+    await pulsa(boton(raiz, 'Guardar serie'));
+    // Después, el día 1: lo dice junto a los botones y se guarda con el día elegido.
+    await eligeEn(campo(raiz, 'Día') as HTMLSelectElement, '1');
+    expect(textoDe(raiz)).toContain(
+      'Se guardará en el lunes 2 de marzo, el día 1 de tu rutina, no hoy.',
+    );
+    expect(textoDe(raiz)).toContain(
+      'Lo que registres irá al lunes 2 de marzo, la última vez que tocó el día 1.',
+    );
+    await pulsa(boton(raiz, 'Guardar serie'));
+    await pulsa(boton(raiz, 'Guardar serie'));
+    const [deHoy, delLunes, otraDelLunes] = envios(red);
+    expect(deHoy?.rutina).toBeUndefined();
+    // El día viaja tal cual se eligió, con el entrenamiento de hoy como referencia: la
+    // fecha la vuelve a calcular el servidor y nunca sale del navegador.
+    expect(delLunes?.rutina).toEqual({ sesion: deHoy?.sesion.clave, dia: '1' });
+    expect(JSON.stringify(envios(red))).not.toMatch(/fecha|iniciada_en|realizada_en/);
+    // El lunes va en su propio entrenamiento, y sigue en él; el de hoy no se toca.
+    expect(delLunes?.sesion.clave).not.toBe(deHoy?.sesion.clave);
+    expect(otraDelLunes?.sesion.clave).toBe(delLunes?.sesion.clave);
+    expect(entrenamientoVigente()?.clave).toBe(deHoy?.sesion.clave);
+    // Al volver a lo de hoy, al entrenamiento de hoy.
+    await pulsa(boton(raiz, 'Volver a la de hoy'));
+    await pulsa(boton(raiz, 'Guardar serie'));
+    expect(envios(red).at(-1)?.sesion.clave).toBe(deHoy?.sesion.clave);
+  });
+
+  it('un día que caería antes del inicio de la rutina lo explica y no deja guardar', async () => {
+    const { raiz } = await pinta(conDias);
+    await eligeEn(campo(raiz, 'Día') as HTMLSelectElement, '3');
+    expect(textoDe(raiz)).toContain(
+      'El día 3 caería antes del lunes 2 de marzo, cuando empezó la rutina: no hay fecha a la que registrarlo.',
+    );
+    await eligeYRellena(raiz, 'Press banca');
+    await pulsa(boton(raiz, '2'));
+    expect(boton(raiz, 'Guardar serie').disabled).toBe(true);
+    expect(textoDe(raiz)).toContain('Falta: un día de la rutina que tenga fecha.');
+  });
+
+  it('si lo guardado quedó en otra fecha que la de hoy, la respuesta lo dice', async () => {
+    const red = simulaFetch({
+      'GET /api/lectura/v1/catalogo': { cuerpo: CATALOGO },
+      'GET /api/lectura/v1/catalogo/base': { cuerpo: BASE },
+      'GET /api/registro/v1/rutina': (_c, url) => ({ cuerpo: conDias(url) }),
+      'POST /api/registro/v1/serie': {
+        cuerpo: {
+          estado: 'aceptada',
+          mensaje: MENSAJE,
+          serie: { id: 's1', orden: 1, fecha_logica: '2026-03-02', fecha_por_confirmar: false },
+        },
+      },
+    });
+    window.history.replaceState(null, '', '/registrar?dia=1');
+    montado = await monta(<Registrar />);
+    await eligeYRellena(montado.raiz, 'Press banca');
+    await pulsa(boton(montado.raiz, '2'));
+    await pulsa(boton(montado.raiz, 'Guardar serie'));
+    const aviso = [...montado.raiz.querySelectorAll('.aviso p')].map((x) => x.textContent);
+    // El mensaje del servidor, palabra por palabra; la fecha, aparte.
+    expect(aviso).toContain(MENSAJE);
+    expect(aviso).toContain('Quedó en el lunes 2 de marzo.');
+    expect(red.llamadas.some((l) => l.url === '/api/registro/v1/serie')).toBe(true);
   });
 });

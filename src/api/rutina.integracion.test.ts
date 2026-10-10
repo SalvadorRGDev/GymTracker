@@ -297,3 +297,121 @@ describe('GET /api/registro/v1/rutina', () => {
     expect(press?.tipo === 'ejercicio' && press.ejercicio.archivado).toBe(true);
   });
 });
+
+describe('registrar un día elegido de la rutina (ADR-026)', () => {
+  /** Una serie de trabajo con la rutina y el día elegidos a mano; devuelve la respuesta. */
+  async function serieDelDia(
+    rutinaElegida: { dia?: string; version?: string; sesion?: string },
+    clave: string = randomUUID(),
+    ejercicio = 'Remo con barra',
+  ) {
+    const r = await pide('POST', '/api/registro/v1/serie', {
+      sesion: { clave },
+      serie: {
+        clave: randomUUID(),
+        ejercicio,
+        repeticiones: 8,
+        carga_lb: '95',
+        rir: 2,
+        calentamiento: false,
+      },
+      rutina: rutinaElegida,
+    });
+    expect(r.statusCode, r.body).toBe(200);
+    return r.json() as { estado: string; mensaje: string; serie?: { fecha_logica: string } };
+  }
+
+  const fechasDeSesiones = async () => {
+    const r = await pide('GET', '/api/lectura/v1/historial');
+    return (r.json() as { sesiones: { fecha_logica: string; fecha_por_confirmar: boolean }[] })
+      .sesiones;
+  };
+
+  it('la lectura dice a qué fecha va cada día: el de hoy, hoy; otro, la última vez que tocaba', async () => {
+    await torsoPierna(); // ciclo de 4 anclado el lunes 2
+    s.reloj.fija('2026-03-05T18:00:00.000Z'); // jueves 5: toca el día 4
+    expect((await lee()).vista?.registro).toEqual({ como: 'hoy', fecha: '2026-03-05' });
+    expect((await lee('?dia=2')).vista?.registro).toEqual({
+      como: 'dia-del-ciclo',
+      fecha: '2026-03-03',
+    });
+    expect((await lee('?dia=1')).vista?.registro).toEqual({
+      como: 'dia-del-ciclo',
+      fecha: '2026-03-02',
+    });
+    // El selector sabe de antemano a qué fecha llevaría cada día.
+    expect((await lee()).vista?.fechas_del_ciclo).toEqual([
+      '2026-03-02',
+      '2026-03-03',
+      '2026-03-04',
+      '2026-03-05',
+    ]);
+    // Otra rutina no tiene calendario: lo que se registre con ella va a hoy.
+    const otra = await rutina('Cuerpo entero', 7, [
+      { dia: 2, ejercicio_id: ids.remo, objetivo: '3' },
+    ]);
+    expect((await lee(`?version=${otra.id}&dia=2`)).vista?.registro).toEqual({
+      como: 'otra-rutina',
+      fecha: '2026-03-05',
+    });
+    expect((await lee(`?version=${otra.id}`)).vista?.fechas_del_ciclo).toBeNull();
+  });
+
+  it('guardar con el día 2 elegido lo pone en el martes, y su lista lo cuenta allí, no hoy', async () => {
+    await torsoPierna();
+    s.reloj.fija('2026-03-05T18:00:00.000Z');
+    const r = await serieDelDia({ dia: '2' });
+    expect(r).toMatchObject({ estado: 'aceptada', serie: { fecha_logica: '2026-03-03' } });
+    expect(fila(await lee('?dia=2'), 'Remo con barra')?.hechas).toBe('1.00');
+    expect(await fechasDeSesiones()).toEqual([
+      expect.objectContaining({ fecha_logica: '2026-03-03', fecha_por_confirmar: false }),
+    ]);
+    // Sin elegir nada, sigue yendo a hoy.
+    await serie('Press militar', 2);
+    expect((await fechasDeSesiones()).map((x) => x.fecha_logica)).toEqual([
+      '2026-03-05',
+      '2026-03-03',
+    ]);
+  });
+
+  it('un día que caería antes del inicio de la rutina no tiene fecha: se dice y no se guarda', async () => {
+    await torsoPierna();
+    s.reloj.fija('2026-03-03T18:00:00.000Z'); // martes 3, día 2: el día 3 sería el sábado 28
+    expect((await lee('?dia=3')).vista?.registro).toEqual({
+      como: 'antes-del-inicio',
+      fecha: null,
+      desde: '2026-03-02',
+    });
+    expect((await lee()).vista?.fechas_del_ciclo).toEqual(['2026-03-02', '2026-03-03', null, null]);
+    const r = await serieDelDia({ dia: '3' });
+    expect(r.estado).toBe('rechazada');
+    expect(r.mensaje).toContain('antes del 2026-03-02');
+    expect(await fechasDeSesiones()).toEqual([]);
+  });
+
+  it('un entrenamiento es de un día: su clave no acepta series de otro, ni las mezcla', async () => {
+    await torsoPierna();
+    s.reloj.fija('2026-03-05T18:00:00.000Z');
+    const deHoy = randomUUID();
+    await serie('Press militar', 2, deHoy);
+    const r = await serieDelDia({ dia: '2' }, deHoy);
+    expect(r.estado).toBe('rechazada');
+    expect(r.mensaje).toContain('van en entrenamientos distintos');
+    expect((await fechasDeSesiones()).map((x) => x.fecha_logica)).toEqual(['2026-03-05']);
+  });
+
+  it('pasada la medianoche, el día del entrenamiento abierto sigue mandando también al guardar', async () => {
+    await torsoPierna();
+    const abierto = randomUUID();
+    s.reloj.fija('2026-03-03T05:50:00.000Z'); // lunes 2, 23:50: día 1
+    await serie('Press banca', 2, abierto);
+    s.reloj.fija('2026-03-03T06:15:00.000Z'); // martes 3, 00:15
+    // Lo mismo que leyó la pantalla: con el entrenamiento abierto, el día 1 es el de hoy.
+    expect((await lee(`?sesion=${abierto}&dia=1`)).vista?.registro).toEqual({
+      como: 'hoy',
+      fecha: '2026-03-02',
+    });
+    const r = await serieDelDia({ sesion: abierto, dia: '1' }, abierto, 'Press banca');
+    expect(r).toMatchObject({ estado: 'aceptada', serie: { fecha_logica: '2026-03-02' } });
+  });
+});

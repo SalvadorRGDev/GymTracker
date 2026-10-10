@@ -36,7 +36,15 @@ export type Origen = 'captura' | 'registro';
 
 export interface SerieNormalizada {
   readonly origen: Origen;
-  readonly sesion: { readonly clave: string; readonly iniciadaEn: Date };
+  readonly sesion: {
+    readonly clave: string;
+    readonly iniciadaEn: Date;
+    /**
+     * La fecha de un día elegido de la rutina en la web (ADR-026), calculada por
+     * el servidor. Sin ella, la fecha sale de `iniciadaEn` en la zona de la cuenta.
+     */
+    readonly fecha?: FechaLogica;
+  };
   readonly serie: {
     readonly clave: string;
     readonly ejercicio: string;
@@ -192,8 +200,19 @@ export function registraSerie(
   // zona de la cuenta. La serie de las 00:15 viaja con la clave de la sesión de
   // las 23:50 y hereda su fecha: el motor nunca ve la medianoche.
   let sesion = sesiones.find((s) => s.clave_idempotencia === entrada.sesion.clave);
+  // Un entrenamiento es de un día: lo de otro día va en otro, nunca mezclado en silencio.
+  if (
+    sesion !== undefined &&
+    entrada.sesion.fecha !== undefined &&
+    sesion.fecha_logica !== entrada.sesion.fecha
+  ) {
+    return rechazo(
+      `Ese entrenamiento es del ${sesion.fecha_logica} y esta serie es del ${entrada.sesion.fecha}: van en entrenamientos distintos. No se guardó nada.`,
+    );
+  }
   if (sesion === undefined) {
-    const fecha = fechaLogicaEn(entrada.sesion.iniciadaEn, almacen.zonaHoraria);
+    const fecha =
+      entrada.sesion.fecha ?? fechaLogicaEn(entrada.sesion.iniciadaEn, almacen.zonaHoraria);
     const version = versionVigenteEn(parametros.versiones, fecha);
     if (version === undefined) {
       return rechazo(`No hay parámetros vigentes el ${fecha}. Revisa la fecha del teléfono.`);

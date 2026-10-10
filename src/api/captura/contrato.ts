@@ -1,4 +1,5 @@
 import { type Static, Type } from '@sinclair/typebox';
+import { Uuid } from '../planes/contrato.js';
 
 /**
  * Contrato de captura (`docs/06-contrato-captura.md`). La versión va en la
@@ -65,10 +66,25 @@ export const SerieDeCaptura = Type.Object(
 );
 
 /** En la web el instante lo pone el servidor: el navegador no manda relojes. */
+/**
+ * La rutina y el día elegidos a mano en «Registrar» (ADR-026): lo mismo con que
+ * se leyó la rutina. Con ellos el servidor vuelve a calcular la fecha a la que
+ * va la serie; el navegador nunca la propone.
+ */
+const RutinaElegida = Type.Object(
+  {
+    sesion: Type.Optional(Clave),
+    version: Type.Optional(Uuid),
+    dia: Type.Optional(Type.String({ pattern: '^\\d{1,2}$' })),
+  },
+  cerrado,
+);
+
 export const SerieDeRegistro = Type.Object(
   {
     sesion: Type.Object({ clave: Clave }, cerrado),
     serie: Type.Object(SerieComun, cerrado),
+    rutina: Type.Optional(RutinaElegida),
   },
   cerrado,
 );

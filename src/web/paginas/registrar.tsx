@@ -1,7 +1,7 @@
 import { useState } from 'preact/hooks';
 import type { RespuestaDeCaptura } from '../../api/captura/contrato';
 import type { Catalogo } from '../../api/lectura/contrato';
-import type { RutinaDelDia } from '../../api/registro/contrato';
+import type { DestinoDeRegistro, RutinaDelDia } from '../../api/registro/contrato';
 import type { CatalogoBase } from '../../catalogo/tipos';
 import {
   Aviso,
@@ -18,6 +18,7 @@ import { lugarEnLaRutina, TarjetaDeRutina } from '../componentes/tarjeta-de-ruti
 import { mensajeDe, pide } from '../estado/api';
 import { useRecurso } from '../estado/recurso';
 import { useUbicacion } from '../estado/ruta';
+import { fechaLarga } from '../formato/fechas';
 
 /**
  * Captura web (ADR-011): la misma operación que los atajos, contra el mismo
@@ -25,7 +26,8 @@ import { useUbicacion } from '../estado/ruta';
  * y el mensaje que se enseña es el suyo, palabra por palabra.
  *
  * Empieza por la rutina del día (ADR-022): la asignada y el día de su ciclo que
- * toca, con lo que va hecho; cualquier otro ejercicio se busca abajo.
+ * toca, con lo que va hecho; cualquier otro ejercicio se busca abajo. Elegir otro
+ * día de la rutina registra en SU fecha (ADR-026), que calcula el servidor.
  */
 
 /** La lectura de la rutina: la fecha la manda el entrenamiento abierto, si lo hay. */
@@ -85,6 +87,55 @@ function abreEntrenamiento(ahora: number = Date.now()): EntrenamientoAbierto {
   return nuevo;
 }
 
+/**
+ * Los entrenamientos de otros días de la rutina (ADR-026), uno por fecha y con la
+ * misma vigencia. Van aparte del de hoy: una serie del lunes no entra en el
+ * entrenamiento del martes, y volver al lunes sigue en el suyo.
+ */
+const CLAVE_DE_OTROS_DIAS = 'sigir:entrenamientos-de-otros-dias';
+
+function leeOtrosDias(ahora: number): Record<string, EntrenamientoAbierto> {
+  try {
+    const valor = JSON.parse(window.sessionStorage.getItem(CLAVE_DE_OTROS_DIAS) ?? '{}') as Record<
+      string,
+      Partial<EntrenamientoAbierto>
+    >;
+    const vigentes: Record<string, EntrenamientoAbierto> = {};
+    for (const [fecha, e] of Object.entries(valor)) {
+      if (
+        typeof e.clave === 'string' &&
+        typeof e.iniciado === 'number' &&
+        ahora - e.iniciado < VIGENCIA_MS
+      ) {
+        vigentes[fecha] = { clave: e.clave, iniciado: e.iniciado };
+      }
+    }
+    return vigentes;
+  } catch {
+    return {};
+  }
+}
+
+/** El entrenamiento de un día elegido de la rutina: el que ya había para esa fecha o uno nuevo. */
+export function entrenamientoDelDia(
+  fecha: string,
+  ahora: number = Date.now(),
+): EntrenamientoAbierto {
+  const otros = leeOtrosDias(ahora);
+  const vigente = otros[fecha];
+  if (vigente !== undefined) return vigente;
+  const nuevo = { clave: nuevaClave(), iniciado: ahora };
+  try {
+    window.sessionStorage.setItem(
+      CLAVE_DE_OTROS_DIAS,
+      JSON.stringify({ ...otros, [fecha]: nuevo }),
+    );
+  } catch {
+    // Sin almacenamiento de sesión, recargar abriría otro; lo demás funciona.
+  }
+  return nuevo;
+}
+
 function cierraEntrenamientoLocal(): void {
   try {
     window.sessionStorage.removeItem(CLAVE_DE_SESION);
@@ -116,6 +167,9 @@ export function Registrar() {
   const ejercicios = (completo.datos?.ejercicios ?? []).filter((e) => !e.archivado);
   const nombreElegido = ejercicios.find((e) => e.id === elegido)?.nombre ?? null;
   const vista = rutina.datos?.vista ?? null;
+  // Adónde va lo que se guarde: lo dice el servidor al leer la rutina (ADR-026).
+  const destino: DestinoDeRegistro | null = vista?.registro ?? null;
+  const aMano = consulta.has('rutina') || consulta.has('dia');
   const lugar = lugarEnLaRutina(vista, elegido);
   // Tras guardar, lo elegido se queda: casi siempre viene otra serie de lo mismo.
   const elige = (id: string, busqueda: boolean) => {
@@ -130,6 +184,7 @@ export function Registrar() {
   }
   // ADR-023: la carga en libras, lo que marcan los discos. El peso corporal sigue en kg.
   if (!/^\d{1,4}(?:[.,]\d{1,2})?$/.test(carga.trim())) faltas.push('carga en lb, como 135');
+  if (destino?.como === 'antes-del-inicio') faltas.push('un día de la rutina que tenga fecha');
 
   const guarda = async (calentamiento: boolean) => {
     if (nombreElegido === null) return;
@@ -141,11 +196,23 @@ export function Registrar() {
     }
     setOcupado(true);
     setError(null);
-    const entrenamiento = abreEntrenamiento();
-    setAbierto(entrenamiento);
+    // Un día elegido que lleva a otra fecha va a su propio entrenamiento; si no, al de hoy.
+    const otroDia = aMano && destino?.como === 'dia-del-ciclo';
+    const entrenamiento = otroDia ? entrenamientoDelDia(destino.fecha) : abreEntrenamiento();
+    if (!otroDia) setAbierto(entrenamiento);
     try {
       const r = await pide<RespuestaDeCaptura>('POST', '/api/registro/v1/serie', {
         sesion: { clave: entrenamiento.clave },
+        // Lo mismo con que se leyó la rutina: el servidor recalcula la fecha con ello.
+        ...(aMano
+          ? {
+              rutina: {
+                ...(abierto === null ? {} : { sesion: abierto.clave }),
+                ...(consulta.has('rutina') ? { version: consulta.get('rutina') } : {}),
+                ...(consulta.has('dia') ? { dia: consulta.get('dia') } : {}),
+              },
+            }
+          : {}),
         serie: {
           clave: nuevaClave(),
           ejercicio: nombreElegido,
@@ -313,6 +380,15 @@ export function Registrar() {
             </div>
             <span class="ayuda">0 es llegar al fallo. El calentamiento no lleva RIR.</span>
           </fieldset>
+          {destino?.como === 'dia-del-ciclo' && vista !== null && (
+            <p class="destino-del-registro">
+              <Icono nombre="calendar-range" tamano={16} />
+              <span>
+                Se guardará en el <strong>{fechaLarga(destino.fecha)}</strong>, el día {vista.dia}{' '}
+                de tu rutina, no hoy.
+              </span>
+            </p>
+          )}
           {faltas.length > 0 && <p class="ayuda">Falta: {faltas.join(', ')}.</p>}
           <div class="acciones">
             <button
@@ -339,6 +415,11 @@ export function Registrar() {
             {respuesta !== null && error === null && (
               <Aviso tipo={respuesta.estado === 'aceptada' ? 'exito' : 'alerta'}>
                 <p>{respuesta.mensaje}</p>
+                {respuesta.serie !== undefined &&
+                  rutina.datos !== null &&
+                  respuesta.serie.fecha_logica !== rutina.datos.fecha && (
+                    <p>Quedó en el {fechaLarga(respuesta.serie.fecha_logica)}.</p>
+                  )}
                 {respuesta.serie?.fecha_por_confirmar === true && (
                   <p>Fecha por confirmar: revísala en el historial.</p>
                 )}

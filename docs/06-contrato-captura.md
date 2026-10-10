@@ -143,6 +143,11 @@ ejercicio.
 
 Los mismos cuerpos **sin instantes** (`sesion: { clave }`, `serie` sin
 `realizada_en`; `peso` sin `medido_en`): la fecha lógica la pone el servidor.
+La serie admite además `rutina: { sesion?, version?, dia? }`, la rutina y el día
+elegidos a mano con que se leyó la rutina (ADR-026): el servidor recalcula con
+ellos la fecha del día elegido y la sesión nueva la toma. Un día sin fecha
+(antes del inicio de la rutina) o una clave de sesión de otra fecha se rechazan
+con 200 y su motivo; no se guarda nada.
 Además, sólo desde la web y a la vista:
 
 | Ruta | Qué hace |
@@ -155,7 +160,8 @@ Además, sólo desde la web y a la vista:
 
 La pantalla guarda del entrenamiento abierto **la clave y un instante** en
 `sessionStorage`, vigentes seis horas por antigüedad, para que recargar no parta
-la sesión. No hay cola: nada pendiente, nada que reintentar.
+la sesión, y otro igual por cada fecha elegida (ADR-026). No hay cola: nada
+pendiente, nada que reintentar.
 
 ### `GET /api/registro/v1/rutina` (ADR-022)
 
@@ -177,4 +183,11 @@ Todo lo decide el servidor; la pantalla sólo pinta.
   tienen fila propia ese día, y ofrece los del catálogo que lo trabajan (1.00 o
   0.50), sin archivados ni los que ya tienen fila. Un ejercicio archivado
   después de publicar la rutina llega con `archivado: true`.
-- Guardar una serie no cambia: la serie no guarda de qué rutina salió.
+- **`vista.registro`** dice adónde va lo que se registre viendo eso (ADR-026):
+  `hoy`, `dia-del-ciclo` (otro día de la asignada: la última fecha en que tocaba,
+  nunca futura), `otra-rutina` (no asignada: va a hoy) o `antes-del-inicio`
+  (`fecha: null`, con `desde`). `hechas` cuenta esa fecha.
+- **`vista.fechas_del_ciclo`**: la fecha de cada día del ciclo de la asignada,
+  para el selector; `null` dentro para un día antes del inicio y `null` entera
+  para otra rutina.
+- La serie no guarda de qué rutina salió: guarda su fecha.

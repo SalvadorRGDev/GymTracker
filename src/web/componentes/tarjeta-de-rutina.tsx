@@ -15,8 +15,9 @@ import { Icono } from './iconos';
 /**
  * La rutina del día en «Registrar» (ADR-022): qué rutina y qué día se ven, por
  * qué, y la lista de lo que pide con lo que ya va hecho. Lo decide el servidor
- * —la fecha, el día del ciclo, qué cuenta como efectiva—; aquí sólo se pinta.
- * La rutina y el día elegidos a mano van en la consulta (`?rutina=…&dia=…`).
+ * —la fecha, el día del ciclo, qué cuenta como efectiva y a qué fecha va lo que
+ * se registre (ADR-026)—; aquí sólo se pinta. La rutina y el día elegidos a mano
+ * van en la consulta (`?rutina=…&dia=…`).
  */
 
 const volverAHoy = () => actualizaConsulta({ rutina: null, dia: null }, { reemplaza: true });
@@ -103,6 +104,15 @@ function nombreDeOpcion(r: RutinaPublicada, todas: readonly RutinaPublicada[]): 
   return `${r.plan_nombre}${repetida ? ` · versión ${r.numero}` : ''}${r.asignada ? ' · asignada' : ''}`;
 }
 
+/** En el selector, a qué fecha llevaría cada día de la asignada; de otra rutina, nada. */
+function cuandoToca(vista: VistaDeRutina, deHoy: RutinaDelDia['de_hoy'], dia: number): string {
+  if (deHoy?.version_id === vista.version_id && deHoy.dia === dia) return ' · toca hoy';
+  const fechas = vista.fechas_del_ciclo;
+  if (fechas === null) return '';
+  const fecha = fechas[dia - 1];
+  return fecha === null || fecha === undefined ? ' · antes del inicio' : ` · ${fechaLarga(fecha)}`;
+}
+
 function Selectores({ datos }: { datos: RutinaDelDia }) {
   const { vista, de_hoy: deHoy } = datos;
   const cambiaRutina = (id: string) => {
@@ -154,9 +164,7 @@ function Selectores({ datos }: { datos: RutinaDelDia }) {
           >
             {Array.from({ length: vista.ciclo_dias }, (_, i) => i + 1).map((n) => (
               <option key={n} value={String(n)}>
-                {`Día ${n} de ${vista.ciclo_dias}${
-                  deHoy?.version_id === vista.version_id && deHoy.dia === n ? ' · toca hoy' : ''
-                }`}
+                {`Día ${n} de ${vista.ciclo_dias}${cuandoToca(vista, deHoy, n)}`}
               </option>
             ))}
           </select>
@@ -230,6 +238,16 @@ function Explicacion({
 
   const rutinaDeHoy =
     deHoy === null ? undefined : datos.rutinas.find((r) => r.version_id === deHoy.version_id);
+  // ADR-026: lo que se registre va a la fecha del día elegido, que dice el servidor.
+  const { registro } = vista;
+  const adonde =
+    registro.como === 'dia-del-ciclo'
+      ? `Lo que registres irá al ${fechaLarga(registro.fecha)}, la última vez que tocó el día ${vista.dia}.`
+      : registro.como === 'antes-del-inicio'
+        ? `El día ${vista.dia} caería antes del ${fechaLarga(registro.desde)}, cuando empezó la rutina: no hay fecha a la que registrarlo. Elige otro día.`
+        : registro.como === 'otra-rutina' && deHoy !== null
+          ? `${nombre} no es la asignada y no tiene calendario: lo que registres irá al ${fecha}.`
+          : `Lo que registres irá al ${fecha}.`;
   return (
     <>
       <Aviso tipo="alerta">
@@ -237,7 +255,7 @@ function Explicacion({
           {deHoy === null
             ? `${nombre} no está asignada, así que el día lo eliges tú: estás viendo el día ${vista.dia}${cuantas === 0 ? ', que es de descanso' : ''}.`
             : `Estás viendo el día ${vista.dia} de ${nombre}${cuantas === 0 ? ', que es de descanso' : ''}, no el que toca: el día ${deHoy.dia}${rutinaDeHoy === undefined ? '' : ` de «${rutinaDeHoy.plan_nombre}»`}.`}{' '}
-          Lo que registres cuenta para el {fecha}.
+          {adonde}
         </p>
         {deHoy !== null && (
           <button type="button" class="boton-texto" onClick={volverAHoy}>

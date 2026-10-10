@@ -4,8 +4,9 @@ import { Uuid } from '../planes/contrato.js';
 
 /**
  * La rutina del día para la pantalla «Registrar» (ADR-022). Es una LECTURA:
- * qué rutina toca, qué día de su ciclo y qué pide, con lo que ya se hizo. Cómo
- * se guarda una serie no cambia, y la serie no guarda de qué rutina salió.
+ * qué rutina toca, qué día de su ciclo y qué pide, con lo que ya se hizo, y a
+ * qué fecha iría lo que se registre viendo ese día (ADR-026). La serie no guarda
+ * de qué rutina salió: guarda su fecha.
  *
  * El cliente web importa de aquí sólo TIPOS (`import type`).
  */
@@ -50,7 +51,7 @@ export type EntradaDelDia =
         readonly archivado: boolean;
       };
       readonly objetivo: string;
-      /** Series efectivas de ese ejercicio en la fecha. */
+      /** Series efectivas de ese ejercicio en la fecha del registro. */
       readonly hechas: string;
       readonly completa: boolean;
     }
@@ -76,6 +77,21 @@ export type EntradaDelDia =
       }[];
     };
 
+/**
+ * A qué fecha va lo que se registre viendo esta rutina y este día (ADR-026). Lo
+ * decide el servidor, igual al leer que al guardar:
+ *
+ * - `hoy`: el día que toca, o el del entrenamiento abierto.
+ * - `dia-del-ciclo`: otro día de la rutina asignada; va a la última fecha en
+ *   que tocaba, nunca a una futura.
+ * - `otra-rutina`: una rutina que no está asignada no tiene calendario; va a hoy.
+ * - `antes-del-inicio`: ese día caería antes de que empezara la asignación: no
+ *   hay fecha a la que registrarlo.
+ */
+export type DestinoDeRegistro =
+  | { readonly como: 'hoy' | 'dia-del-ciclo' | 'otra-rutina'; readonly fecha: string }
+  | { readonly como: 'antes-del-inicio'; readonly fecha: null; readonly desde: string };
+
 export interface VistaDeRutina {
   readonly version_id: string;
   readonly plan_nombre: string;
@@ -84,6 +100,14 @@ export interface VistaDeRutina {
   readonly dia: number;
   /** Es la asignada y el día que toca en la fecha. */
   readonly es_la_de_hoy: boolean;
+  /** Adónde va lo que se registre viendo esto. `hechas` cuenta esa fecha. */
+  readonly registro: DestinoDeRegistro;
+  /**
+   * La fecha de cada día del ciclo (el día 1 primero), para la rutina asignada:
+   * así el selector dice a qué fecha llevaría cada día antes de elegirlo. `null`
+   * dentro, un día que caería antes del inicio; `null` entera, otra rutina.
+   */
+  readonly fechas_del_ciclo: readonly (string | null)[] | null;
   /** En el orden de la rutina. Vacía: día de descanso. */
   readonly entradas: readonly EntradaDelDia[];
   /** Hay entradas y todas llegaron a su objetivo. */

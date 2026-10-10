@@ -52,6 +52,9 @@ redondean distinto.
 - **El día de ciclo se cuenta desde el ancla de la asignación**, que es el
   inicio de su vigencia. Nunca desde el lunes ni desde el principio de la
   ventana.
+  La inversa, `fechaDelDiaDelCiclo` (ADR-026), da la última fecha en que tocaba
+  un día, sin pasar de hoy, y `null` si cae antes del ancla: nunca una fecha
+  fuera de la asignación.
 - **`seriesEfectivas`, `seriesSinMapeo` y compañía cuentan ENTRADAS, no volumen.**
   Para la ejecución coinciden con el número de series; para un plan expandido una
   sola entrada puede valer 4.50. El volumen está en `porGrupo` y solo ahí.

@@ -108,6 +108,31 @@ function compruebaAsignaciones(asignaciones: readonly AsignacionDePlan[]): void 
   }
 }
 
+/** El día del ciclo de una fecha: se cuenta desde el ANCLA (día 1), nunca desde el lunes. */
+export function diaDelCiclo(ancla: FechaLogica, cicloDias: number, fecha: FechaLogica): number {
+  return (diasEntre(ancla, fecha) % cicloDias) + 1;
+}
+
+/**
+ * La última fecha, sin pasar de `hasta`, en que tocaba el día `dia` del ciclo
+ * (ADR-026): elegir el día 1 un martes es registrar en el lunes, no en el
+ * martes. Un día que caería antes del ancla no tiene fecha: `null`, nunca una
+ * inventada fuera de la asignación.
+ */
+export function fechaDelDiaDelCiclo(
+  ancla: FechaLogica,
+  cicloDias: number,
+  dia: number,
+  hasta: FechaLogica,
+): FechaLogica | null {
+  if (!Number.isInteger(dia) || dia < 1 || dia > cicloDias || hasta < ancla) {
+    throw new ErrorDeMotor(`El día ${dia} no cabe en un ciclo de ${cicloDias} días desde ${ancla}`);
+  }
+  const atras = (diaDelCiclo(ancla, cicloDias, hasta) - dia + cicloDias) % cicloDias;
+  const fecha = sumaDias(hasta, -atras);
+  return fecha < ancla ? null : fecha;
+}
+
 /**
  * Convierte asignaciones y entradas en `Serie[]`, un día tras otro.
  *

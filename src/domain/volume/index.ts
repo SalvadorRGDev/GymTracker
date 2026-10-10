@@ -40,8 +40,10 @@ export {
 export {
   type AsignacionDePlan,
   type DestinoDeEntrada,
+  diaDelCiclo,
   type EntradaDePlan,
   expandePlan,
+  fechaDelDiaDelCiclo,
   type ParametrosDeExpansion,
   type PeticionDeExpansion,
   type VersionDePlan,

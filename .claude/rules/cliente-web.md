@@ -67,7 +67,8 @@ llama al mismo servicio, así que hereda sus reglas enteras:
   y aquí se mide así.
 - **La fecha lógica la pone el servidor**, que la saca de la zona de la cuenta.
   Tomarla del reloj del navegador rompería la sesión que cruza la medianoche y
-  mentiría cuando el usuario viaja.
+  mentiría cuando el usuario viaja. También la del día elegido de la rutina
+  (ADR-026): la pantalla manda la rutina y el día, nunca una fecha.
 - **El mensaje que se enseña es el del servidor**, palabra por palabra, acepte o
   rechace. Reescribirlo aquí sería mantener dos textos para el mismo rechazo,
   uno por cliente, y son los que divergen.
@@ -80,6 +81,11 @@ llama al mismo servicio, así que hereda sus reglas enteras:
 - **La rutina o el día elegidos a mano van en la consulta** (`?rutina=…&dia=…`) y
   la pantalla lo dice: «Estás viendo el día 3…, no el que toca», con «Volver a la
   de hoy». Elegir la asignada limpia la consulta, para que siga al día que toque.
+- **Un día elegido se registra en su fecha** (ADR-026), la que dice
+  `vista.registro`: el selector enseña la fecha de cada día, junto a los botones
+  se lee «Se guardará en el lunes 2 de marzo…», y cada fecha elegida tiene su
+  propio entrenamiento abierto: nunca se mezcla con el de hoy. Un día sin fecha
+  (antes del inicio) no deja guardar y dice por qué.
 - **La búsqueda libre sigue, debajo y rotulada** («¿Vas a hacer algo que no está
   en la rutina?»); lo elegido que no está en la lista del día se avisa: se guarda
   igual y cuenta para la semana. Sin rutina, la búsqueda es lo principal y lo
