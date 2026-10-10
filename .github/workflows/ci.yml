@@ -18,9 +18,18 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # El historial ENTERO, no sólo lo que trae el push: la acción de gitleaks
+      # escanea el rango subido y falla en el primer push (el commit raíz no tiene
+      # padre). El binario va con versión y suma fijas.
+      - name: gitleaks sobre todo el historial
+        run: |
+          set -euo pipefail
+          version=8.24.3
+          suma=9991e0b2903da4c8f6122b5c3186448b927a5da4deef1fe45271c3793f4ee29c
+          curl -sSfL -o gitleaks.tar.gz "https://github.com/gitleaks/gitleaks/releases/download/v${version}/gitleaks_${version}_linux_x64.tar.gz"
+          echo "${suma}  gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf gitleaks.tar.gz gitleaks
+          ./gitleaks detect --source . --redact --verbose --exit-code 1
 
   adrs:
     name: ADRs pendientes

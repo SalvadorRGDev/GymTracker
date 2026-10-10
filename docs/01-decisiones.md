@@ -348,6 +348,8 @@ del cálculo, iría allí con sus pruebas.
 
 ## ADR-019 — Comparativa: ventana desde el ancla y línea semanal del atajo
 
+**Estado**: ACEPTADO (enmienda al ADR-009)
+
 **Contexto.** La fase 3 es la resta de lo ejecutado menos lo planeado. Dos cosas
 quedaban por decidir: qué semana se compara, y cómo llega al teléfono la línea
 semanal que pide el §17.1 («pectoral 12 de 16») sin que el atajo calcule.
