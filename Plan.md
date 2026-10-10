@@ -101,11 +101,12 @@ semana, y compara lo **planeado** con lo **ejecutado**.
   referencia, constructor de rutinas y rediseño visual), la baja de cuenta, el
   alta pública con tope (ADR-020), «Ver ejemplo»: una figura animada propia
   para cada ejercicio del catálogo base, donde se elija un ejercicio (ADR-021),
-  «Registrar» que empieza por la rutina del día, con lo que va hecho (ADR-022),
+  «Registrar» que empieza por la rutina del día, con lo que va hecho, y registra
+  un día elegido en su fecha (ADR-022 y 026),
   las cargas en libras con el peso corporal en kilos (ADR-023) y el historial en
   tabla con área, carga media y progreso (ADR-024), con sus gráficas de las
   últimas ocho semanas: músculos trabajados y fuerza estimada por tren (ADR-025).
-  **411 pruebas en verde**, lint limpio, ensayo de 22 afirmaciones. Falta
+  **422 pruebas en verde**, lint limpio, ensayo de 22 afirmaciones. Falta
   **probar los atajos en un iPhone real**.
 
 ---
@@ -292,6 +293,7 @@ El proyecto siguió un proceso muy deliberado que vale la pena copiar:
 | 29 sep 2026  | **«Registrar» desde la rutina del día** (ADR-022): la asignada y el día de su ciclo que toca, con lo que va hecho contado por el motor; la búsqueda libre, debajo. 350 pruebas en verde. | **sin commit** |
 | 1 oct 2026   | **Cargas en libras** (ADR-023; el peso corporal sigue en kilos, los libros y atajos viejos se convierten), **historial en tabla** de diez en diez con área, series efectivas, carga media y progreso (ADR-024) y «Ver ejemplo» donde se elige un ejercicio. 387 pruebas en verde. | **sin commit** |
 | 9 oct 2026   | **Gráficas del historial** (ADR-025): músculos trabajados por semana con la escala del mapa y fuerza estimada por tren en libras, encadenada con los ejercicios repetidos. 411 pruebas en verde. | **sin commit** |
+| 9 oct 2026   | **Un día elegido de la rutina se registra en su fecha** (ADR-026): el selector dice la fecha de cada día, cada fecha tiene su entrenamiento y el servidor la recalcula al guardar; nunca una futura. 422 pruebas en verde. | **sin commit** |
 
 ### 4.4 Lo que se esperaba contra lo que pasó
 
@@ -1037,7 +1039,7 @@ Vistas:
 | ---------------- | ------------------------------------------------------------------------------------------- |
 | Acceso           | Correo y contraseña. El mismo mensaje exista o no el correo.                               |
 | **Resumen**      | Series efectivas por grupo esta semana, frescura («última serie recibida…»), primeros pasos. |
-| **Registrar**    | Captura web desde la rutina del día (ADR-022), con la búsqueda libre debajo; carga en lb; «Guardar serie» o «Guardar calentamiento». |
+| **Registrar**    | Captura web desde la rutina del día (ADR-022); otro día elegido se registra en su fecha (ADR-026); búsqueda libre debajo; carga en lb; «Guardar serie» o «Guardar calentamiento». |
 | Historial        | Tabla de diez en diez: fecha, área, series efectivas, carga media (lb) y progreso de −10 a +10 frente a la anterior de su área (ADR-024); cada fila despliega sus series crudas. |
 | Proyección       | Volumen previsto por semana relativa a hoy; cambiar de plan recalcula.                      |
 | Planes / rutinas | Constructor por día del ciclo, plantillas, volumen del borrador **leído del servidor**, publicar, asignar. |
