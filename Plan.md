@@ -287,8 +287,8 @@ El proyecto siguió un proceso muy deliberado que vale la pena copiar:
 | 16 sep 2026  | **Segundo giro**: el almacén pasa de PostgreSQL a libros de Excel (ADR-010) y la ejecución a la máquina local con túnel (ADR-011). Se retiran migraciones, Docker, Fly y Caddy. | **sin commit** |
 | 21 sep 2026  | **Fase de producto**: catálogo base (ADR-012), versión sin fijar reescribible (ADR-013), rangos de referencia (ADR-014), constructor de rutinas (ADR-015), vidrio sobre lienzo (ADR-016). | **sin commit** |
 | 26 sep 2026  | Este documento. 337 pruebas en verde, lint limpio.                                                            | **sin commit**  |
-| 27 sep 2026  | **Fase 3** (ADR-019) y mapa «Comparado con el plan»; revisión de errores con experimentos (`WEB_DIR` que servía los datos, `credencial.json` detrás del túnel, límite por IP, JSON ilegible); baja de cuenta y aviso de privacidad. | `1a43544` (primer commit) |
-| 28 sep 2026  | Paleta clara en azules; cuentas de usuarios migradas; **alta pública con tope** (ADR-020) con auditoría de seguridad; **«Ver ejemplo»** con figuras animadas propias para los 182 ejercicios (ADR-021). | `0a6770a` y un commit por cambio |
+| 27 sep 2026  | **Fase 3** (ADR-019) y mapa «Comparado con el plan»; revisión de errores con experimentos (`WEB_DIR` que servía los datos, `credencial.json` detrás del túnel, límite por IP, JSON ilegible); baja de cuenta y aviso de privacidad. | `79f8088` (primer commit) |
+| 28 sep 2026  | Paleta clara en azules; cuentas de usuarios migradas; **alta pública con tope** (ADR-020) con auditoría de seguridad; **«Ver ejemplo»** con figuras animadas propias para los 182 ejercicios (ADR-021). | `0ae0078` y un commit por cambio |
 | 29 sep 2026  | Revisión de las figuras: maniquí con volumen, músculos del ejercicio coloreados desde el catálogo base, cámara por lo que trabaja, máquinas que no se estiran y fallos de pies y rodillas. 327 pruebas en verde. | en el commit de «Ver ejemplo» |
 | 29 sep 2026  | **«Registrar» desde la rutina del día** (ADR-022): la asignada y el día de su ciclo que toca, con lo que va hecho contado por el motor; la búsqueda libre, debajo. 350 pruebas en verde. | **sin commit** |
 | 1 oct 2026   | **Cargas en libras** (ADR-023; el peso corporal sigue en kilos, los libros y atajos viejos se convierten), **historial en tabla** de diez en diez con área, series efectivas, carga media y progreso (ADR-024) y «Ver ejemplo» donde se elige un ejercicio. 387 pruebas en verde. | **sin commit** |
@@ -1275,7 +1275,8 @@ publicar → asignar** y mirar la **Proyección**.
 
 #### Las dos cuentas actuales
 
-Hoy existen dos cuentas. Para dejar la otra computadora con el mismo registro,
+Hoy existen dos cuentas. Los correos de abajo son de ejemplo: los reales no se
+publican en el repositorio. Para dejar la otra computadora con el mismo registro,
 después de `npm run build:api`:
 
 ```bash
@@ -1285,8 +1286,8 @@ npm run alta -- cuenta-2@ejemplo.com America/Mexico_City 2
 
 | Correo                       | Zona horaria          | Umbral de RIR | Unidad | Alta original            |
 | ---------------------------- | --------------------- | ------------- | ------ | ------------------------ |
-| `cuenta-1@ejemplo.com` | `America/Mexico_City` | 2             | kg     | 2026-09-22 02:02:39 UTC |
-| `cuenta-2@ejemplo.com`    | `America/Mexico_City` | 2             | kg     | 2026-09-22 02:02:55 UTC |
+| `cuenta-1@ejemplo.com`       | `America/Mexico_City` | 2             | kg     | 2026-09-22 02:02:39 UTC |
+| `cuenta-2@ejemplo.com`       | `America/Mexico_City` | 2             | kg     | 2026-09-22 02:02:55 UTC |
 
 Cada `alta` pide la contraseña por teclado. No se puede sacar de la máquina
 vieja: `cuentas.xlsx` solo guarda su hash Argon2id. Cada persona teclea la suya
@@ -1397,13 +1398,13 @@ correcto ante sospecha de compromiso.
 
 ### 16.3 Estado del repositorio
 
-Comprobado con `git status` el 09/10/2026: la rama es `main`. Tras `1a43544`
-(el primero) y `0a6770a`, un commit por cambio: la paleta en azules, la cabecera
-sin el correo, el alta pública con su auditoría (ADR-020) y «Ver ejemplo» con sus
-figuras (ADR-021). Lo posterior —«Registrar» desde la rutina del día (ADR-022),
-las libras (ADR-023), el historial (ADR-024), sus gráficas (ADR-025) y «Ver
-ejemplo» donde se elige un ejercicio— está sin commit. Localmente, pruebas, lint, las dos compilaciones y el ensayo
-están en verde.
+Comprobado el 09/10/2026: la rama es `main`, no queda nada sin commit y se
+publica en GitHub (`SalvadorRGDev/GymTracker`, licencia MIT). Tras `79f8088` (el
+primero) y `0ae0078`, un commit por cambio. Antes de publicar se reescribió el
+historial para cambiar los correos reales de las cuentas por direcciones de
+ejemplo: los identificadores de commit de antes del 9 de octubre ya no son los
+que citan notas anteriores. Localmente, pruebas, lint, las dos compilaciones y el
+ensayo están en verde.
 
 ### 16.4 Lo único pendiente del plan original
 
