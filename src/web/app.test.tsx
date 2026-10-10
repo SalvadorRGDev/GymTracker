@@ -100,7 +100,7 @@ describe('la sesión', () => {
     montado = await monta(<App />);
     const activa = montado.raiz.querySelector('nav a[aria-current="page"]');
     expect(activa?.textContent).toContain('Historial');
-    expect(document.title).toBe('Historial · SIGIR');
+    expect(document.title).toBe('Historial · GymTracker');
     expect(textoDe(montado.raiz)).toContain('Todavía no hay sesiones');
     await pulsa(boton(montado.raiz, 'Salir'));
     expect(textoDe(montado.raiz)).toContain('Cuánto trabajó cada músculo esta semana');

@@ -425,18 +425,21 @@ describe('dispositivos y exportación', () => {
 
     it('detrás de un túnel que reescribe Host, a donde está el navegador (Origin)', async () => {
       expect(
-        await emite(s, ana, { host: '127.0.0.1:3000', origin: 'https://sigir.ejemplo.ts.net' }),
-      ).toEqual({ url: 'https://sigir.ejemplo.ts.net', aviso: null });
+        await emite(s, ana, {
+          host: '127.0.0.1:3000',
+          origin: 'https://gymtracker.ejemplo.ts.net',
+        }),
+      ).toEqual({ url: 'https://gymtracker.ejemplo.ts.net', aviso: null });
     });
 
     it('sin Origin, esquema y Host; las X-Forwarded-* sólo del proxy de confianza', async () => {
       const cabeceras = {
         host: '127.0.0.1:3000',
         'x-forwarded-proto': 'https',
-        'x-forwarded-host': 'sigir.ejemplo.ts.net',
+        'x-forwarded-host': 'gymtracker.ejemplo.ts.net',
       };
       expect(await emite(s, ana, cabeceras)).toEqual({
-        url: 'https://sigir.ejemplo.ts.net',
+        url: 'https://gymtracker.ejemplo.ts.net',
         aviso: null,
       });
       const sinConfianza = await servidorDePrueba({ trustProxy: false });
@@ -451,9 +454,13 @@ describe('dispositivos y exportación', () => {
     });
 
     it('un Origin que no es una dirección (null, ruta, otro esquema) no cuenta', async () => {
-      for (const origin of ['null', 'https://sigir.ejemplo.ts.net/ruta', 'ftp://sigir.ejemplo']) {
-        expect((await emite(s, ana, { host: 'sigir.lan:3000', origin })).url).toBe(
-          'http://sigir.lan:3000',
+      for (const origin of [
+        'null',
+        'https://gymtracker.ejemplo.ts.net/ruta',
+        'ftp://gymtracker.ejemplo',
+      ]) {
+        expect((await emite(s, ana, { host: 'gymtracker.lan:3000', origin })).url).toBe(
+          'http://gymtracker.lan:3000',
         );
       }
     });
@@ -488,7 +495,9 @@ describe('dispositivos y exportación', () => {
       headers: { cookie: ana.cookie },
     });
     expect(r.statusCode).toBe(200);
-    expect(r.headers['content-disposition']).toBe('attachment; filename="sigir-2026-09-26.json"');
+    expect(r.headers['content-disposition']).toBe(
+      'attachment; filename="gymtracker-2026-09-26.json"',
+    );
     const datos = r.json() as Exportacion;
     expect(Object.keys(datos.datos)).toHaveLength(11);
     expect(datos.datos['serie']).toHaveLength(1);

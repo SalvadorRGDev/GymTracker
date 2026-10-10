@@ -1,4 +1,4 @@
-# Especificación — SIGIR Fitness
+# Especificación — GymTracker
 
 Escrita como encargo a un ingeniero senior. Se puede leer como documento o pegar
 como prompt. Las respuestas a sus preguntas son los ADR (`01-decisiones.md`) y

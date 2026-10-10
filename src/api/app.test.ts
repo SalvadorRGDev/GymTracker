@@ -72,11 +72,11 @@ describe('proxy de confianza y límite por IP', () => {
 
 describe('un solo proceso sirve la API y el cliente', () => {
   async function conCliente(): Promise<ServidorDePrueba> {
-    web = await mkdtemp(join(tmpdir(), 'sigir-web-'));
+    web = await mkdtemp(join(tmpdir(), 'gymtracker-web-'));
     await mkdir(join(web, 'assets'));
     await writeFile(
       join(web, 'index.html'),
-      '<!doctype html><title>SIGIR</title><div id="app"></div>',
+      '<!doctype html><title>GymTracker</title><div id="app"></div>',
     );
     await writeFile(join(web, 'assets', 'app-abc123.js'), 'console.log(1)');
     return servidorDePrueba({ webDir: web });
@@ -87,7 +87,7 @@ describe('un solo proceso sirve la API y el cliente', () => {
     for (const ruta of ['/', '/resumen', '/planes/editor']) {
       const r = await s.pide({ method: 'GET', url: ruta });
       expect(r.statusCode, ruta).toBe(200);
-      expect(r.body).toContain('<title>SIGIR</title>');
+      expect(r.body).toContain('<title>GymTracker</title>');
       expect(r.headers['cache-control']).toBe('no-cache');
     }
   });
@@ -114,7 +114,7 @@ describe('un solo proceso sirve la API y el cliente', () => {
     expect((await s.pide({ method: 'GET', url: '/assets/app-abc123.js' })).body).toBe(
       'console.log(1)',
     );
-    expect((await s.pide({ method: 'GET', url: '/' })).body).toContain('<title>SIGIR</title>');
+    expect((await s.pide({ method: 'GET', url: '/' })).body).toContain('<title>GymTracker</title>');
   });
 
   it('una ruta de API desconocida sigue siendo un 404 de API, no una página', async () => {

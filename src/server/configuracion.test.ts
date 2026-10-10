@@ -5,14 +5,14 @@ const SECRETO = 'x'.repeat(64);
 
 describe('leeConfiguracion', () => {
   it('por omisión escucha sólo en 127.0.0.1 y confía en el túnel local', () => {
-    const c = leeConfiguracion({ SESSION_SECRET: SECRETO }, '/srv/sigir');
+    const c = leeConfiguracion({ SESSION_SECRET: SECRETO }, '/srv/gymtracker');
     expect(c).toMatchObject({
       host: '127.0.0.1',
       puerto: 3000,
       trustProxy: 'loopback',
       horasDeSesion: 720,
-      datosDir: '/srv/sigir/datos',
-      webDir: '/srv/sigir/dist/web',
+      datosDir: '/srv/gymtracker/datos',
+      webDir: '/srv/gymtracker/dist/web',
     });
   });
 
@@ -53,20 +53,22 @@ describe('leeConfiguracion', () => {
   it('URL_PUBLICA es un origen https: se normaliza, y lo demás no arranca', () => {
     expect(leeConfiguracion({ SESSION_SECRET: SECRETO }).urlPublica).toBeNull();
     expect(
-      leeConfiguracion({ SESSION_SECRET: SECRETO, URL_PUBLICA: ' https://Sigir.Ejemplo.ts.net/ ' })
-        .urlPublica,
-    ).toBe('https://sigir.ejemplo.ts.net');
+      leeConfiguracion({
+        SESSION_SECRET: SECRETO,
+        URL_PUBLICA: ' https://GymTracker.Ejemplo.ts.net/ ',
+      }).urlPublica,
+    ).toBe('https://gymtracker.ejemplo.ts.net');
     expect(
       leeConfiguracion({
         SESSION_SECRET: SECRETO,
-        URL_PUBLICA: 'https://sigir.ejemplo.ts.net:8443',
+        URL_PUBLICA: 'https://gymtracker.ejemplo.ts.net:8443',
       }).urlPublica,
-    ).toBe('https://sigir.ejemplo.ts.net:8443');
+    ).toBe('https://gymtracker.ejemplo.ts.net:8443');
     for (const mala of [
-      'http://sigir.ejemplo.ts.net',
-      'https://sigir.ejemplo.ts.net/api',
-      'https://ana:clave@sigir.ejemplo.ts.net',
-      'sigir.ejemplo.ts.net',
+      'http://gymtracker.ejemplo.ts.net',
+      'https://gymtracker.ejemplo.ts.net/api',
+      'https://ana:clave@gymtracker.ejemplo.ts.net',
+      'gymtracker.ejemplo.ts.net',
     ]) {
       expect(() => leeConfiguracion({ SESSION_SECRET: SECRETO, URL_PUBLICA: mala })).toThrow(
         /URL_PUBLICA/,
@@ -77,32 +79,34 @@ describe('leeConfiguracion', () => {
   it('WEB_DIR no puede contener DATOS_DIR: serviría los libros a internet', () => {
     for (const [web, datos] of [
       ['.', 'datos'],
-      ['/srv/sigir', '/srv/sigir/datos'],
-      ['/srv/sigir/datos', '/srv/sigir/datos'],
-      ['/srv', '/srv/sigir/datos/'],
+      ['/srv/gymtracker', '/srv/gymtracker/datos'],
+      ['/srv/gymtracker/datos', '/srv/gymtracker/datos'],
+      ['/srv', '/srv/gymtracker/datos/'],
     ] as const) {
       expect(
         () =>
           leeConfiguracion(
             { SESSION_SECRET: SECRETO, WEB_DIR: web, DATOS_DIR: datos },
-            '/srv/sigir',
+            '/srv/gymtracker',
           ),
         `${web} ⊇ ${datos}`,
       ).toThrow(/WEB_DIR .* contiene DATOS_DIR/);
     }
     for (const [web, datos] of [
       ['dist/web', 'datos'],
-      ['/srv/sigir/web', '/srv/sigir/web-datos'],
-      ['/srv/sigir/dist/web', '/srv/sigir'],
+      ['/srv/gymtracker/web', '/srv/gymtracker/web-datos'],
+      ['/srv/gymtracker/dist/web', '/srv/gymtracker'],
     ] as const) {
       expect(
-        leeConfiguracion({ SESSION_SECRET: SECRETO, WEB_DIR: web, DATOS_DIR: datos }, '/srv/sigir')
-          .webDir,
+        leeConfiguracion(
+          { SESSION_SECRET: SECRETO, WEB_DIR: web, DATOS_DIR: datos },
+          '/srv/gymtracker',
+        ).webDir,
         `${web} / ${datos}`,
       ).not.toBeNull();
     }
     expect(
-      leeConfiguracion({ SESSION_SECRET: SECRETO, WEB_DIR: '', DATOS_DIR: '.' }, '/srv/sigir')
+      leeConfiguracion({ SESSION_SECRET: SECRETO, WEB_DIR: '', DATOS_DIR: '.' }, '/srv/gymtracker')
         .webDir,
     ).toBeNull();
   });

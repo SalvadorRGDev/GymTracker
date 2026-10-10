@@ -1,9 +1,9 @@
 # Aviso de privacidad
 
-Qué guarda SIGIR, dónde y cómo se borra. Son datos personales sensibles bajo la
+Qué guarda GymTracker, dónde y cómo se borra. Son datos personales sensibles bajo la
 LFPDPPP (México): peso corporal e historial de entrenamiento.
 
-- **Responsable**: quien opera el servidor (la máquina donde corre SIGIR).
+- **Responsable**: quien opera el servidor (la máquina donde corre GymTracker).
 - **Qué se guarda**: correo, huella Argon2id de la contraseña, zona horaria,
   huellas de las credenciales, y el entrenamiento (sesiones, series, peso,
   planes, parámetros).

@@ -40,8 +40,9 @@ function Emision({ zona, alEmitir }: { zona: string; alEmitir: () => void }) {
         <code>{emitido.credencial}</code>
         <p>
           Guarda este contenido como <strong>{emitido.archivo.nombre}</strong> en{' '}
-          <strong>iCloud Drive › Atajos › SIGIR</strong> y ejecuta el atajo «Configurar». Nunca la
-          pegues dentro de un atajo: compartirlo exportaría sus acciones y con ellas la credencial.
+          <strong>iCloud Drive › Atajos › GymTracker</strong> y ejecuta el atajo «Configurar». Nunca
+          la pegues dentro de un atajo: compartirlo exportaría sus acciones y con ellas la
+          credencial.
         </p>
         <pre class="bloque-codigo">{emitido.archivo.contenido}</pre>
         {emitido.servidor.aviso !== null && <Aviso tipo="alerta">{emitido.servidor.aviso}</Aviso>}
@@ -130,7 +131,7 @@ function Exportacion() {
       const url = URL.createObjectURL(blob);
       const enlace = document.createElement('a');
       enlace.href = url;
-      enlace.download = `sigir-${datos.exportado_en.slice(0, 10)}.json`;
+      enlace.download = `gymtracker-${datos.exportado_en.slice(0, 10)}.json`;
       enlace.click();
       URL.revokeObjectURL(url);
       setEstado({ tipo: 'exito', texto: 'Descargada.' });

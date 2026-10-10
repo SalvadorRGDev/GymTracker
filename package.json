@@ -1,9 +1,9 @@
 {
-  "name": "sigir-fitness",
+  "name": "gymtracker",
   "version": "0.2.0",
   "private": true,
   "description": "Series efectivas por grupo muscular y semana: lo planeado contra lo ejecutado.",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "engines": {
     "node": ">=22.9"

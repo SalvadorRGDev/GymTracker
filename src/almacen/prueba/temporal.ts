@@ -37,7 +37,7 @@ export interface DepositoDePrueba {
 }
 
 export async function depositoDePrueba(reloj = new RelojDePrueba()): Promise<DepositoDePrueba> {
-  const directorio = await mkdtemp(join(tmpdir(), 'sigir-prueba-'));
+  const directorio = await mkdtemp(join(tmpdir(), 'gymtracker-prueba-'));
   const deposito = await Deposito.abre({ directorio, reloj: reloj.lee });
   return {
     deposito,

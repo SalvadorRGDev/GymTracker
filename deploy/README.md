@@ -113,9 +113,9 @@ Un servicio de usuario de systemd para el servidor y otro para el túnel, con
 `Restart=on-failure`, reduce el riesgo R8 (servidor apagado):
 
 ```ini
-# ~/.config/systemd/user/sigir.service
+# ~/.config/systemd/user/gymtracker.service
 [Unit]
-Description=SIGIR Fitness
+Description=GymTracker
 After=network-online.target
 
 [Service]
@@ -127,7 +127,7 @@ Restart=on-failure
 WantedBy=default.target
 ```
 
-`systemctl --user enable --now sigir` (y `loginctl enable-linger $USER` para que
+`systemctl --user enable --now gymtracker` (y `loginctl enable-linger $USER` para que
 arranque sin iniciar sesión).
 
 ## El ensayo

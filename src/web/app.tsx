@@ -54,8 +54,8 @@ export function App() {
     const seccion = SECCIONES.find((s) => s.camino === camino);
     document.title =
       sesion.tipo === 'activa' && seccion !== undefined
-        ? `${seccion.titulo} · SIGIR`
-        : 'SIGIR Fitness';
+        ? `${seccion.titulo} · GymTracker`
+        : 'GymTracker';
   }, [camino, sesion.tipo]);
 
   if (sesion.tipo === 'comprobando') {

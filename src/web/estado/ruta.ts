@@ -8,7 +8,7 @@ import { useEffect, useState } from 'preact/hooks';
  * es estado de la vista: se comparte por mensaje y el botón «atrás» funciona.
  */
 
-const EVENTO = 'sigir:navegacion';
+const EVENTO = 'gymtracker:navegacion';
 
 export interface Ubicacion {
   readonly camino: string;

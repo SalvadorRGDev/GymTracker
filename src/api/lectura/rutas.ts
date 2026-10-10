@@ -215,7 +215,7 @@ export function rutasDeLectura(
     const datos = await conAlmacenDeUsuario(quien, (almacen) => exportacion(almacen, cuenta));
     reply.header(
       'content-disposition',
-      `attachment; filename="sigir-${datos.exportado_en.slice(0, 10)}.json"`,
+      `attachment; filename="gymtracker-${datos.exportado_en.slice(0, 10)}.json"`,
     );
     return datos;
   });

@@ -1,4 +1,4 @@
-# Plan — SIGIR Fitness
+# Plan — GymTracker
 
 > Documento maestro del proyecto: qué problema resuelve, qué se quería
 > construir, cómo se construyó, con qué tecnologías, qué se hizo, qué cambió por
@@ -69,7 +69,7 @@ personas llamen distinto a la misma cosa.
 
 ## 1. Resumen en una página
 
-**SIGIR Fitness** es una aplicación personal de seguimiento de entrenamiento de
+**GymTracker** es una aplicación personal de seguimiento de entrenamiento de
 fuerza. Cuenta cuántas **series efectivas** recibe cada **grupo muscular** por
 semana, y compara lo **planeado** con lo **ejecutado**.
 
@@ -294,6 +294,7 @@ El proyecto siguió un proceso muy deliberado que vale la pena copiar:
 | 1 oct 2026   | **Cargas en libras** (ADR-023; el peso corporal sigue en kilos, los libros y atajos viejos se convierten), **historial en tabla** de diez en diez con área, series efectivas, carga media y progreso (ADR-024) y «Ver ejemplo» donde se elige un ejercicio. 387 pruebas en verde. | **sin commit** |
 | 9 oct 2026   | **Gráficas del historial** (ADR-025): músculos trabajados por semana con la escala del mapa y fuerza estimada por tren en libras, encadenada con los ejercicios repetidos. 411 pruebas en verde. | **sin commit** |
 | 9 oct 2026   | **Un día elegido de la rutina se registra en su fecha** (ADR-026): el selector dice la fecha de cada día, cada fecha tiene su entrenamiento y el servidor la recalcula al guardar; nunca una futura. 422 pruebas en verde. | **sin commit** |
+| 9 oct 2026   | **El proyecto pasa a llamarse GymTracker** (antes SIGIR Fitness): marca, títulos, documentación y nombres del repositorio. La cookie, las claves del navegador y el formato de exportación conservan `sigir` para no cerrar sesiones ni perder datos. | **sin commit** |
 
 ### 4.4 Lo que se esperaba contra lo que pasó
 
@@ -391,7 +392,7 @@ con un framework.
 flowchart LR
     subgraph iPhone
         A[Atajos de iOS<br/>Serie · Calentamiento · Terminar<br/>Sincronizar · Peso · Configurar]
-        Q[(iCloud Drive<br/>Shortcuts/SIGIR/<br/>cola · rechazos · credencial)]
+        Q[(iCloud Drive<br/>Shortcuts/GymTracker/<br/>cola · rechazos · credencial)]
         A <--> Q
     end
     subgraph Navegador
@@ -1075,7 +1076,7 @@ Se versiona la **lista de acciones en Markdown**, reproducible a mano, porque un
 | `Terminar entrenamiento` | Cierra la sesión, muestra el resumen y borra el archivo de sesión vigente.            |
 | `Peso`                   | Peso corporal, leído de Salud o preguntado.                                           |
 
-Estado en `iCloud Drive/Shortcuts/SIGIR/`: `credencial.json`,
+Estado en `iCloud Drive/Shortcuts/GymTracker/`: `credencial.json`,
 `sesion-vigente.json`, `catalogo.json`, `cola/` (un JSON por operación) y
 `rechazos/`. Un archivo por operación evita reescribir una cola única que iOS
 podría truncar a mitad.
@@ -1314,7 +1315,7 @@ Con la copia, las contraseñas y los datos siguen iguales y no hace falta ningú
 - `npm run dev` compila y levanta la API vigilando `dist/`; para recompilar al
   guardar, `npx tsc -p tsconfig.build.json --watch` al lado.
 - `npm run dev:web` levanta Vite con recarga en caliente y reenvía `/api` a
-  `SIGIR_API_URL` (por omisión `http://127.0.0.1:3000`). Con Vite delante,
+  `GYMTRACKER_API_URL` (por omisión `http://127.0.0.1:3000`). Con Vite delante,
   `WEB_DIR` se deja vacío.
 - Antes de cada commit: `npm test` y `npm run lint` (obligatorio).
 - **Nunca** apuntar `DATOS_DIR` al almacén real en un experimento: un libro
@@ -1529,8 +1530,8 @@ que recomiendo atender antes.
    - `src/domain/volume/centesimas.ts` explica el parseo por el driver `pg`; el
      motivo sigue valiendo (el almacén también da cadenas) pero el texto está
      desfasado.
-4. **Decidir la licencia.** Hoy `UNLICENSED`: todos los derechos reservados por
-   omisión. El README ya lo señala como decisión pendiente del autor.
+4. **Hecho (09/10/2026)**: licencia MIT (`LICENSE`), con las fuentes (OFL) y los
+   iconos (ISC) bajo las suyas.
 5. **Añadir este `Plan.md` a la tabla de documentación del `README.md`.**
 
 ### 19.2 Huecos funcionales frente al spec (días)
@@ -1646,7 +1647,7 @@ El enfoque está pensado sobre todo para páginas de marketing. En una aplicaci�
 como esta, una parte aplica tal cual, otra se adapta y otra choca con reglas del
 proyecto. La tabla dice qué se hace con cada pieza y por qué:
 
-| Pieza del estilo *modern SaaS*                        | Veredicto         | Cómo se aplica en SIGIR                                                                                                                                                  |
+| Pieza del estilo *modern SaaS*                        | Veredicto         | Cómo se aplica en GymTracker                                                                                                                                                  |
 | ----------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Base blanca, texto casi negro, **acento verde**       | **Aplica**        | Encaja con la regla «un tono manda»: el proyecto ya es verde. El verde por omisión del estilo (`#5EA832`) **no sirve para texto ni para botones con texto blanco**: su contraste es ≈ 2.9:1, por debajo del 5:1 que exige el ADR-016. Se usa para decoración (puntos, bordes, fondos suaves) y el relleno de botones sigue siendo el verde profundo actual (`#1c6340`). |
 | **Títulos serif editoriales** (Playfair Display) + Inter para todo lo demás | **Aplica, acotado** | Sólo `h1`/`h2` de página y de sección. **Nunca en cifras**: los números van en sans con `font-variant-numeric: tabular-nums` para que las columnas se alineen. |
@@ -1679,7 +1680,7 @@ escritas con la recomendación:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ SIGIR   Resumen  Registrar  Historial  Proyección  Rutinas  Catálogo  ⋯  │ ← cabecera fija, vidrio
+│ GymTracker   Resumen  Registrar  Historial  Proyección  Rutinas  Catálogo  ⋯  │ ← cabecera fija, vidrio
 ├──────────────────────────────────────────────────────────────────────────┤
 │ Semana del 21 al 27 de septiembre                        [ Actualizar ]  │ ← serif
 │ ● Última serie recibida: hoy 19:42                                       │

@@ -275,7 +275,7 @@ export interface DispositivoEmitido {
   readonly dispositivo: Dispositivo;
   /** La ÚNICA vez que la credencial existe fuera del teléfono. No hay forma de volver a verla. */
   readonly credencial: string;
-  /** Lo que el atajo «Configurar» espera en iCloud Drive/Shortcuts/SIGIR/. */
+  /** Lo que el atajo «Configurar» espera en iCloud Drive/Shortcuts/GymTracker/. */
   readonly archivo: { readonly nombre: string; readonly contenido: string };
   /**
    * La dirección del archivo, y el aviso si el teléfono no va a poder usarla
@@ -285,6 +285,7 @@ export interface DispositivoEmitido {
 }
 
 export interface Exportacion {
+  /** Identifica el formato; conserva el nombre anterior del proyecto para no romper lo ya exportado. */
   readonly formato: 'sigir-exportacion';
   readonly version: 1;
   readonly exportado_en: string;

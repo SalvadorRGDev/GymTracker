@@ -7,6 +7,8 @@ import { useEffect, useState } from 'preact/hooks';
  * acceso va envuelto y la página funciona igual sin él.
  */
 
+// El prefijo `sigir:` es el del nombre anterior del proyecto: cambiarlo perdería
+// las preferencias ya guardadas en cada navegador.
 export function leePreferencia(clave: string): string | null {
   try {
     return window.localStorage.getItem(`sigir:${clave}`);

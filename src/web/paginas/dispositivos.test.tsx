@@ -54,10 +54,10 @@ async function emite(servidor: DispositivoEmitido['servidor']) {
 
 describe('Dispositivos', () => {
   it('la credencial se ve una vez, con el archivo que apunta a la dirección del servidor', async () => {
-    const raiz = await emite({ url: 'https://sigir.ejemplo.ts.net', aviso: null });
+    const raiz = await emite({ url: 'https://gymtracker.ejemplo.ts.net', aviso: null });
     expect(textoDe(raiz)).toContain('Ésta es la única vez que la verás');
     expect(raiz.querySelector('pre')?.textContent).toContain(
-      '"servidor": "https://sigir.ejemplo.ts.net"',
+      '"servidor": "https://gymtracker.ejemplo.ts.net"',
     );
     expect(textoDe(raiz)).not.toContain('URL_PUBLICA');
     await pulsa(boton(raiz, 'Ya la guardé'));

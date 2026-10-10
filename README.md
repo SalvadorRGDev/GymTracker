@@ -1,4 +1,4 @@
-# SIGIR Fitness
+# GymTracker
 
 Cuenta cuántas **series efectivas** recibe cada **grupo muscular** por semana y
 lo pone junto a lo que **planeaste**. Un press de banca entrena el pectoral, pero
@@ -59,6 +59,6 @@ Comparativa · Rutinas · Catálogo · Dispositivos: ocho vistas más el acceso.
 
 ## Licencia
 
-`UNLICENSED`: todos los derechos reservados por omisión. Decidir una licencia es
-una decisión pendiente del autor. Las fuentes (Playfair Display, Inter) van con su
-licencia OFL en `src/web/fuentes/`, y los iconos de Lucide con la suya (ISC).
+[MIT](LICENSE). Las fuentes (Playfair Display, Inter) van con su licencia OFL en
+`src/web/fuentes/`, y los iconos de Lucide con la suya (ISC): se conservan con el
+código que los usa.

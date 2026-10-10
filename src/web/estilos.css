@@ -1,5 +1,5 @@
 /*
- * SIGIR Fitness · lenguaje visual (ADR-016 enmendado por ADR-017 y ADR-018).
+ * GymTracker · lenguaje visual (ADR-016 enmendado por ADR-017 y ADR-018).
  *
  * Dirección moderna y luminosa, siempre clara: lienzo blanco azulado con
  * veladuras azules muy suaves, títulos editoriales en serif, tarjetas blancas
@@ -3144,6 +3144,18 @@ button:disabled,
 
   .detalle-flotante {
     transition: opacity var(--duracion) ease;
+  }
+}
+
+/* Desde 1200 px las ocho secciones van en la fila de la marca: un poco más
+   juntas, para que «Dispositivos» quepa entero junto a «GymTracker». */
+@media (min-width: 1200px) {
+  .navegacion {
+    gap: 2px;
+  }
+
+  .navegacion a {
+    padding: 7px 10px;
   }
 }
 

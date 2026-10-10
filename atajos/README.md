@@ -9,7 +9,7 @@ en un diff.
 volumen que enseña es el `mensaje` del servidor. No crea ejercicios, no propone
 más identificadores que sus claves de idempotencia y nunca el pin de parámetros.
 
-## Estado en iCloud Drive › Atajos › SIGIR
+## Estado en iCloud Drive › Atajos › GymTracker
 
 | Archivo | Qué es |
 | ------- | ------ |
@@ -43,19 +43,19 @@ español.
 
 ### 1. Configurar (una vez por teléfono)
 
-1. **Obtener archivo** `Atajos/SIGIR/credencial.json` (desactiva «Mostrar selector
+1. **Obtener archivo** `Atajos/GymTracker/credencial.json` (desactiva «Mostrar selector
    de documentos»). → **Obtener diccionario de la entrada**.
 2. **Obtener valor del diccionario** `servidor` → variable *Servidor*;
    `portador` → variable *Portador*.
 3. **Obtener contenido de URL** `Servidor` + `/api/captura/v1/catalogo`, método
    GET, cabecera `Authorization: Bearer ` + *Portador*.
-4. **Guardar archivo** en `Atajos/SIGIR/catalogo.json` (sobrescribir).
-5. **Mostrar notificación**: «SIGIR configurado» y el número de ejercicios.
+4. **Guardar archivo** en `Atajos/GymTracker/catalogo.json` (sobrescribir).
+5. **Mostrar notificación**: «GymTracker configurado» y el número de ejercicios.
 
 ### 2. Sincronizar
 
 1. Leer *Servidor* y *Portador* como en `Configurar`.
-2. **Obtener contenido de la carpeta** `Atajos/SIGIR/cola` → **Ordenar** por nombre.
+2. **Obtener contenido de la carpeta** `Atajos/GymTracker/cola` → **Ordenar** por nombre.
 3. **Repetir con cada** archivo:
    1. **Obtener diccionario** del archivo; `ruta` y `cuerpo`.
    2. **Obtener contenido de URL** `Servidor` + `ruta`, método POST, cabecera

@@ -17,7 +17,7 @@ export default defineConfig({
   server: {
     host: '127.0.0.1',
     proxy: {
-      '/api': process.env.SIGIR_API_URL ?? 'http://127.0.0.1:3000',
+      '/api': process.env.GYMTRACKER_API_URL ?? 'http://127.0.0.1:3000',
     },
   },
 });

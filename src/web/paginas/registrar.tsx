@@ -42,6 +42,7 @@ function urlDeRutina(clave: string | null, consulta: URLSearchParams): string {
   return `/api/registro/v1/rutina${texto === '' ? '' : `?${texto}`}`;
 }
 
+// `sigir:` es el nombre anterior del proyecto: cambiarlo partiría el entrenamiento abierto.
 const CLAVE_DE_SESION = 'sigir:entrenamiento-abierto';
 /** Vigente por ANTIGÜEDAD, como el archivo del atajo: la sesión de 23:50 a 00:15 no se parte. */
 const VIGENCIA_MS = 6 * 3_600_000;

@@ -57,11 +57,11 @@ export function Marco({
       <header class={`marco-cabecera${conSombra ? ' con-sombra' : ''}`}>
         <div class="contenedor">
           <div class="cabecera-fila">
-            <Enlace href="/" class="marca" aria-label="SIGIR, ir al resumen">
+            <Enlace href="/" class="marca" aria-label="GymTracker, ir al resumen">
               <span class="marca-simbolo" aria-hidden="true">
                 <Icono nombre="dumbbell" tamano={17} />
               </span>
-              SIGIR
+              GymTracker
             </Enlace>
             <nav class="navegacion navegacion-escritorio" aria-label="Secciones">
               <ListaDeSecciones camino={camino} />
@@ -87,7 +87,7 @@ export function Marco({
       </main>
       <footer class="pie">
         <div class="contenedor">
-          <span>SIGIR Fitness · series efectivas por grupo y semana</span>
+          <span>GymTracker · series efectivas por grupo y semana</span>
           <span>Tus datos viven en tu máquina, en libros de Excel.</span>
         </div>
       </footer>

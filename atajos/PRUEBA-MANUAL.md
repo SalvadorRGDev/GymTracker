@@ -5,7 +5,7 @@ Antes: `./atajos/comprueba-servidor.sh https://tu-servidor "<portador>"` en verd
 
 | # | Paso | Resultado esperado |
 | - | ---- | ------------------ |
-| 1 | `Configurar` con una credencial recién emitida | «SIGIR configurado» con el número de ejercicios |
+| 1 | `Configurar` con una credencial recién emitida | «GymTracker configurado» con el número de ejercicios |
 | 2 | `Serie` desde la pantalla bloqueada | Notificación con el total de la semana del servidor; el historial web la muestra |
 | 3 | `Calentamiento` | La notificación dice que no cuenta volumen; el historial la marca |
 | 4 | Modo avión → `Serie` | El archivo queda en `cola/`; `Sincronizar` aborta y la cola conserva el archivo |

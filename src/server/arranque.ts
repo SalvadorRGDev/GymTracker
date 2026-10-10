@@ -28,7 +28,7 @@ async function principal(): Promise<void> {
 
   await app.listen({ host: configuracion.host, port: configuracion.puerto });
   console.log(
-    `SIGIR escuchando en http://${configuracion.host}:${configuracion.puerto} · propietarios=${resumen.propietarios} sesiones=${resumen.sesiones}${
+    `GymTracker escuchando en http://${configuracion.host}:${configuracion.puerto} · propietarios=${resumen.propietarios} sesiones=${resumen.sesiones}${
       configuracion.webDir === null ? ' · sin cliente (WEB_DIR vacío)' : ''
     }`,
   );

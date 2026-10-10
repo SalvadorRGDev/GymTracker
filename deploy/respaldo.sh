@@ -2,7 +2,7 @@
 # Respaldo COMPLETO del directorio de datos, en un tar.gz con fecha.
 #
 #   bash deploy/respaldo.sh [destino]
-#   BACKUP_RECIPIENT=<huella-gpg> bash deploy/respaldo.sh /media/disco/sigir
+#   BACKUP_RECIPIENT=<huella-gpg> bash deploy/respaldo.sh /media/disco/gymtracker
 #
 # Si BACKUP_RECIPIENT está puesto, el archivo sale cifrado con GPG y el tar.gz en
 # claro se borra: un .xlsx en claro en una nube es el historial de entrenamiento
@@ -22,7 +22,7 @@ case "$DESTINO_REAL/" in
 esac
 
 SELLO="$(date -u +%Y-%m-%dT%H-%M-%SZ)"
-ARCHIVO="$DESTINO_REAL/sigir-$SELLO.tar.gz"
+ARCHIVO="$DESTINO_REAL/gymtracker-$SELLO.tar.gz"
 # Las escrituras son renombrados atómicos: tar lee la versión de antes o la de después.
 tar --exclude='*.tmp' -czf "$ARCHIVO" -C "$DATOS_REAL" .
 chmod 600 "$ARCHIVO"

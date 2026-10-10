@@ -1,4 +1,4 @@
-# SIGIR Fitness — reglas del proyecto
+# GymTracker — reglas del proyecto
 
 Aplicación personal de seguimiento de fuerza: **series efectivas por grupo
 muscular y semana**, lo planeado contra lo ejecutado. Dos personas, coste cero,

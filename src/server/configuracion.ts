@@ -112,7 +112,9 @@ export function leeConfiguracion(entorno: Entorno, base = process.cwd()): Config
   const publicaTexto = entorno['URL_PUBLICA']?.trim() ?? '';
   const publica = publicaTexto === '' ? null : leeOrigen(publicaTexto, ['https:']);
   if (publicaTexto !== '' && publica === null) {
-    problemas.push('URL_PUBLICA debe ser un origen https sin ruta (https://sigir.ejemplo.ts.net)');
+    problemas.push(
+      'URL_PUBLICA debe ser un origen https sin ruta (https://gymtracker.ejemplo.ts.net)',
+    );
   }
 
   const altaTexto = entorno['ALTA_ABIERTA']?.trim() || 'no';

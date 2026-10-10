@@ -6,6 +6,7 @@ import { ErrorDeDominio } from './errores.js';
  * un `Set-Cookie` no justifica una séptima dependencia de ejecución.
  */
 
+/** Conserva el nombre anterior del proyecto: cambiarlo cerraría todas las sesiones abiertas. */
 export const NOMBRE_DE_COOKIE = 'sigir_sesion';
 
 export function leeCookie(request: FastifyRequest, nombre = NOMBRE_DE_COOKIE): string | null {

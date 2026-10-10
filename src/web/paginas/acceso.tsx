@@ -78,9 +78,9 @@ export function Acceso() {
           </span>
           <h1>Cuánto trabajó cada músculo esta semana</h1>
           <p class="entradilla">
-            SIGIR cuenta las series efectivas que recibe cada grupo muscular y las pone junto a lo
-            que planeaste. Tus datos viven en tu máquina, en libros de Excel que puedes abrir cuando
-            quieras.
+            GymTracker cuenta las series efectivas que recibe cada grupo muscular y las pone junto a
+            lo que planeaste. Tus datos viven en tu máquina, en libros de Excel que puedes abrir
+            cuando quieras.
           </p>
           <form
             class="tarjeta acceso-tarjeta formulario"

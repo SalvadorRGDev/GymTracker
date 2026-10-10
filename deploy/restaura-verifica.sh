@@ -3,7 +3,7 @@
 # cada libro (lo que valida todas las celdas y todos los invariantes) y compara
 # conteos con lo que se DECLARA esperar.
 #
-#   ESPERADO_PROPIETARIOS=2 ESPERADO_SESIONES=87 bash deploy/restaura-verifica.sh sigir-….tar.gz[.gpg]
+#   ESPERADO_PROPIETARIOS=2 ESPERADO_SESIONES=87 bash deploy/restaura-verifica.sh gymtracker-….tar.gz[.gpg]
 #
 # Sin conteos declarados, FALLA: una prueba de restauración que no compara nada
 # aprueba un respaldo vacío.

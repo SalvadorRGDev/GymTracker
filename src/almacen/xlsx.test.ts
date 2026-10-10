@@ -116,7 +116,7 @@ function hayLibreOffice(): boolean {
 
 describe.runIf(hayLibreOffice())('xlsx con LibreOffice Calc', () => {
   it('Calc abre lo que escribimos y lo que re-guarda lo leemos igual', { timeout: 120_000 }, () => {
-    const dir = mkdtempSync(join(tmpdir(), 'sigir-soffice-'));
+    const dir = mkdtempSync(join(tmpdir(), 'gymtracker-soffice-'));
     try {
       const entrada = join(dir, 'entrada.xlsx');
       const salida = join(dir, 'salida');
