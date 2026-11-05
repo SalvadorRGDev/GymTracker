@@ -15,7 +15,7 @@ jobs:
     name: Detección de secretos
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       # El historial ENTERO, no sólo lo que trae el push: la acción de gitleaks
@@ -35,7 +35,7 @@ jobs:
     name: ADRs pendientes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Ningún ADR PENDIENTE con código escrito
         run: |
           set -euo pipefail
@@ -58,8 +58,8 @@ jobs:
     name: Lint, tipos, pruebas y compilación
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -75,8 +75,8 @@ jobs:
     needs: lint-y-pruebas
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -89,8 +89,8 @@ jobs:
     name: LibreOffice abre y re-guarda sin cambiar un decimal
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
