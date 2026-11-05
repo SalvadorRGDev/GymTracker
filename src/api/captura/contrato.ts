@@ -144,6 +144,26 @@ export interface CatalogoDeCaptura {
   readonly grupos: readonly { readonly nombre: string }[];
 }
 
+/** `?sesion=`: la clave del entrenamiento abierto, para que pasada la medianoche siga su día. */
+export const ConsultaDeRutinaDelAtajo = Type.Object({ sesion: Type.Optional(Clave) }, cerrado);
+export type ParametrosDeRutinaDelAtajo = Static<typeof ConsultaDeRutinaDelAtajo>;
+
+/**
+ * `GET /api/captura/v1/rutina`: lo que toca hoy, para que el atajo `Serie`
+ * ofrezca primero los ejercicios del día. Lo decide la misma función que la
+ * rutina de «Registrar» (ADR-022); el atajo sólo enseña la lista.
+ */
+export interface RutinaDelAtajo {
+  /** Para la pregunta del atajo: «Día 2 de 4 · Torso-Pierna», «… descanso» o «sin rutina». */
+  readonly titulo: string;
+  /**
+   * Los nombres del día en el orden de la rutina, sin repetir: los ejercicios de
+   * la lista y, tras un objetivo por grupo, los del catálogo que lo trabajan. Sin
+   * archivados. Vacía sin rutina o en descanso.
+   */
+  readonly ejercicios: readonly string[];
+}
+
 /** 426: el atajo pide un contrato que este servidor no conoce. */
 export interface RespuestaDeContratoDesconocido {
   readonly codigo: 'contrato-desconocido';

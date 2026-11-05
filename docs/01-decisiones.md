@@ -582,6 +582,18 @@ cuenta como hecho (efectivas, la frontera del umbral, calentamientos,
 coeficientes, sin contar dos veces) y los rechazos; `registrar.test.tsx`, lo que
 se ve, lo que se avisa y lo que va a la consulta.
 
+**Ampliación: la rutina del día también en el atajo `Serie`.** Al construir los
+atajos en el iPhone, el usuario vio que `Serie` ofrecía el catálogo entero y no
+lo de su día. `GET /api/captura/v1/rutina` devuelve lo que toca hoy calculado por
+la **misma** `rutinaDelDia` que la web: un título («Día 2 de 4 · Torso-Pierna»,
+el descanso o «sin rutina») y los nombres en el orden de la rutina, con los
+candidatos de un objetivo por grupo y sin archivados. `?sesion=` hace que pasada
+la medianoche siga el día del entrenamiento abierto. El atajo enseña esa lista y,
+al final, «Otro ejercicio…» con el catálogo entero, como la búsqueda libre de la
+web. No amplía el alcance `captura`: ya leía las rutinas desde el ADR-019, y las
+sesiones y series de hoy caen en su ventana de 30 días. Ruta nueva: el contrato
+crece de forma aditiva (riesgo R7).
+
 ## ADR-023 — Las cargas, en libras
 
 **Estado**: ACEPTADO (enmienda la unidad canónica del Plan, §7.3)

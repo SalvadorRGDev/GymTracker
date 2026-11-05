@@ -15,6 +15,7 @@ import {
   type Serie,
   volumenDe,
 } from '../../domain/volume/index.js';
+import type { RutinaDelAtajo } from '../captura/contrato.js';
 import { conflicto, invalido, noEncontrado } from '../errores.js';
 import { hoyDe, parametrosDe, serieDelMotor, versionVigenteEn } from '../volumen.js';
 import type {
@@ -303,4 +304,26 @@ function cantidades(objetivo: Centesimas, hechas: Centesimas) {
     hechas: decimalDesdeCentesimas(hechas),
     completa: hechas >= objetivo,
   };
+}
+
+/**
+ * Lo que toca hoy para el atajo `Serie` (ampliación del ADR-022): la misma
+ * rutina que enseña «Registrar», reducida a lo que el atajo puede ofrecer, una
+ * lista de nombres. Con la clave del entrenamiento abierto, la fecha es la suya.
+ */
+export function rutinaDelAtajo(almacen: AlmacenDeUsuario, sesion?: string): RutinaDelAtajo {
+  const { vista } = rutinaDelDia(almacen, sesion === undefined ? {} : { sesion });
+  if (vista === null) return { titulo: 'Hoy no tienes rutina asignada', ejercicios: [] };
+  const dia = `Día ${vista.dia} de ${vista.ciclo_dias}`;
+  if (vista.entradas.length === 0) {
+    return { titulo: `${dia} de «${vista.plan_nombre}»: descanso`, ejercicios: [] };
+  }
+  const nombres = vista.entradas.flatMap((e) =>
+    e.tipo === 'ejercicio'
+      ? e.ejercicio.archivado
+        ? []
+        : [e.ejercicio.nombre]
+      : e.ejercicios.map((x) => x.nombre),
+  );
+  return { titulo: `${dia} · ${vista.plan_nombre}`, ejercicios: [...new Set(nombres)] };
 }

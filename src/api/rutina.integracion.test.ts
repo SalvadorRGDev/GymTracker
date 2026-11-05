@@ -415,3 +415,88 @@ describe('registrar un día elegido de la rutina (ADR-026)', () => {
     expect(r).toMatchObject({ estado: 'aceptada', serie: { fecha_logica: '2026-03-02' } });
   });
 });
+
+describe('GET /api/captura/v1/rutina: lo de hoy para el atajo (ampliación del ADR-022)', () => {
+  let portador: string;
+  beforeEach(async () => {
+    portador = await s.portador(ana);
+  });
+
+  async function delAtajo(consulta = '') {
+    const r = await s.pide({
+      method: 'GET',
+      url: `/api/captura/v1/rutina${consulta}`,
+      headers: { authorization: `Bearer ${portador}` },
+    });
+    expect(r.statusCode, r.body).toBe(200);
+    return r.json() as { titulo: string; ejercicios: string[] };
+  }
+
+  /** Los nombres que enseña «Registrar» en la web, en su orden: lo que el atajo debe ofrecer. */
+  const deLaWeb = (r: RutinaDelDia) => [
+    ...new Set(
+      (r.vista?.entradas ?? []).flatMap((e) =>
+        e.tipo === 'ejercicio' ? [e.ejercicio.nombre] : e.ejercicios.map((x) => x.nombre),
+      ),
+    ),
+  ];
+
+  it('sin credencial, 401', async () => {
+    const r = await s.pide({ method: 'GET', url: '/api/captura/v1/rutina' });
+    expect(r.statusCode).toBe(401);
+  });
+
+  it('sin rutina asignada lo dice, y no ofrece nada inventado', async () => {
+    expect(await delAtajo()).toEqual({ titulo: 'Hoy no tienes rutina asignada', ejercicios: [] });
+  });
+
+  it('el día que toca, con los mismos ejercicios y en el mismo orden que la web', async () => {
+    await torsoPierna(); // lunes 2: día 1, press banca y un objetivo de pectoral
+    const atajo = await delAtajo();
+    expect(atajo.titulo).toBe('Día 1 de 4 · Torso-Pierna');
+    expect(atajo.ejercicios[0]).toBe('Press banca');
+    expect(atajo.ejercicios.length).toBeGreaterThan(1); // los que trabajan el pectoral
+    expect(atajo.ejercicios).toEqual(deLaWeb(await lee()));
+    s.reloj.fija('2026-03-03T18:00:00.000Z'); // martes: día 2
+    expect(await delAtajo()).toEqual({
+      titulo: 'Día 2 de 4 · Torso-Pierna',
+      ejercicios: ['Remo con barra', 'Sentadilla'],
+    });
+  });
+
+  it('el día de descanso lo dice, sin lista', async () => {
+    await torsoPierna();
+    s.reloj.fija('2026-03-04T18:00:00.000Z'); // miércoles: día 3, descanso
+    expect(await delAtajo()).toEqual({
+      titulo: 'Día 3 de 4 de «Torso-Pierna»: descanso',
+      ejercicios: [],
+    });
+  });
+
+  it('pasada la medianoche, con la clave del entrenamiento abierto sigue su día', async () => {
+    await torsoPierna();
+    const clave = randomUUID();
+    s.reloj.fija('2026-03-03T05:50:00.000Z'); // lunes 2, 23:50: día 1
+    await serie('Press banca', 2, clave);
+    s.reloj.fija('2026-03-03T06:15:00.000Z'); // martes 3, 00:15
+    expect((await delAtajo(`?sesion=${clave}`)).titulo).toBe('Día 1 de 4 · Torso-Pierna');
+    expect((await delAtajo()).titulo).toBe('Día 2 de 4 · Torso-Pierna');
+  });
+
+  it('un ejercicio archivado no se ofrece: el servidor lo rechazaría', async () => {
+    await torsoPierna();
+    await pide('PUT', `/api/lectura/v1/catalogo/ejercicios/${ids.press}/archivo`, {
+      archivado: true,
+    });
+    expect((await delAtajo()).ejercicios).not.toContain('Press banca');
+  });
+
+  it('una clave de sesión mal formada es 400, ya con la credencial comprobada', async () => {
+    const r = await s.pide({
+      method: 'GET',
+      url: '/api/captura/v1/rutina?sesion=no%20vale',
+      headers: { authorization: `Bearer ${portador}` },
+    });
+    expect(r.statusCode).toBe(400);
+  });
+});

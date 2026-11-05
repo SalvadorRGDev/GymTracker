@@ -125,6 +125,25 @@ Sin plan hoy: `{ "mensaje": "No hay plan asignado hoy: la línea compara contra 
 Ruta **nueva** (el contrato crece de forma aditiva). Para calcularla, el alcance
 `captura` **lee** el plan; no lo escribe, no lo exporta y no lo borra.
 
+## `GET /api/captura/v1/rutina` (ampliación del ADR-022)
+
+Lo que toca hoy, para que `Serie` ofrezca primero los ejercicios del día. Lo
+calcula la misma función que la rutina de «Registrar» en la web.
+
+```json
+{ "titulo": "Día 2 de 4 · Torso-Pierna", "ejercicios": ["Remo con barra", "Sentadilla"] }
+```
+
+- `ejercicios`: los nombres en el orden de la rutina, sin repetir; tras un
+  objetivo por grupo, los del catálogo que lo trabajan (1.00 o 0.50). Sin
+  archivados.
+- Sin rutina asignada: `{ "titulo": "Hoy no tienes rutina asignada", "ejercicios": [] }`;
+  un día de descanso, `"titulo": "Día 3 de 4 de «Torso-Pierna»: descanso"` y
+  la lista vacía.
+- `?sesion=<clave>` (opcional): la del entrenamiento abierto; pasada la
+  medianoche, la fecha es la suya. Una clave mal formada es 400, después de la
+  credencial.
+
 ## 426 — contrato desconocido
 
 Cualquier `/api/captura/<versión>/…` distinta de `v1`:

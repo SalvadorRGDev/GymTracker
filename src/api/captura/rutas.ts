@@ -5,16 +5,20 @@ import { compruebaEsquema, leePortador } from '../credenciales.js';
 import { ErrorDeDominio, MENSAJE_SIN_CREDENCIAL } from '../errores.js';
 import type { LimiteDeTasa } from '../limites.js';
 import { lineaSemanal } from '../planes/servicio.js';
+import { rutinaDelAtajo } from '../registro/rutina.js';
 import {
   type CatalogoDeCaptura,
   CierreDeCaptura,
+  ConsultaDeRutinaDelAtajo,
   type CuerpoCierreDeCaptura,
   type CuerpoPesoDeCaptura,
   type CuerpoSerieDeCaptura,
   type LineaSemanal,
+  type ParametrosDeRutinaDelAtajo,
   PesoDeCaptura,
   type RespuestaDeCaptura,
   type RespuestaDeContratoDesconocido,
+  type RutinaDelAtajo,
   SerieDeCaptura,
 } from './contrato.js';
 import { cierreDesdeCaptura, pesoDesde, serieDesdeCaptura } from './entrada.js';
@@ -98,6 +102,18 @@ export function rutasDeCaptura(
     const quien = await identidad(request);
     return conAlmacenDeUsuario(quien, lineaSemanal);
   });
+
+  // Los ejercicios de hoy para el atajo `Serie` (ampliación del ADR-022). Sólo lee.
+  app.get<{ Querystring: ParametrosDeRutinaDelAtajo }>(
+    '/api/captura/v1/rutina',
+    { schema: { querystring: ConsultaDeRutinaDelAtajo }, attachValidation: true },
+    async (request): Promise<RutinaDelAtajo> => {
+      const quien = await identidad(request);
+      compruebaEsquema(request);
+      const { sesion } = request.query;
+      return conAlmacenDeUsuario(quien, (almacen) => rutinaDelAtajo(almacen, sesion));
+    },
+  );
 
   /**
    * Un atajo viejo o de otra versión: 426 con la dirección de reinstalación EN
