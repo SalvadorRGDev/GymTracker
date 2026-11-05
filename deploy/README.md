@@ -109,26 +109,32 @@ compromiso.
 
 ## Arranque automático (recomendado)
 
-Un servicio de usuario de systemd para el servidor y otro para el túnel, con
-`Restart=on-failure`, reduce el riesgo R8 (servidor apagado):
+Un servicio de usuario de systemd que arranca solo y se reinicia si cae
+(`Restart=on-failure`): reduce el riesgo R8 (servidor apagado).
 
-```ini
-# ~/.config/systemd/user/gymtracker.service
-[Unit]
-Description=GymTracker
-After=network-online.target
-
-[Service]
-WorkingDirectory=%h/Proyectos/gymtracker-V2
-ExecStart=/usr/bin/npm start
-Restart=on-failure
-
-[Install]
-WantedBy=default.target
+```bash
+bash deploy/instala-servicio.sh
 ```
 
-`systemctl --user enable --now gymtracker` (y `loginctl enable-linger $USER` para que
-arranque sin iniciar sesión).
+Compila, escribe `~/.config/systemd/user/gymtracker.service` desde
+`deploy/gymtracker.service` con la ruta del proyecto y la de Node, lo activa y
+comprueba la salud. Se niega si ya hay un `npm start` abierto en el puerto: dos
+procesos escribiendo los mismos libros es lo que no puede pasar. Repetirlo
+tras actualizar el código recompila y reinicia.
+
+El túnel no necesita servicio: `tailscale funnel --bg 3000` lo recuerda
+`tailscaled` entre reinicios. Sin `sudo loginctl enable-linger $USER`, el
+servidor arranca al iniciar tu sesión; con él, al encender el equipo.
+
+| Qué | Cómo |
+| --- | ---- |
+| Estado | `systemctl --user status gymtracker` |
+| Mensajes | `journalctl --user -u gymtracker -n 50` |
+| Reiniciar | `systemctl --user restart gymtracker` |
+| Parar (y no arrancar más) | `systemctl --user disable --now gymtracker` |
+
+Antes de la primera vez, un respaldo completo **fuera del proyecto**:
+`bash deploy/respaldo.sh ~/respaldos-gymtracker`.
 
 ## El ensayo
 

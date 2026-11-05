@@ -47,6 +47,7 @@ npm run alta -- correo zona umbral     # cuenta nueva; la contraseña se teclea
 npm run verifica -- datos              # valida el almacén sin escribir nada
 npm run baja -- correo                 # borra la cuenta de verdad; se confirma tecleando el correo
 npm start                              # http://127.0.0.1:3000
+bash deploy/instala-servicio.sh        # arranque automático: servicio de usuario de systemd
 npm run dev / npm run dev:web          # API vigilando dist/ · Vite con /api reenviado
 ```
 

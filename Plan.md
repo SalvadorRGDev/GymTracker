@@ -1507,33 +1507,18 @@ que recomiendo atender antes.
 
 ### 19.1 Higiene inmediata (horas, sin decisiones de diseño)
 
-1. **Hacer commit del trabajo pendiente** (§16.3), en commits temáticos
-   (almacén Excel; captura web; catálogo base; rutinas; visual; documentación),
-   con `npm test` y `npm run lint` antes de cada uno y la justificación de la
-   dependencia nueva (`fflate`, `@fastify/static`) en su mensaje.
-2. **Hacer que el CI vea las ramas**: añadir `fase-1` (o `branches: ['**']`) al
-   disparador `push`, o abrir un PR hacia `main`. Hoy `CLAUDE.md` dice que el
-   ensayo corre «en cada push» y no es cierto fuera de `main`.
-3. **Corregir incoherencias de documentación** encontradas al redactar esto:
-   - El **ADR-010** (y la nota del ADR-004) dicen que el almacén usa `exceljs`;
-     la implementación es `src/almacen/xlsx.ts` propio sobre `fflate`, y el motivo
-     (las librerías convierten tipos) está en el propio archivo. Merece una nota
-     en el ADR.
-   - `README.md` y `deploy/README.md` dicen que el ensayo hace **dieciséis**
-     comprobaciones; son **veinte** (como dice `CLAUDE.md`).
-   - `README.md` habla de «siete vistas» y enumera ocho (con el acceso).
-   - El comentario de cabecera de `src/almacen/xlsx.ts` cita
-     `xlsx.soffice.test.ts`; la prueba está en `xlsx.test.ts`.
-   - `docs/04-aceptacion.md` dice que la batería de captura corre «contra
-     PostgreSQL 16» y cita `app.borrar_cuenta()`, que ya no existen.
-   - `docs/05-riesgos.md` (R9) habla de trece dependencias y `@types/pg`; hoy son
-     seis en ejecución.
-   - `src/domain/volume/centesimas.ts` explica el parseo por el driver `pg`; el
-     motivo sigue valiendo (el almacén también da cadenas) pero el texto está
-     desfasado.
+Todo hecho; se conserva la lista como registro.
+
+1. **Hecho**: el trabajo pendiente está en commits temáticos, un commit por
+   cambio desde `79f8088`.
+2. **Hecho**: el CI corre en todas las ramas y en los PR (`branches: ['**']`).
+3. **Hecho**: las incoherencias de documentación (la nota sobre `exceljs` en el
+   ADR-010, el número de afirmaciones del ensayo, las vistas del README, el
+   nombre de la prueba de LibreOffice, y los restos de PostgreSQL en
+   `docs/04`, `docs/05` y `centesimas.ts`).
 4. **Hecho (09/10/2026)**: licencia MIT (`LICENSE`), con las fuentes (OFL) y los
    iconos (ISC) bajo las suyas.
-5. **Añadir este `Plan.md` a la tabla de documentación del `README.md`.**
+5. **Hecho**: `Plan.md` está en la tabla de documentación del `README.md`.
 
 ### 19.2 Huecos funcionales frente al spec (días)
 
@@ -1543,15 +1528,17 @@ que recomiendo atender antes.
    `cuentas.xlsx`—, pero hay que decidir qué pasa con `datos/respaldos/` y con
    los respaldos completos, y escribir el **aviso de privacidad** que declare el
    plazo de borrado efectivo.
-2. **Corregir o borrar una serie mal capturada.** Hoy no hay ruta para ello. Un
+2. **Hecho**: borrar una serie o una sesión desde el historial web
+   (`DELETE /api/registro/v1/serie/:id` y `/sesion/:id`), confirmado en dos pasos.
+   **Corregir o borrar una serie mal capturada.** No había ruta para ello. Un
    RIR de 22 en vez de 2 que el rango rechaza está bien, pero un 8 en vez de 80
    kg entra y no se puede quitar salvo editando el Excel a mano. Propuesta:
    borrado explícito y visible de una serie (no edición en sitio), desde el
    historial web, con el alcance `sesion` únicamente.
-3. **Archivar un ejercicio desde la web.** `archivado_en` existe en el esquema y
-   se respeta en los selectores, pero no hay ruta ni botón para ponerlo.
-4. **Confirmar una `fecha_por_confirmar`.** La marca se pone y el historial la
-   muestra, pero no hay acción para confirmarla.
+3. **Hecho**: «Archivar» y «Recuperar» en el catálogo
+   (`PUT /api/lectura/v1/catalogo/ejercicios/:id/archivo`).
+4. **Hecho**: «Confirmar fecha» en el detalle del historial
+   (`POST /api/registro/v1/sesion/:id/confirmacion`).
 5. **Resuelto de otra forma (01/10/2026, ADR-023)**: la carga se guarda en
    libras y el peso corporal en kilos; no hay conversión en presentación.
    **Conversión kg ↔ lb en presentación.** El invariante de unidad canónica la
@@ -1569,8 +1556,9 @@ que recomiendo atender antes.
 
 ### 19.3 Operación (horas o días)
 
-1. **Arranque automático**: un servicio de usuario de systemd (o equivalente)
-   para el servidor y el túnel, con `Restart=on-failure`. Reduce el riesgo R8.
+1. **Hecho (04/11/2026)**: `deploy/instala-servicio.sh` instala el servidor como
+   servicio de usuario de systemd con `Restart=on-failure` (riesgo R8); el túnel
+   de Tailscale ya persiste solo. **Arranque automático**.
 2. **Respaldo completo programado y fuera de la máquina**: un timer que corra
    `deploy/respaldo.sh` cifrado con GPG hacia un destino gratuito (un disco
    externo o una carpeta sincronizada), más la prueba de restauración mensual

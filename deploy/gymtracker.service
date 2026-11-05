@@ -1,0 +1,17 @@
+# Servicio de usuario de systemd para GymTracker (riesgo R8: servidor apagado).
+# No se copia a mano: deploy/instala-servicio.sh lo instala en
+# ~/.config/systemd/user/ cambiando @PROYECTO@ y @NODE@ por las rutas reales.
+[Unit]
+Description=GymTracker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=@PROYECTO@
+# Lo mismo que «npm start», sin npm de por medio.
+ExecStart=@NODE@ --env-file=.env dist/server/arranque.js
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
