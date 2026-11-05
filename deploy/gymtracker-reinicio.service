@@ -1,0 +1,9 @@
+# Reinicia el servidor de GymTracker; lo dispara gymtracker-reinicio.timer.
+# Un reinicio a mitad de una petición sólo hace que el atajo la reintente desde
+# su cola, y las escrituras de los libros son atómicas.
+[Unit]
+Description=Reinicio periódico de GymTracker
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl --user restart gymtracker.service

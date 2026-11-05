@@ -1,0 +1,9 @@
+# Cada hora en punto. Para quitarlo: systemctl --user disable --now gymtracker-reinicio.timer
+[Unit]
+Description=Reinicio de GymTracker cada hora
+
+[Timer]
+OnCalendar=hourly
+
+[Install]
+WantedBy=timers.target

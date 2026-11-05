@@ -132,6 +132,8 @@ servidor arranca al iniciar tu sesión; con él, al encender el equipo.
 | Mensajes | `journalctl --user -u gymtracker -n 50` |
 | Reiniciar | `systemctl --user restart gymtracker` |
 | Parar (y no arrancar más) | `systemctl --user disable --now gymtracker` |
+| Reinicio cada hora (activo) | `systemctl --user list-timers gymtracker-reinicio.timer` |
+| Quitar el reinicio cada hora | `systemctl --user disable --now gymtracker-reinicio.timer` |
 
 Antes de la primera vez, un respaldo completo **fuera del proyecto**:
 `bash deploy/respaldo.sh ~/respaldos-gymtracker`.

@@ -32,8 +32,11 @@ npm run --silent build:web
 
 mkdir -p "$(dirname "$DESTINO")"
 sed -e "s#@PROYECTO@#$RAIZ#" -e "s#@NODE@#$NODE#" deploy/gymtracker.service > "$DESTINO"
+# Reinicio cada hora (gymtracker-reinicio.timer): lo que se copia tal cual.
+cp deploy/gymtracker-reinicio.service deploy/gymtracker-reinicio.timer "$(dirname "$DESTINO")/"
 systemctl --user daemon-reload
 systemctl --user enable gymtracker.service
+systemctl --user enable --now gymtracker-reinicio.timer
 systemctl --user restart gymtracker.service
 sleep 2
 systemctl --user --no-pager --lines=0 status gymtracker.service | head -3
