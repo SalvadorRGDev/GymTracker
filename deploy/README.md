@@ -107,6 +107,12 @@ Cambiar `SESSION_SECRET` y reiniciar. Cierra **todas** las sesiones web y anula
 `credencial.json` de cada iPhone. Es el precio correcto ante sospecha de
 compromiso.
 
+## En un servidor que no se apaga
+
+Para no depender de tu PC: [`deploy/oracle/README.md`](oracle/README.md) monta lo
+mismo en una máquina gratuita de Oracle Cloud, con arranque automático,
+respaldo diario y Tailscale Funnel, y trae tus datos desde el PC.
+
 ## Arranque automático (recomendado)
 
 Un servicio de usuario de systemd para el servidor y otro para el túnel, con
