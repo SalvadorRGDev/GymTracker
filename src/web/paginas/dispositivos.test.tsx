@@ -64,6 +64,36 @@ describe('Dispositivos', () => {
     expect(textoDe(raiz)).not.toContain(CREDENCIAL);
   });
 
+  it('el archivo se descarga tal cual lo dio el servidor: sin copiar ni pegar nada a mano', async () => {
+    const blobs: Blob[] = [];
+    const descargas: string[] = [];
+    vi.stubGlobal('URL', {
+      ...URL,
+      createObjectURL: (b: Blob) => {
+        blobs.push(b);
+        return 'blob:credencial';
+      },
+      revokeObjectURL: () => {},
+    });
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
+      this: HTMLAnchorElement,
+    ) {
+      descargas.push(this.download);
+    });
+    const raiz = await emite({ url: 'https://gymtracker.ejemplo.ts.net', aviso: null });
+    await pulsa(boton(raiz, 'Descargar credencial.json'));
+    expect(descargas).toEqual(['credencial.json']);
+    const texto = await blobs[0]?.text();
+    // Texto plano y JSON de verdad: lo que falla al crearlo a mano en el iPhone.
+    expect(texto).toBe(
+      emitido({ url: 'https://gymtracker.ejemplo.ts.net', aviso: null }).archivo.contenido,
+    );
+    expect(JSON.parse(texto ?? '')).toEqual({
+      servidor: 'https://gymtracker.ejemplo.ts.net',
+      portador: CREDENCIAL,
+    });
+  });
+
   it('si el teléfono no va a alcanzar la dirección, lo dice con el texto del servidor', async () => {
     const aviso =
       '«http://127.0.0.1:3000» sólo existe en este ordenador: el teléfono no la alcanzará.';

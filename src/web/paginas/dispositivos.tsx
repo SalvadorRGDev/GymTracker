@@ -23,6 +23,16 @@ import { instanteRelativo } from '../formato/fechas';
  * guarda su HMAC y no hay forma de volver a verla.
  */
 
+/** Un archivo de texto descargado por el navegador, sin pasar por el servidor. */
+function descargaTexto(nombre: string, texto: string): void {
+  const url = URL.createObjectURL(new Blob([texto], { type: 'application/json' }));
+  const enlace = document.createElement('a');
+  enlace.href = url;
+  enlace.download = nombre;
+  enlace.click();
+  URL.revokeObjectURL(url);
+}
+
 function Emision({ zona, alEmitir }: { zona: string; alEmitir: () => void }) {
   const [nombre, setNombre] = useState('');
   const [emitido, setEmitido] = useState<DispositivoEmitido | null>(null);
@@ -39,14 +49,23 @@ function Emision({ zona, alEmitir }: { zona: string; alEmitir: () => void }) {
         </Aviso>
         <code>{emitido.credencial}</code>
         <p>
-          Guarda este contenido como <strong>{emitido.archivo.nombre}</strong> en{' '}
-          <strong>iCloud Drive › Atajos › GymTracker</strong> y ejecuta el atajo «Configurar». Nunca
-          la pegues dentro de un atajo: compartirlo exportaría sus acciones y con ellas la
-          credencial.
+          Descarga <strong>{emitido.archivo.nombre}</strong> y muévelo a{' '}
+          <strong>iCloud Drive › Shortcuts › GymTracker</strong>; luego ejecuta el atajo
+          «Configurar». En el iPhone, Safari lo deja en <strong>Descargas</strong>: ábrelo en
+          Archivos, mantén pulsado y elige «Mover». Nunca la pegues dentro de un atajo: compartirlo
+          exportaría sus acciones y con ellas la credencial.
         </p>
         <pre class="bloque-codigo">{emitido.archivo.contenido}</pre>
         {emitido.servidor.aviso !== null && <Aviso tipo="alerta">{emitido.servidor.aviso}</Aviso>}
         <div class="acciones">
+          <button
+            type="button"
+            class="boton"
+            onClick={() => descargaTexto(emitido.archivo.nombre, emitido.archivo.contenido)}
+          >
+            <Icono nombre="download" tamano={16} />
+            Descargar {emitido.archivo.nombre}
+          </button>
           <button
             type="button"
             class="boton-fantasma"
@@ -62,7 +81,7 @@ function Emision({ zona, alEmitir }: { zona: string; alEmitir: () => void }) {
             <Icono nombre="copy" tamano={16} />
             {copiado ? 'Copiado' : 'Copiar el archivo'}
           </button>
-          <button type="button" class="boton" onClick={() => setEmitido(null)}>
+          <button type="button" class="boton-fantasma" onClick={() => setEmitido(null)}>
             Ya la guardé
           </button>
         </div>
@@ -127,13 +146,10 @@ function Exportacion() {
     setEstado(null);
     try {
       const datos = await pide<{ exportado_en: string }>('GET', '/api/lectura/v1/exportacion');
-      const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const enlace = document.createElement('a');
-      enlace.href = url;
-      enlace.download = `gymtracker-${datos.exportado_en.slice(0, 10)}.json`;
-      enlace.click();
-      URL.revokeObjectURL(url);
+      descargaTexto(
+        `gymtracker-${datos.exportado_en.slice(0, 10)}.json`,
+        JSON.stringify(datos, null, 2),
+      );
       setEstado({ tipo: 'exito', texto: 'Descargada.' });
     } catch (e) {
       if (e instanceof ErrorDeApi && e.estado === 429) {

@@ -9,7 +9,14 @@ en un diff.
 volumen que enseña es el `mensaje` del servidor. No crea ejercicios, no propone
 más identificadores que sus claves de idempotencia y nunca el pin de parámetros.
 
-## Estado en iCloud Drive › Atajos › GymTracker
+## Estado en iCloud Drive › Shortcuts › GymTracker
+
+La carpeta de Atajos en iCloud Drive se llama **Shortcuts** aunque el iPhone
+esté en español, y las rutas de las acciones de archivo empiezan **dentro** de
+ella: se escribe `GymTracker/credencial.json`, nunca `Atajos/…` ni `Shortcuts/…`.
+Ojo con crear `GymTracker` dentro de una `Shortcuts` duplicada
+(`Shortcuts › Shortcuts › …`): el atajo no la encuentra. Comprobado en el iPhone
+(05/11/2026).
 
 | Archivo | Qué es |
 | ------- | ------ |
@@ -30,6 +37,21 @@ más identificadores que sus claves de idempotencia y nunca el pin de parámetro
 3. **La bandera de calentamiento es el atajo**: `Serie` y `Calentamiento`, en vez
    de un campo que olvidar.
 
+## Para otra persona
+
+1. **Su cuenta**: se registra en la web (con `ALTA_ABIERTA=si`) o se la creas con
+   `npm run alta`. Antes, el aviso de privacidad (`docs/11-privacidad.md`): sus
+   datos viven en tu máquina.
+2. **Los atajos**: en Atajos, cada uno → **Compartir → Copiar enlace de iCloud**,
+   y se los mandas. Tienen que estar **todos** con su nombre exacto (`Serie` llama
+   a `Sincronizar` por su nombre). Ninguno lleva credenciales: viven en el archivo.
+3. **Su credencial**: en Safari, con **su** cuenta, **Dispositivos → Emitir →
+   Descargar credencial.json**. Se descarga en **Descargas**; desde Archivos la
+   mueve a **iCloud Drive › Shortcuts › GymTracker** (la carpeta `GymTracker` es lo
+   único que crea a mano).
+4. **Ejecutar `Configurar`**: baja el catálogo y crea `cola` y `rechazos`. La
+   primera conexión de cada atajo pide permiso para tu dirección: **Permitir**.
+
 ## Claves de idempotencia sin acción de UUID
 
 El servidor acepta claves de 8 a 64 caracteres `[A-Za-z0-9_-]`. Se componen con
@@ -41,32 +63,62 @@ aleatorio** entre 100000 y 999999. Prefijo `s-` para sesión y `e-` para serie.
 Constrúyelos en este orden. Los nombres de las acciones son los de iOS en
 español.
 
+Los nombres de algunas acciones cambian con la versión de iOS: «Obtener archivo»
+es **Obtener archivo de la carpeta**; «Ajustar variable», **Establecer variable**;
+«Preguntar por entrada», **Solicitar entrada**; «Formatear fecha», **Dar formato a
+fecha**. Atajos conecta sola la salida de la acción de encima: revisa cada campo.
+En toda lectura de archivo, **«Error si no se encuentra» activado** (salvo
+`sesion-vigente.json`, que puede no existir): desactivado, una ruta mal escrita no
+falla y `Sincronizar` diría «0 pendientes» sin ver la cola.
+
 ### 1. Configurar (una vez por teléfono)
 
-1. **Obtener archivo** `Atajos/GymTracker/credencial.json` (desactiva «Mostrar selector
-   de documentos»). → **Obtener diccionario de la entrada**.
-2. **Obtener valor del diccionario** `servidor` → variable *Servidor*;
-   `portador` → variable *Portador*.
-3. **Obtener contenido de URL** `Servidor` + `/api/captura/v1/catalogo`, método
-   GET, cabecera `Authorization: Bearer ` + *Portador*.
-4. **Guardar archivo** en `Atajos/GymTracker/catalogo.json` (sobrescribir).
-5. **Mostrar notificación**: «GymTracker configurado» y el número de ejercicios.
+1. **Obtener archivo de la carpeta** Shortcuts, ruta `GymTracker/credencial.json`.
+   → **Obtener diccionario de** [Archivo].
+2. **Obtener valor de** `servidor` en [Diccionario] → **Establecer variable**
+   *Servidor*; lo mismo con `portador` → *Portador*. La clave va en minúscula,
+   como en el archivo; el nombre de la variable es libre.
+3. **Texto** [Servidor]`/api/captura/v1/catalogo` → **Obtener contenido de URL**,
+   método GET, cabecera `Authorization: Bearer ` + *Portador*.
+4. **Guardar archivo** (sin preguntar) con subruta `GymTracker/catalogo.json`,
+   sobrescribiendo.
+5. **Las carpetas de la cola**, para que nadie tenga que crearlas a mano. Para
+   `cola` y luego para `rechazos`:
+   - **Obtener archivo de la carpeta** Shortcuts, ruta `GymTracker/cola`, con
+     «Error si no se encuentra» **desactivado** (aquí que falte es normal).
+   - **Si** [Archivo] **no tiene ningún valor** → **Crear carpeta** `GymTracker/cola`
+     en Shortcuts.
+   Se comprueba antes de crear porque no está verificado qué hace «Crear carpeta»
+   con una carpeta que ya existe.
+6. **Mostrar notificación**: «GymTracker configurado».
+
+`credencial.json` tiene que ser **texto plano** con comillas rectas: uno guardado
+como texto enriquecido (TextEdit, Pages) o con comillas tipográficas no se lee
+como diccionario.
 
 ### 2. Sincronizar
 
 1. Leer *Servidor* y *Portador* como en `Configurar`.
-2. **Obtener contenido de la carpeta** `Atajos/GymTracker/cola` → **Ordenar** por nombre.
-3. **Repetir con cada** archivo:
-   1. **Obtener diccionario** del archivo; `ruta` y `cuerpo`.
-   2. **Obtener contenido de URL** `Servidor` + `ruta`, método POST, cabecera
-      `Authorization`, cuerpo JSON = `cuerpo`. Si el servidor contesta 401, 409,
-      426, 429 o 500, Atajos aborta y **el archivo se queda en la cola**.
-   3. **Si** `estado` es `aceptada` → **Eliminar archivos** (sin confirmar) y
-      **Mostrar notificación** con `mensaje`.
-   4. **Si no** → **Guardar archivo** en `rechazos/` con el mismo nombre,
-      **Eliminar** el de la cola y **Mostrar notificación** con `mensaje`.
-4. **Contar** los archivos que quedan en `cola/` y **Mostrar notificación**:
-   «N pendientes» (**cero también**).
+2. **Obtener archivo de la carpeta** Shortcuts, ruta `GymTracker/cola` (error
+   activado) → **Obtener contenido de la carpeta** (sin «Recursiva»).
+3. **Repetir con cada** [Repetir elemento]:
+   1. **Obtener diccionario de** [Repetir elemento]; `ruta` → *Ruta* y `cuerpo` →
+      *Cuerpo*.
+   2. **Obtener contenido de URL** [Servidor][Ruta], método POST, cabeceras
+      `Authorization: Bearer ` + *Portador* y `Content-Type: application/json`,
+      cuerpo de la solicitud **Archivo** = [Cuerpo].
+   3. **Obtener diccionario de** la respuesta; `estado` → *Estado* (tipo
+      **Texto**, para que el **Si** ofrezca «es») y `mensaje` → *Mensaje*.
+   4. **Si** *Estado* es `aceptada` → **Eliminar archivos** [Repetir elemento]
+      sin confirmar y **Mostrar notificación** [Mensaje].
+   5. **Si** *Estado* es `rechazada` → **Guardar archivo** [Repetir elemento] en
+      `GymTracker/rechazos/`, **Eliminar** el de la cola y notificar [Mensaje].
+   6. **Si no** (401, 409, 426, 429, 500: la respuesta no trae `estado`) →
+      notificar «No se pudo enviar» + [Mensaje] y **Detener este atajo**: el
+      archivo se queda en la cola. «Obtener contenido de URL» no se para sola con
+      un código de error; lo decide el atajo con `estado`.
+4. **Contar** lo que queda en `cola/` y **Mostrar notificación**: «N pendientes»
+   (**cero también**).
 
 ### 3. Serie
 
@@ -74,7 +126,12 @@ español.
 2. **Si** no existe, o **Obtener tiempo entre fechas** (`iniciada_en`, ahora) en
    horas es **6 o más** → nueva *ClaveDeSesion* (`s-…`) e *IniciadaEn* = **Fecha
    actual** en ISO 8601; **Guardar archivo** `sesion-vigente.json`.
-3. **Elegir de la lista** con los nombres de `catalogo.json` → *Ejercicio*.
+3. **Lo de hoy primero**: **Obtener contenido de URL** [Servidor]
+   `/api/captura/v1/rutina?sesion=` + *ClaveDeSesion*, GET con `Authorization`.
+   Del diccionario, `ejercicios` → *DelDia* y `titulo` → *Titulo*. **Elegir de
+   la lista** [DelDia] + «Otro ejercicio…», con el texto [Titulo]. Si se elige
+   «Otro ejercicio…» (o sin conexión, o con la lista vacía), **Elegir de la
+   lista** con los nombres de `catalogo.json`. → *Ejercicio*.
 4. **Preguntar por entrada** (número) «Repeticiones» → *Repeticiones*.
 5. **Preguntar por entrada** (número decimal) «Libras» → *Carga*. La carga va en
    libras (ADR-023): lo que marcan los discos o la columna de placas.
@@ -131,9 +188,13 @@ días»), nunca como «pendientes»: la web no ve el teléfono.
 no es del dispositivo: URL, credencial, catálogo, el 401 y el 426 donde el atajo
 espera abortar. No escribe nada.
 
-## Supuestos de iOS aún sin verificar
+## Supuestos de iOS
 
-Que el código de estado HTTP no es legible desde el atajo; que leer el archivo de
-credencial no pide permiso cada vez; que guardar un JSON es atómico; que un
-número decimal se convierte a texto con coma en español (el servidor admite coma
-y punto). **La prueba del iPhone los cierra** (`PRUEBA-MANUAL.md`).
+Comprobados en el iPhone (05/11/2026): las rutas empiezan dentro de
+`iCloud Drive › Shortcuts`; leer `credencial.json` no pide permiso cada vez.
+
+Aún sin verificar: que «Obtener contenido de URL» no aborta con un código de
+error (el atajo decide por `estado`); que el cuerpo como **Archivo** llega como
+JSON; que guardar un JSON es atómico; que un número decimal se convierte a texto
+con coma en español (el servidor admite coma y punto). **La prueba del iPhone los
+cierra** (`PRUEBA-MANUAL.md`).
